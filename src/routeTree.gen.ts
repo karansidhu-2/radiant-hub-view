@@ -9,50 +9,266 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SiteRouteImport } from './routes/_site'
+import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteShopRouteImport } from './routes/_site.shop'
+import { Route as SiteServicesRouteImport } from './routes/_site.services'
+import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteCartRouteImport } from './routes/_site.cart'
+import { Route as SiteBookRouteImport } from './routes/_site.book'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
+import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$slug'
 
-const IndexRoute = IndexRouteImport.update({
+const SiteRoute = SiteRouteImport.update({
+  id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShopRoute = SiteShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteServicesRoute = SiteServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCartRoute = SiteCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteBookRoute = SiteBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShopSlugRoute = SiteShopSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => SiteShopRoute,
+} as any)
+const SiteServicesSlugRoute = SiteServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => SiteServicesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof SiteIndexRoute
+  '/about': typeof SiteAboutRoute
+  '/book': typeof SiteBookRoute
+  '/cart': typeof SiteCartRoute
+  '/contact': typeof SiteContactRoute
+  '/services': typeof SiteServicesRouteWithChildren
+  '/shop': typeof SiteShopRouteWithChildren
+  '/services/$slug': typeof SiteServicesSlugRoute
+  '/shop/$slug': typeof SiteShopSlugRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/about': typeof SiteAboutRoute
+  '/book': typeof SiteBookRoute
+  '/cart': typeof SiteCartRoute
+  '/contact': typeof SiteContactRoute
+  '/services': typeof SiteServicesRouteWithChildren
+  '/shop': typeof SiteShopRouteWithChildren
+  '/': typeof SiteIndexRoute
+  '/services/$slug': typeof SiteServicesSlugRoute
+  '/shop/$slug': typeof SiteShopSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_site': typeof SiteRouteWithChildren
+  '/_site/about': typeof SiteAboutRoute
+  '/_site/book': typeof SiteBookRoute
+  '/_site/cart': typeof SiteCartRoute
+  '/_site/contact': typeof SiteContactRoute
+  '/_site/services': typeof SiteServicesRouteWithChildren
+  '/_site/shop': typeof SiteShopRouteWithChildren
+  '/_site/': typeof SiteIndexRoute
+  '/_site/services/$slug': typeof SiteServicesSlugRoute
+  '/_site/shop/$slug': typeof SiteShopSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/book'
+    | '/cart'
+    | '/contact'
+    | '/services'
+    | '/shop'
+    | '/services/$slug'
+    | '/shop/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/about'
+    | '/book'
+    | '/cart'
+    | '/contact'
+    | '/services'
+    | '/shop'
+    | '/'
+    | '/services/$slug'
+    | '/shop/$slug'
+  id:
+    | '__root__'
+    | '/_site'
+    | '/_site/about'
+    | '/_site/book'
+    | '/_site/cart'
+    | '/_site/contact'
+    | '/_site/services'
+    | '/_site/shop'
+    | '/_site/'
+    | '/_site/services/$slug'
+    | '/_site/shop/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  SiteRoute: typeof SiteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_site': {
+      id: '/_site'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_site/': {
+      id: '/_site/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shop': {
+      id: '/_site/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof SiteShopRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/services': {
+      id: '/_site/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof SiteServicesRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/cart': {
+      id: '/_site/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof SiteCartRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/book': {
+      id: '/_site/book'
+      path: '/book'
+      fullPath: '/book'
+      preLoaderRoute: typeof SiteBookRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shop/$slug': {
+      id: '/_site/shop/$slug'
+      path: '/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof SiteShopSlugRouteImport
+      parentRoute: typeof SiteShopRoute
+    }
+    '/_site/services/$slug': {
+      id: '/_site/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof SiteServicesSlugRouteImport
+      parentRoute: typeof SiteServicesRoute
     }
   }
 }
 
+interface SiteServicesRouteChildren {
+  SiteServicesSlugRoute: typeof SiteServicesSlugRoute
+}
+
+const SiteServicesRouteChildren: SiteServicesRouteChildren = {
+  SiteServicesSlugRoute: SiteServicesSlugRoute,
+}
+
+const SiteServicesRouteWithChildren = SiteServicesRoute._addFileChildren(
+  SiteServicesRouteChildren,
+)
+
+interface SiteShopRouteChildren {
+  SiteShopSlugRoute: typeof SiteShopSlugRoute
+}
+
+const SiteShopRouteChildren: SiteShopRouteChildren = {
+  SiteShopSlugRoute: SiteShopSlugRoute,
+}
+
+const SiteShopRouteWithChildren = SiteShopRoute._addFileChildren(
+  SiteShopRouteChildren,
+)
+
+interface SiteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
+  SiteBookRoute: typeof SiteBookRoute
+  SiteCartRoute: typeof SiteCartRoute
+  SiteContactRoute: typeof SiteContactRoute
+  SiteServicesRoute: typeof SiteServicesRouteWithChildren
+  SiteShopRoute: typeof SiteShopRouteWithChildren
+  SiteIndexRoute: typeof SiteIndexRoute
+}
+
+const SiteRouteChildren: SiteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
+  SiteBookRoute: SiteBookRoute,
+  SiteCartRoute: SiteCartRoute,
+  SiteContactRoute: SiteContactRoute,
+  SiteServicesRoute: SiteServicesRouteWithChildren,
+  SiteShopRoute: SiteShopRouteWithChildren,
+  SiteIndexRoute: SiteIndexRoute,
+}
+
+const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  SiteRoute: SiteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
