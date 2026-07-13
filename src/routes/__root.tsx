@@ -11,6 +11,9 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CartProvider } from "@/context/CartContext";
+import { Toaster } from "@/components/ui/sonner";
+
 
 function NotFoundComponent() {
   return (
@@ -77,14 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Xero — Simple data encryption for teams" },
-      { name: "description", content: "Fully managed data encrypting service and annotation platform for teams of all industries." },
-      { name: "author", content: "Xero" },
-      { property: "og:title", content: "Xero — Simple data encryption for teams" },
-      { property: "og:description", content: "Fully managed data encrypting service and annotation platform for teams of all industries." },
+      { title: "HVAC Pro — Trusted HVAC Service, Repair & Installation" },
+      { name: "description", content: "US-based HVAC experts. Book AC, furnace, and heat-pump service, or shop top-brand systems with professional installation." },
+      { name: "author", content: "HVAC Pro" },
+      { property: "og:title", content: "HVAC Pro — Service, Repair & Installation" },
+      { property: "og:description", content: "Book HVAC service or shop systems with professional installation, nationwide." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -122,8 +124,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <CartProvider>
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </CartProvider>
     </QueryClientProvider>
   );
 }
+
