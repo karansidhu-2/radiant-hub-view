@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, Phone, ShoppingCart, Wind, X } from "lucide-react";
+import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, Wind, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const nav = [
   { to: "/services", label: "Services" },
