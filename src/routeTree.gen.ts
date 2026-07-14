@@ -10,18 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SiteRouteImport } from './routes/_site'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as SiteServicesRouteImport } from './routes/_site.services'
 import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteBookRouteImport } from './routes/_site.book'
+import { Route as SiteAuthRouteImport } from './routes/_site.auth'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
 import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$slug'
+import { Route as AuthenticatedAdminZipsRouteImport } from './routes/_authenticated.admin.zips'
+import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
+import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
+import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
+import { Route as AuthenticatedAdminBookingsRouteImport } from './routes/_authenticated.admin.bookings'
+import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
 
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
@@ -44,6 +59,11 @@ const SiteContactRoute = SiteContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteCheckoutRoute = SiteCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteCartRoute = SiteCartRouteImport.update({
   id: '/cart',
   path: '/cart',
@@ -54,10 +74,25 @@ const SiteBookRoute = SiteBookRouteImport.update({
   path: '/book',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteAuthRoute = SiteAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteAboutRoute = SiteAboutRouteImport.update({
   id: '/about',
   path: '/about',
   getParentRoute: () => SiteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const SiteShopSlugRoute = SiteShopSlugRouteImport.update({
   id: '/$slug',
@@ -69,80 +104,175 @@ const SiteServicesSlugRoute = SiteServicesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => SiteServicesRoute,
 } as any)
+const AuthenticatedAdminZipsRoute = AuthenticatedAdminZipsRouteImport.update({
+  id: '/zips',
+  path: '/zips',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminServicesRoute =
+  AuthenticatedAdminServicesRouteImport.update({
+    id: '/services',
+    path: '/services',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProductsRoute =
+  AuthenticatedAdminProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminOrdersRoute =
+  AuthenticatedAdminOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBookingsRoute =
+  AuthenticatedAdminBookingsRouteImport.update({
+    id: '/bookings',
+    path: '/bookings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
+  id: '/confirmation/$kind/$ref',
+  path: '/confirmation/$kind/$ref',
+  getParentRoute: () => SiteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/about': typeof SiteAboutRoute
+  '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
   '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
+  '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
+  '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/services': typeof AuthenticatedAdminServicesRoute
+  '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof SiteIndexRoute
   '/about': typeof SiteAboutRoute
+  '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
   '/cart': typeof SiteCartRoute
+  '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
-  '/': typeof SiteIndexRoute
+  '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
+  '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/services': typeof AuthenticatedAdminServicesRoute
+  '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_site': typeof SiteRouteWithChildren
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_site/about': typeof SiteAboutRoute
+  '/_site/auth': typeof SiteAuthRoute
   '/_site/book': typeof SiteBookRoute
   '/_site/cart': typeof SiteCartRoute
+  '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/contact': typeof SiteContactRoute
   '/_site/services': typeof SiteServicesRouteWithChildren
   '/_site/shop': typeof SiteShopRouteWithChildren
   '/_site/': typeof SiteIndexRoute
+  '/_authenticated/admin/bookings': typeof AuthenticatedAdminBookingsRoute
+  '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
+  '/_authenticated/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/_site/services/$slug': typeof SiteServicesSlugRoute
   '/_site/shop/$slug': typeof SiteShopSlugRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_site/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/about'
+    | '/auth'
     | '/book'
     | '/cart'
+    | '/checkout'
     | '/contact'
     | '/services'
     | '/shop'
+    | '/admin/bookings'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/services'
+    | '/admin/zips'
     | '/services/$slug'
     | '/shop/$slug'
+    | '/admin/'
+    | '/confirmation/$kind/$ref'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/about'
+    | '/auth'
     | '/book'
     | '/cart'
+    | '/checkout'
     | '/contact'
     | '/services'
     | '/shop'
-    | '/'
+    | '/admin/bookings'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/services'
+    | '/admin/zips'
     | '/services/$slug'
     | '/shop/$slug'
+    | '/admin'
+    | '/confirmation/$kind/$ref'
   id:
     | '__root__'
+    | '/_authenticated'
     | '/_site'
+    | '/_authenticated/admin'
     | '/_site/about'
+    | '/_site/auth'
     | '/_site/book'
     | '/_site/cart'
+    | '/_site/checkout'
     | '/_site/contact'
     | '/_site/services'
     | '/_site/shop'
     | '/_site/'
+    | '/_authenticated/admin/bookings'
+    | '/_authenticated/admin/orders'
+    | '/_authenticated/admin/products'
+    | '/_authenticated/admin/services'
+    | '/_authenticated/admin/zips'
     | '/_site/services/$slug'
     | '/_site/shop/$slug'
+    | '/_authenticated/admin/'
+    | '/_site/confirmation/$kind/$ref'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SiteRoute: typeof SiteRouteWithChildren
 }
 
@@ -153,6 +283,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_site/': {
@@ -183,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteContactRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/checkout': {
+      id: '/_site/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof SiteCheckoutRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/cart': {
       id: '/_site/cart'
       path: '/cart'
@@ -197,12 +341,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteBookRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/auth': {
+      id: '/_site/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof SiteAuthRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/about': {
       id: '/_site/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof SiteAboutRouteImport
       parentRoute: typeof SiteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_site/shop/$slug': {
       id: '/_site/shop/$slug'
@@ -218,8 +383,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteServicesSlugRouteImport
       parentRoute: typeof SiteServicesRoute
     }
+    '/_authenticated/admin/zips': {
+      id: '/_authenticated/admin/zips'
+      path: '/zips'
+      fullPath: '/admin/zips'
+      preLoaderRoute: typeof AuthenticatedAdminZipsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/services': {
+      id: '/_authenticated/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AuthenticatedAdminServicesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/products': {
+      id: '/_authenticated/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/orders': {
+      id: '/_authenticated/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/bookings': {
+      id: '/_authenticated/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AuthenticatedAdminBookingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_site/confirmation/$kind/$ref': {
+      id: '/_site/confirmation/$kind/$ref'
+      path: '/confirmation/$kind/$ref'
+      fullPath: '/confirmation/$kind/$ref'
+      preLoaderRoute: typeof SiteConfirmationKindRefRouteImport
+      parentRoute: typeof SiteRoute
+    }
   }
 }
+
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBookingsRoute: typeof AuthenticatedAdminBookingsRoute
+  AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
+  AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
+  AuthenticatedAdminZipsRoute: typeof AuthenticatedAdminZipsRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBookingsRoute: AuthenticatedAdminBookingsRoute,
+  AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
+  AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
+  AuthenticatedAdminZipsRoute: AuthenticatedAdminZipsRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface SiteServicesRouteChildren {
   SiteServicesSlugRoute: typeof SiteServicesSlugRoute
@@ -247,27 +486,34 @@ const SiteShopRouteWithChildren = SiteShopRoute._addFileChildren(
 
 interface SiteRouteChildren {
   SiteAboutRoute: typeof SiteAboutRoute
+  SiteAuthRoute: typeof SiteAuthRoute
   SiteBookRoute: typeof SiteBookRoute
   SiteCartRoute: typeof SiteCartRoute
+  SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteContactRoute: typeof SiteContactRoute
   SiteServicesRoute: typeof SiteServicesRouteWithChildren
   SiteShopRoute: typeof SiteShopRouteWithChildren
   SiteIndexRoute: typeof SiteIndexRoute
+  SiteConfirmationKindRefRoute: typeof SiteConfirmationKindRefRoute
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
   SiteAboutRoute: SiteAboutRoute,
+  SiteAuthRoute: SiteAuthRoute,
   SiteBookRoute: SiteBookRoute,
   SiteCartRoute: SiteCartRoute,
+  SiteCheckoutRoute: SiteCheckoutRoute,
   SiteContactRoute: SiteContactRoute,
   SiteServicesRoute: SiteServicesRouteWithChildren,
   SiteShopRoute: SiteShopRouteWithChildren,
   SiteIndexRoute: SiteIndexRoute,
+  SiteConfirmationKindRefRoute: SiteConfirmationKindRefRoute,
 }
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SiteRoute: SiteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
