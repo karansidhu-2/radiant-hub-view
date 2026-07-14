@@ -14,16 +14,389 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          city: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          reference: string
+          scheduled_date: string
+          scheduled_hour: number
+          service_name: string
+          service_slug: string | null
+          state: string
+          status: Database["public"]["Enums"]["booking_status"]
+          street: string
+          updated_at: string
+          user_id: string | null
+          zip: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          reference?: string
+          scheduled_date: string
+          scheduled_hour: number
+          service_name: string
+          service_slug?: string | null
+          state: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          street: string
+          updated_at?: string
+          user_id?: string | null
+          zip: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          reference?: string
+          scheduled_date?: string
+          scheduled_hour?: number
+          service_name?: string
+          service_slug?: string | null
+          state?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          street?: string
+          updated_at?: string
+          user_id?: string | null
+          zip?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          include_installation: boolean
+          installation_fee: number
+          order_id: string
+          product_name: string
+          product_slug: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          include_installation?: boolean
+          installation_fee?: number
+          order_id: string
+          product_name: string
+          product_slug: string
+          quantity?: number
+          unit_price: number
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          include_installation?: boolean
+          installation_fee?: number
+          order_id?: string
+          product_name?: string
+          product_slug?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          city: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          installation_total: number
+          notes: string | null
+          phone: string
+          reference: string
+          scheduled_date: string | null
+          scheduled_hour: number | null
+          state: string
+          status: Database["public"]["Enums"]["order_status"]
+          street: string
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string | null
+          zip: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          installation_total?: number
+          notes?: string | null
+          phone: string
+          reference?: string
+          scheduled_date?: string | null
+          scheduled_hour?: number | null
+          state: string
+          status?: Database["public"]["Enums"]["order_status"]
+          street: string
+          subtotal: number
+          total: number
+          updated_at?: string
+          user_id?: string | null
+          zip: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          installation_total?: number
+          notes?: string | null
+          phone?: string
+          reference?: string
+          scheduled_date?: string | null
+          scheduled_hour?: number | null
+          state?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          street?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+          zip?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          available: boolean
+          brand: string
+          capacity_btu: number | null
+          category: string
+          created_at: string
+          description: string
+          features: Json
+          hspf: number | null
+          id: string
+          installation_fee: number
+          name: string
+          price: number
+          published: boolean
+          seer: number | null
+          slug: string
+          stock: number
+          tag: string | null
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean
+          brand: string
+          capacity_btu?: number | null
+          category: string
+          created_at?: string
+          description: string
+          features?: Json
+          hspf?: number | null
+          id?: string
+          installation_fee?: number
+          name: string
+          price: number
+          published?: boolean
+          seer?: number | null
+          slug: string
+          stock?: number
+          tag?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean
+          brand?: string
+          capacity_btu?: number | null
+          category?: string
+          created_at?: string
+          description?: string
+          features?: Json
+          hspf?: number | null
+          id?: string
+          installation_fee?: number
+          name?: string
+          price?: number
+          published?: boolean
+          seer?: number | null
+          slug?: string
+          stock?: number
+          tag?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      service_areas: {
+        Row: {
+          active: boolean
+          city: string | null
+          created_at: string
+          id: string
+          state: string | null
+          zip: string
+        }
+        Insert: {
+          active?: boolean
+          city?: string | null
+          created_at?: string
+          id?: string
+          state?: string | null
+          zip: string
+        }
+        Update: {
+          active?: boolean
+          city?: string | null
+          created_at?: string
+          id?: string
+          state?: string | null
+          zip?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          bullets: Json
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          published: boolean
+          short: string
+          slug: string
+          starting_at: number
+          updated_at: string
+        }
+        Insert: {
+          bullets?: Json
+          category: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          name: string
+          published?: boolean
+          short: string
+          slug: string
+          starting_at?: number
+          updated_at?: string
+        }
+        Update: {
+          bullets?: Json
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          published?: boolean
+          short?: string
+          slug?: string
+          starting_at?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "customer"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "scheduled"
+        | "installed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +523,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "customer"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      order_status: [
+        "pending",
+        "confirmed",
+        "scheduled",
+        "installed",
+        "cancelled",
+      ],
+    },
   },
 } as const
