@@ -72,8 +72,8 @@ function CartPage() {
             </div>
             <Separator className="my-4" />
             <div className="flex items-baseline justify-between"><span className="font-semibold">Total</span><span className="text-2xl font-bold">{formatMoney(total)}</span></div>
-            <Link to="/book" search={{ fromCart: true }}>
-              <Button size="lg" className="mt-5 w-full gradient-cool text-primary-foreground shadow-soft">Proceed to booking</Button>
+            <Link to="/checkout">
+              <Button size="lg" className="mt-5 w-full gradient-cool text-primary-foreground shadow-soft">Proceed to checkout</Button>
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">Free financing available · 0% APR for qualified buyers · No payment due today</p>
           </CardContent>

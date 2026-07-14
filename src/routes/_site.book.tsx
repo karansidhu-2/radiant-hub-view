@@ -1,43 +1,181 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { checkZip, getBookedSlots, createBooking } from "@/lib/hvac.functions";
+import { services } from "@/data/services";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/book")({
   validateSearch: (s: Record<string, unknown>) => ({
     service: typeof s.service === "string" ? s.service : undefined,
-    fromCart: s.fromCart === true || s.fromCart === "true",
   }),
-  head: () => ({ meta: [{ title: "Book Service — HVAC Pro" }, { name: "description", content: "Schedule your HVAC service or installation appointment." }] }),
+  head: () => ({ meta: [{ title: "Book Service — HVAC Pro" }] }),
   component: BookPage,
 });
 
+const HOURS = Array.from({ length: 11 }, (_, i) => i + 8); // 8..18
+function fmtHour(h: number) {
+  const s = h < 12 ? "AM" : "PM";
+  const hr = h === 12 ? 12 : h % 12;
+  return `${hr}:00 ${s}`;
+}
+function tomorrowISO() {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 function BookPage() {
-  const { service, fromCart } = Route.useSearch();
+  const { service: serviceSlug } = Route.useSearch();
+  const navigate = useNavigate();
+  const svc = services.find((s) => s.slug === serviceSlug) ?? services[0];
+
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+  }, []);
+
+  const [form, setForm] = useState({
+    full_name: "", email: "", phone: "",
+    street: "", city: "", state: "", zip: "",
+    service_slug: svc.slug, service_name: svc.name,
+    scheduled_date: tomorrowISO(), scheduled_hour: 10,
+    notes: "",
+  });
+  const [zipState, setZipState] = useState<"idle" | "checking" | "ok" | "bad" | "invalid">("idle");
+  const [zipMsg, setZipMsg] = useState<string>("");
+  const [busy, setBusy] = useState(false);
+  const [bookedHours, setBookedHours] = useState<number[]>([]);
+
+  const checkZipFn = useServerFn(checkZip);
+  const bookedFn = useServerFn(getBookedSlots);
+  const bookFn = useServerFn(createBooking);
+
+  // check zip on blur
+  const doCheckZip = async () => {
+    if (!/^\d{5}$/.test(form.zip)) { setZipState("invalid"); setZipMsg("Enter a 5-digit ZIP"); return; }
+    setZipState("checking");
+    const res = await checkZipFn({ data: { zip: form.zip } });
+    if (res.available) {
+      setZipState("ok"); setZipMsg(`We serve ${res.city}, ${res.state}`);
+      setForm((f) => ({ ...f, city: f.city || res.city || "", state: f.state || res.state || "" }));
+    } else {
+      setZipState("bad");
+      setZipMsg(res.reason === "invalid" ? "Enter a valid ZIP" : "Sorry, we don't service this ZIP yet");
+    }
+  };
+
+  useEffect(() => {
+    bookedFn({ data: { date: form.scheduled_date } }).then((r) => setBookedHours(r.hours));
+  }, [form.scheduled_date, bookedFn]);
+
+  const setSvc = (slug: string) => {
+    const s = services.find((x) => x.slug === slug)!;
+    setForm((f) => ({ ...f, service_slug: s.slug, service_name: s.name }));
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
+    setBusy(true);
+    try {
+      const res = await bookFn({ data: { ...form, notes: form.notes || null } });
+      toast.success("Booking confirmed!");
+      navigate({ to: "/confirmation/$kind/$ref", params: { kind: "booking", ref: res.reference } });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to book");
+    } finally { setBusy(false); }
+  };
+
+  if (authed === false) {
+    return (
+      <section className="mx-auto max-w-md px-4 py-16">
+        <Card><CardContent className="p-6 text-center">
+          <h1 className="text-xl font-bold">Sign in to book</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Create an account to track your booking and status.</p>
+          <Button onClick={() => navigate({ to: "/auth", search: { redirect: "/book" } })} className="mt-4 gradient-cool text-primary-foreground">Sign in / Sign up</Button>
+        </CardContent></Card>
+      </section>
+    );
+  }
+
   return (
-    <section className="mx-auto max-w-2xl px-4 py-16 md:px-6">
+    <section className="mx-auto max-w-2xl px-4 py-12 md:px-6">
       <h1 className="text-3xl font-bold md:text-4xl">Book your appointment</h1>
-      <p className="mt-2 text-muted-foreground">
-        {fromCart ? "Confirm installation details for your cart." : service ? `Booking: ${service}` : "Tell us what you need — we'll confirm within 1 business hour."}
-      </p>
-      <form
-        className="mt-8 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-soft"
-        onSubmit={(e) => {
-          e.preventDefault();
-          alert("Thanks! We'll call you shortly to confirm your appointment.");
-        }}
-      >
-        <input required placeholder="Full name" className="rounded-md border border-input bg-background px-3 py-2" />
-        <input required type="email" placeholder="Email" className="rounded-md border border-input bg-background px-3 py-2" />
-        <input required type="tel" placeholder="Phone" className="rounded-md border border-input bg-background px-3 py-2" />
-        <input required placeholder="Street address" className="rounded-md border border-input bg-background px-3 py-2" />
-        <div className="grid grid-cols-2 gap-3">
-          <input required placeholder="City" className="rounded-md border border-input bg-background px-3 py-2" />
-          <input required placeholder="ZIP" className="rounded-md border border-input bg-background px-3 py-2" />
-        </div>
-        <input required type="date" className="rounded-md border border-input bg-background px-3 py-2" />
-        <textarea placeholder="Describe the issue (optional)" rows={4} className="rounded-md border border-input bg-background px-3 py-2" />
-        <button type="submit" className="rounded-md gradient-cool px-4 py-3 font-semibold text-primary-foreground shadow-soft">
-          Request appointment
-        </button>
-        <Link to="/" className="text-center text-sm text-muted-foreground hover:text-foreground">Cancel</Link>
+      <p className="mt-2 text-muted-foreground">Pick a service, verify your ZIP, and choose a time slot.</p>
+
+      <form onSubmit={submit} className="mt-8 grid gap-4">
+        <Card><CardContent className="p-5 grid gap-4">
+          <div>
+            <Label>Service</Label>
+            <Select value={form.service_slug} onValueChange={setSvc}>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+              <SelectContent>{services.map((s) => <SelectItem key={s.slug} value={s.slug}>{s.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><Label>Full name</Label><Input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
+            <div><Label>Phone</Label><Input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+          </div>
+          <div><Label>Email</Label><Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+
+          <div><Label>Street</Label><Input required value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} /></div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div><Label>City</Label><Input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+            <div><Label>State</Label><Input required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
+            <div>
+              <Label>ZIP</Label>
+              <Input required value={form.zip} maxLength={5}
+                onChange={(e) => { setForm({ ...form, zip: e.target.value }); setZipState("idle"); }}
+                onBlur={doCheckZip} />
+            </div>
+          </div>
+          {zipState !== "idle" && (
+            <div className={`flex items-center gap-2 text-sm ${zipState === "ok" ? "text-green-600" : zipState === "checking" ? "text-muted-foreground" : "text-destructive"}`}>
+              {zipState === "checking" ? <Loader2 className="h-4 w-4 animate-spin" /> : zipState === "ok" ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+              {zipMsg}
+            </div>
+          )}
+        </CardContent></Card>
+
+        <Card><CardContent className="p-5 grid gap-4">
+          <div>
+            <Label>Preferred date</Label>
+            <Input type="date" required min={tomorrowISO()} value={form.scheduled_date}
+              onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
+          </div>
+          <div>
+            <Label>Available time slots</Label>
+            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {HOURS.map((h) => {
+                const taken = bookedHours.includes(h);
+                const sel = form.scheduled_hour === h;
+                return (
+                  <button key={h} type="button" disabled={taken}
+                    onClick={() => setForm({ ...form, scheduled_hour: h })}
+                    className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${sel ? "border-primary bg-primary text-primary-foreground" : taken ? "border-border bg-muted text-muted-foreground line-through" : "border-border bg-card hover:bg-accent"}`}>
+                    {fmtHour(h)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div><Label>Notes (optional)</Label>
+            <textarea rows={3} className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </div>
+        </CardContent></Card>
+
+        <Button type="submit" size="lg" disabled={busy || zipState !== "ok"} className="gradient-cool text-primary-foreground shadow-soft">
+          {busy ? "Booking…" : "Confirm booking"}
+        </Button>
       </form>
     </section>
   );

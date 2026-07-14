@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, Phone, ShoppingCart, Wind, X } from "lucide-react";
+import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, Wind, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const nav = [
   { to: "/services", label: "Services" },
@@ -13,6 +14,7 @@ const nav = [
 
 export function SiteHeader() {
   const { count, hydrated } = useCart();
+  const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
@@ -58,6 +60,18 @@ export function SiteHeader() {
               </span>
             )}
           </Link>
+          {user ? (
+            <>
+              <Link to="/admin" className="hidden md:block" title="Admin">
+                <Button variant="outline" size="icon"><Shield className="h-4 w-4" /></Button>
+              </Link>
+              <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out"><LogOut className="h-4 w-4" /></Button>
+            </>
+          ) : (
+            <Link to="/auth" search={{ redirect: "/" }} className="hidden md:block">
+              <Button variant="outline" size="icon" title="Sign in"><LogIn className="h-4 w-4" /></Button>
+            </Link>
+          )}
           <Link to="/book" className="hidden md:block">
             <Button className="gradient-cool text-primary-foreground shadow-soft hover:opacity-95">
               Book Service
