@@ -227,6 +227,61 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------- Admin allowlist (invite by email) ----------
+export const adminListAllowlist = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: allow } = await supabaseAdmin
+      .from("admin_allowlist").select("*").order("created_at", { ascending: false });
+    // Try to mark which are actually registered users with admin role
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const byEmail = new Map((users?.users ?? []).map((u) => [u.email?.toLowerCase(), u]));
+    return (allow ?? []).map((r) => ({
+      ...r,
+      registered: byEmail.has(r.email.toLowerCase()),
+    }));
+  });
+
+export const adminAddAllowlistEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { email: string }) => ({ email: d.email.trim().toLowerCase() }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) throw new Error("Invalid email");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("admin_allowlist")
+      .upsert({ email: data.email, added_by: context.userId }, { onConflict: "email" });
+    if (error) throw new Error(error.message);
+    // If a user with that email already exists, grant admin role now
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const match = (users?.users ?? []).find((u) => u.email?.toLowerCase() === data.email);
+    if (match) {
+      await supabaseAdmin.from("user_roles")
+        .upsert({ user_id: match.id, role: "admin" }, { onConflict: "user_id,role" });
+    }
+    return { ok: true, granted: Boolean(match) };
+  });
+
+export const adminRemoveAllowlistEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { email: string }) => ({ email: d.email.trim().toLowerCase() }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("admin_allowlist").delete().eq("email", data.email);
+    // Revoke admin role from that user if registered
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const match = (users?.users ?? []).find((u) => u.email?.toLowerCase() === data.email);
+    if (match) {
+      await supabaseAdmin.from("user_roles").delete()
+        .eq("user_id", match.id).eq("role", "admin");
+    }
+    return { ok: true };
+  });
+
 export const adminListBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

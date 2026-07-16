@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin } from "lucide-react";
+import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -17,6 +17,7 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/bookings", label: "Bookings", icon: Calendar },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
+  { to: "/admin/admins", label: "Admins", icon: UserCog },
 ];
 
 function AdminLayout() {
@@ -37,10 +38,8 @@ function AdminLayout() {
       <div className="mx-auto max-w-md p-16 text-center">
         <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
         <h1 className="mt-3 text-xl font-bold">Admin access required</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Signed in as {email}. Ask an existing admin to grant your account the admin role.</p>
-        <p className="mt-3 text-xs text-muted-foreground font-mono break-all">
-          The first admin can grant themselves the role via the DB:<br/>
-          INSERT INTO user_roles (user_id, role) VALUES ('&lt;your-uid&gt;', 'admin');
+        <p className="mt-2 text-sm text-muted-foreground">
+          Signed in as <b>{email}</b>. Ask an existing admin to invite your email from the Admins page.
         </p>
         <Button className="mt-4" onClick={() => navigate({ to: "/" })}>Back</Button>
       </div>

@@ -1,11 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { products, productCategories, formatMoney, type ProductCategory } from "@/data/products";
+import { productCategories, formatMoney, type ProductCategory } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
@@ -19,7 +22,7 @@ export const Route = createFileRoute("/_site/shop")({
   component: ShopPage,
 });
 
-function iconForCategory(cat: ProductCategory) {
+function iconForCategory(cat: string) {
   switch (cat) {
     case "furnace": return "Flame";
     case "thermostat": return "Thermometer";
@@ -31,10 +34,34 @@ function iconForCategory(cat: ProductCategory) {
   }
 }
 
+type ProductRow = {
+  slug: string; name: string; brand: string; category: string;
+  price: number; installation_fee: number;
+  seer: number | null; capacity_btu: number | null; hspf: number | null;
+  tag: string | null; available: boolean;
+};
+
 function ShopPage() {
   const [filter, setFilter] = useState<ProductCategory | "all">("all");
   const { addItem } = useCart();
-  const filtered = filter === "all" ? products : products.filter((p) => p.category === filter);
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products", "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,tag,available")
+        .eq("published", true)
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as ProductRow[];
+    },
+  });
+
+  const filtered = useMemo(
+    () => filter === "all" ? products : products.filter((p) => p.category === filter),
+    [products, filter]
+  );
 
   const handleAdd = (slug: string, name: string) => {
     addItem(slug, { includeInstallation: true });
@@ -76,45 +103,55 @@ function ShopPage() {
           })}
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((p) => (
-            <Card key={p.slug} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-elevated">
-              <Link to="/shop/$slug" params={{ slug: p.slug }}>
-                <div className="relative aspect-[4/3] gradient-cool">
-                  <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-                    <DynamicIcon name={iconForCategory(p.category)} className="h-16 w-16 opacity-90" />
-                  </div>
-                  {p.tag && (
-                    <span className="absolute left-3 top-3 rounded-full bg-[color:var(--ember)] px-2 py-0.5 text-xs font-semibold text-[color:var(--ember-foreground)]">
-                      {p.tag}
-                    </span>
-                  )}
-                </div>
-              </Link>
-              <CardContent className="p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+        {isLoading ? (
+          <div className="grid place-items-center py-20 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((p) => (
+              <Card key={p.slug} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-elevated">
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
-                  <h3 className="mt-1 text-base font-semibold leading-tight hover:text-primary">{p.name}</h3>
+                  <div className="relative aspect-[4/3] gradient-cool">
+                    <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
+                      <DynamicIcon name={iconForCategory(p.category)} className="h-16 w-16 opacity-90" />
+                    </div>
+                    {p.tag && (
+                      <span className="absolute left-3 top-3 rounded-full bg-[color:var(--ember)] px-2 py-0.5 text-xs font-semibold text-[color:var(--ember-foreground)]">
+                        {p.tag}
+                      </span>
+                    )}
+                    {!p.available && (
+                      <span className="absolute right-3 top-3 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">
+                        Out of stock
+                      </span>
+                    )}
+                  </div>
                 </Link>
-                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {p.seer && <span>{p.seer} SEER2</span>}
-                  {p.capacityBTU && <span>{(p.capacityBTU / 12000).toFixed(1)} ton</span>}
-                  {p.hspf && <span>{p.hspf} HSPF2</span>}
-                </div>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-xl font-bold">{formatMoney(p.price)}</span>
-                  <span className="text-xs text-muted-foreground">+ {formatMoney(p.installationFee)} install</span>
-                </div>
-                <Button
-                  onClick={() => handleAdd(p.slug, p.name)}
-                  className="mt-4 w-full gradient-cool text-primary-foreground hover:opacity-95"
-                >
-                  Add to cart
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardContent className="p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                  <Link to="/shop/$slug" params={{ slug: p.slug }}>
+                    <h3 className="mt-1 text-base font-semibold leading-tight hover:text-primary">{p.name}</h3>
+                  </Link>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    {p.seer && <span>{p.seer} SEER2</span>}
+                    {p.capacity_btu && <span>{(p.capacity_btu / 12000).toFixed(1)} ton</span>}
+                    {p.hspf && <span>{p.hspf} HSPF2</span>}
+                  </div>
+                  <div className="mt-3 flex items-baseline gap-1">
+                    <span className="text-xl font-bold">{formatMoney(Number(p.price))}</span>
+                    <span className="text-xs text-muted-foreground">+ {formatMoney(Number(p.installation_fee))} install</span>
+                  </div>
+                  <Button
+                    onClick={() => handleAdd(p.slug, p.name)}
+                    disabled={!p.available}
+                    className="mt-4 w-full gradient-cool text-primary-foreground hover:opacity-95"
+                  >
+                    {p.available ? "Add to cart" : "Unavailable"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );
