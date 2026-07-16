@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { checkZip, getBookedSlots, createBooking } from "@/lib/hvac.functions";
-import { services } from "@/data/services";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,21 @@ function tomorrowISO() {
 function BookPage() {
   const { service: serviceSlug } = Route.useSearch();
   const navigate = useNavigate();
-  const svc = services.find((s) => s.slug === serviceSlug) ?? services[0];
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["services", "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("services").select("slug,name").eq("published", true).order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const svc = useMemo(
+    () => services.find((s) => s.slug === serviceSlug) ?? services[0],
+    [services, serviceSlug]
+  );
 
   const [authed, setAuthed] = useState<boolean | null>(null);
   useEffect(() => {
@@ -44,10 +58,15 @@ function BookPage() {
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "",
     street: "", city: "", state: "", zip: "",
-    service_slug: svc.slug, service_name: svc.name,
+    service_slug: "", service_name: "",
     scheduled_date: tomorrowISO(), scheduled_hour: 10,
     notes: "",
   });
+  useEffect(() => {
+    if (svc && !form.service_slug) {
+      setForm((f) => ({ ...f, service_slug: svc.slug, service_name: svc.name }));
+    }
+  }, [svc, form.service_slug]);
   const [zipState, setZipState] = useState<"idle" | "checking" | "ok" | "bad" | "invalid">("idle");
   const [zipMsg, setZipMsg] = useState<string>("");
   const [busy, setBusy] = useState(false);
