@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings, telHref } from "@/hooks/useSiteSettings";
 
 const nav = [
   { to: "/services", label: "Services" },
@@ -15,6 +16,7 @@ const nav = [
 export function SiteHeader() {
   const { count, hydrated } = useCart();
   const { user, signOut } = useAuth();
+  const settings = useSiteSettings();
   const [open, setOpen] = useState(false);
 
   return (
