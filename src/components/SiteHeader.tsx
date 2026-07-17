@@ -26,9 +26,7 @@ export function SiteHeader() {
           <span className="grid h-9 w-9 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft">
             <Wind className="h-5 w-5" strokeWidth={2.4} />
           </span>
-          <span>
-            HVAC<span className="text-primary">Pro</span>
-          </span>
+          <span>{settings.company_name}</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
