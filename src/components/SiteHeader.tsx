@@ -102,8 +102,8 @@ export function SiteHeader() {
                 {n.label}
               </Link>
             ))}
-            <a href="tel:18005551234" className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
-              📞 (800) 555-1234
+            <a href={telHref(settings.support_phone)} className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
+              📞 {settings.support_phone}
             </a>
             <Link to="/book" onClick={() => setOpen(false)}>
               <Button className="mt-2 w-full gradient-cool text-primary-foreground">Book Service</Button>
