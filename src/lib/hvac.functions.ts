@@ -345,3 +345,21 @@ export const adminDeleteArea = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------- Site settings ----------
+export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    company_name: string; tagline: string; support_phone: string;
+    support_email: string; address: string; business_hours: string; emergency_phone: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("site_settings")
+      .update(data)
+      .eq("singleton", true);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
