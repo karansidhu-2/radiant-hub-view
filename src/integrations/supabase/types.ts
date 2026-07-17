@@ -370,6 +370,48 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          address: string
+          business_hours: string
+          company_name: string
+          created_at: string
+          emergency_phone: string
+          id: string
+          singleton: boolean
+          support_email: string
+          support_phone: string
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          business_hours?: string
+          company_name?: string
+          created_at?: string
+          emergency_phone?: string
+          id?: string
+          singleton?: boolean
+          support_email?: string
+          support_phone?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          business_hours?: string
+          company_name?: string
+          created_at?: string
+          emergency_phone?: string
+          id?: string
+          singleton?: boolean
+          support_email?: string
+          support_phone?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

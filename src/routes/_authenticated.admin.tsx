@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog } from "lucide-react";
+import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -18,6 +18,7 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
   { to: "/admin/admins", label: "Admins", icon: UserCog },
+  { to: "/admin/settings", label: "Site Settings", icon: Settings },
 ];
 
 function AdminLayout() {

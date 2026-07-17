@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings, telHref } from "@/hooks/useSiteSettings";
 
 const nav = [
   { to: "/services", label: "Services" },
@@ -15,6 +16,7 @@ const nav = [
 export function SiteHeader() {
   const { count, hydrated } = useCart();
   const { user, signOut } = useAuth();
+  const settings = useSiteSettings();
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,9 +26,7 @@ export function SiteHeader() {
           <span className="grid h-9 w-9 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft">
             <Wind className="h-5 w-5" strokeWidth={2.4} />
           </span>
-          <span>
-            HVAC<span className="text-primary">Pro</span>
-          </span>
+          <span>{settings.company_name}</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -44,11 +44,11 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <a
-            href="tel:18005551234"
+            href={telHref(settings.support_phone)}
             className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent md:inline-flex"
           >
             <Phone className="h-4 w-4" />
-            (800) 555-1234
+            {settings.support_phone}
           </a>
           <Link to="/cart" className="relative">
             <Button variant="outline" size="icon" aria-label="Cart">
@@ -102,8 +102,8 @@ export function SiteHeader() {
                 {n.label}
               </Link>
             ))}
-            <a href="tel:18005551234" className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
-              📞 (800) 555-1234
+            <a href={telHref(settings.support_phone)} className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
+              📞 {settings.support_phone}
             </a>
             <Link to="/book" onClick={() => setOpen(false)}>
               <Button className="mt-2 w-full gradient-cool text-primary-foreground">Book Service</Button>

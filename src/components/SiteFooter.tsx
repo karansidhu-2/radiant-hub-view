@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Wind, Phone, Mail, MapPin } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function SiteFooter() {
+  const s = useSiteSettings();
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-4 md:px-6">
@@ -10,11 +12,9 @@ export function SiteFooter() {
             <span className="grid h-9 w-9 place-items-center rounded-lg gradient-cool text-primary-foreground">
               <Wind className="h-5 w-5" strokeWidth={2.4} />
             </span>
-            HVAC<span className="text-primary">Pro</span>
+            {s.company_name}
           </Link>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Licensed, insured, and NATE-certified HVAC service, repair, and installation across 28 US states.
-          </p>
+          <p className="mt-3 text-sm text-muted-foreground">{s.tagline}</p>
           <p className="mt-4 text-xs text-muted-foreground">EPA #12345 · NATE Certified · BBB A+</p>
         </div>
         <div>
@@ -39,15 +39,15 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> (800) 555-1234</li>
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> hello@hvacpro.com</li>
-            <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-primary" /> 4200 Comfort Ave<br />Denver, CO 80202</li>
+            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> {s.support_phone}</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> {s.support_email}</li>
+            <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-primary" /> {s.address}</li>
           </ul>
-          <p className="mt-4 text-xs font-semibold text-[color:var(--ember)]">🔥 24/7 Emergency Line</p>
+          <p className="mt-4 text-xs font-semibold text-[color:var(--ember)]">🔥 24/7 Emergency: {s.emergency_phone}</p>
         </div>
       </div>
       <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} HVAC Pro Services, Inc. All rights reserved.
+        © {new Date().getFullYear()} {s.company_name}. All rights reserved.
       </div>
     </footer>
   );
