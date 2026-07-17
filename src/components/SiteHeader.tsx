@@ -44,11 +44,11 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <a
-            href="tel:18005551234"
+            href={telHref(settings.support_phone)}
             className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent md:inline-flex"
           >
             <Phone className="h-4 w-4" />
-            (800) 555-1234
+            {settings.support_phone}
           </a>
           <Link to="/cart" className="relative">
             <Button variant="outline" size="icon" aria-label="Cart">
