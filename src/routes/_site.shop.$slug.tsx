@@ -92,6 +92,9 @@ function ProductDetail() {
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
             <h1 className="mt-1 text-3xl font-bold md:text-4xl">{p.name}</h1>
             <p className="mt-3 text-muted-foreground">{p.description}</p>
+            {autoRatings?.[p.slug] && (
+              <div className="mt-4"><AutoRatingBadge rating={autoRatings[p.slug]} /></div>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2 text-xs">
               {p.seer && <span className="rounded-full bg-accent px-3 py-1 font-semibold text-accent-foreground">{p.seer} SEER2</span>}
