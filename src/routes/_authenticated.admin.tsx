@@ -23,6 +23,7 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const router = useRouter();
   const [state, setState] = useState<"loading" | "admin" | "denied">("loading");
   const [email, setEmail] = useState("");
   const check = useServerFn(isCurrentUserAdmin);
