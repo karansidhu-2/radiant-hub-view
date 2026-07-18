@@ -24,6 +24,7 @@ type P = {
   price: number; installation_fee: number;
   seer: number | null; capacity_btu: number | null; hspf: number | null;
   description: string; features: string[]; tag: string | null; available: boolean;
+  image_url: string | null; resolved_image: string | null;
 };
 
 function ProductDetail() {
@@ -36,14 +37,20 @@ function ProductDetail() {
     queryFn: async () => {
       const [main, others] = await Promise.all([
         supabase.from("products")
-          .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,description,features,tag,available")
+          .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,description,features,tag,available,image_url")
           .eq("slug", slug).eq("published", true).maybeSingle(),
         supabase.from("products").select("slug,name,brand,price,category").eq("published", true).neq("slug", slug).limit(6),
       ]);
       if (main.error) throw main.error;
+      let resolved: string | null = null;
+      if (main.data?.image_url) {
+        const { resolveProductImageUrl } = await import("@/lib/product-image");
+        resolved = await resolveProductImageUrl(main.data.image_url);
+      }
       const p = main.data ? {
         ...main.data,
         features: Array.isArray(main.data.features) ? main.data.features as string[] : [],
+        resolved_image: resolved,
       } as P : null;
       const related = (others.data ?? []).filter((r: any) => r.category === (p?.category ?? "")).slice(0, 3);
       return { p, related };
@@ -74,12 +81,16 @@ function ProductDetail() {
         </Link>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated">
-            <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-              <DynamicIcon
-                name={p.category === "furnace" ? "Flame" : p.category === "thermostat" ? "Thermometer" : p.category === "filter" ? "Filter" : "Snowflake"}
-                className="h-40 w-40 opacity-90"
-              />
-            </div>
+            {p.resolved_image ? (
+              <img src={p.resolved_image} alt={p.name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
+                <DynamicIcon
+                  name={p.category === "furnace" ? "Flame" : p.category === "thermostat" ? "Thermometer" : p.category === "filter" ? "Filter" : "Snowflake"}
+                  className="h-40 w-40 opacity-90"
+                />
+              </div>
+            )}
             {p.tag && (
               <span className="absolute left-4 top-4 rounded-full bg-[color:var(--ember)] px-3 py-1 text-xs font-semibold text-[color:var(--ember-foreground)]">
                 {p.tag}
