@@ -376,14 +376,20 @@ function Lightbox({
       </div>
 
       <div
-        className="relative flex-1 select-none"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        ref={swipeAreaRef}
+        className="relative flex-1 select-none touch-pan-y overflow-hidden"
+        style={{ touchAction: "pan-y" }}
       >
-        <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 flex items-center justify-center p-4 will-change-transform"
+          style={{
+            transform: dragX ? `translate3d(${dragX}px,0,0)` : undefined,
+            transition: dragX ? "none" : "transform 200ms ease-out",
+          }}
+        >
           {renderMain(current, { large: true })}
         </div>
+
 
         {total > 1 && (
           <>
