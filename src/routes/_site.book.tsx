@@ -50,10 +50,18 @@ function BookPage() {
     [services, serviceSlug]
   );
 
-  const [authed, setAuthed] = useState<boolean | null>(null);
+  // Guest-friendly: no auth required. If signed in, we prefill and link the booking.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) setForm((f) => ({
+        ...f,
+        email: f.email || u.email || "",
+        full_name: f.full_name || (u.user_metadata?.full_name as string) || "",
+      }));
+    });
   }, []);
+
 
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "",
