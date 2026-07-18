@@ -47,6 +47,7 @@ export type Database = {
           reference: string
           scheduled_date: string
           scheduled_hour: number
+          service_charge: number | null
           service_name: string
           service_slug: string | null
           state: string
@@ -67,6 +68,7 @@ export type Database = {
           reference?: string
           scheduled_date: string
           scheduled_hour: number
+          service_charge?: number | null
           service_name: string
           service_slug?: string | null
           state: string
@@ -87,6 +89,7 @@ export type Database = {
           reference?: string
           scheduled_date?: string
           scheduled_hour?: number
+          service_charge?: number | null
           service_name?: string
           service_slug?: string | null
           state?: string
