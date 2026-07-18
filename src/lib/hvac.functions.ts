@@ -1118,11 +1118,12 @@ export const adminAnalytics = createServerFn({ method: "POST" })
 
     // Daily buckets
     const days: { date: string; orderRevenue: number; serviceRevenue: number; orders: number; bookings: number }[] = [];
-    for (let i = data.days - 1; i >= 0; i--) {
+    for (let i = daysSpan - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       days.push({ date: d.toISOString().slice(0, 10), orderRevenue: 0, serviceRevenue: 0, orders: 0, bookings: 0 });
     }
+
     const idx = new Map(days.map((d, i) => [d.date, i]));
     for (const o of orders) {
       const k = String(o.created_at).slice(0, 10);
