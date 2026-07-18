@@ -332,7 +332,27 @@ function CalendarPage() {
                 )}
                 <p className="mt-1 text-[11px] text-muted-foreground">Add technicians in Settings for a dropdown, or type a name here.</p>
               </div>
+              {conflict && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs">
+                  <div className="font-semibold text-destructive">{conflict}</div>
+                  {alts.length > 0 ? (
+                    <>
+                      <div className="mt-2 text-muted-foreground">Suggested open slots — click to auto-select:</div>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {alts.map((a, i) => (
+                          <button key={i} type="button"
+                            onClick={() => { setEditDate(a.date); setEditHour(a.hour); setConflict(null); setAlts([]); toast.success(`Selected ${a.date} @ ${fmtHour(a.hour)}`); }}
+                            className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/20">
+                            {a.date} · {fmtHour(a.hour)}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : <div className="mt-2 text-muted-foreground">No open alternatives in the next 3 days — try another date.</div>}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">Saving will notify the customer via configured channels.</p>
+
             </div>
           )}
           <DialogFooter>
