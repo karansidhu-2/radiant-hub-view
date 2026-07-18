@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
 });
 
-const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, seer: null, capacity_btu: null, hspf: null, tag: null, image_url: null as string | null, media: [] as MediaItem[] };
+const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, low_stock_threshold: null as number | null, seer: null, capacity_btu: null, hspf: null, tag: null, image_url: null as string | null, media: [] as MediaItem[] };
 
 function AdminProducts() {
   const [items, setItems] = useState<any[]>([]);
