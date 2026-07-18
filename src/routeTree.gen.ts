@@ -30,6 +30,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
 import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$slug'
 import { Route as AuthenticatedAdminZipsRouteImport } from './routes/_authenticated.admin.zips'
+import { Route as AuthenticatedAdminTechniciansRouteImport } from './routes/_authenticated.admin.technicians'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated.admin.settings'
 import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
@@ -151,6 +152,12 @@ const AuthenticatedAdminZipsRoute = AuthenticatedAdminZipsRouteImport.update({
   path: '/zips',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminTechniciansRoute =
+  AuthenticatedAdminTechniciansRouteImport.update({
+    id: '/technicians',
+    path: '/technicians',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
   '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
@@ -302,6 +310,7 @@ export interface FileRoutesByTo {
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
   '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
   '/_authenticated/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/_site/services/$slug': typeof SiteServicesSlugRoute
   '/_site/shop/$slug': typeof SiteShopSlugRoute
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/technicians'
     | '/admin/zips'
     | '/services/$slug'
     | '/shop/$slug'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/technicians'
     | '/admin/zips'
     | '/services/$slug'
     | '/shop/$slug'
@@ -452,6 +464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reviews'
     | '/_authenticated/admin/services'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/technicians'
     | '/_authenticated/admin/zips'
     | '/_site/services/$slug'
     | '/_site/shop/$slug'
@@ -619,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminZipsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/technicians': {
+      id: '/_authenticated/admin/technicians'
+      path: '/technicians'
+      fullPath: '/admin/technicians'
+      preLoaderRoute: typeof AuthenticatedAdminTechniciansRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
@@ -753,6 +773,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRouteWithChildren
   AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminTechniciansRoute: typeof AuthenticatedAdminTechniciansRoute
   AuthenticatedAdminZipsRoute: typeof AuthenticatedAdminZipsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -769,6 +790,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRouteWithChildren,
   AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminTechniciansRoute: AuthenticatedAdminTechniciansRoute,
   AuthenticatedAdminZipsRoute: AuthenticatedAdminZipsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
