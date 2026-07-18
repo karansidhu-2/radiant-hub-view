@@ -480,6 +480,8 @@ export type Database = {
           business_hours: string
           company_name: string
           created_at: string
+          crew_capacity: number
+          crew_capacity_enabled: boolean
           emergency_phone: string
           id: string
           notification_templates: Json
@@ -500,6 +502,8 @@ export type Database = {
           business_hours?: string
           company_name?: string
           created_at?: string
+          crew_capacity?: number
+          crew_capacity_enabled?: boolean
           emergency_phone?: string
           id?: string
           notification_templates?: Json
@@ -520,6 +524,8 @@ export type Database = {
           business_hours?: string
           company_name?: string
           created_at?: string
+          crew_capacity?: number
+          crew_capacity_enabled?: boolean
           emergency_phone?: string
           id?: string
           notification_templates?: Json
