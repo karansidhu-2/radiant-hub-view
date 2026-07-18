@@ -248,7 +248,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {["Texas", "Colorado", "Arizona", "Georgia", "N. Carolina", "Florida", "Virginia", "Tennessee", "Ohio", "Illinois"].map((state) => (
-                <div key={state} className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 backdrop-blur">
+                <div key={state} className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2">
                   <MapPin className="h-3.5 w-3.5 text-[color:var(--ember)]" /> {state}
                 </div>
               ))}
