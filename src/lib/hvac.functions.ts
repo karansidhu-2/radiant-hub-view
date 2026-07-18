@@ -24,13 +24,27 @@ export const getBookedSlots = createServerFn({ method: "POST" })
   .inputValidator((d: { date: string }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin
-      .from("bookings")
-      .select("scheduled_hour")
-      .eq("scheduled_date", data.date)
-      .neq("status", "cancelled");
-    return { hours: (rows ?? []).map((r) => r.scheduled_hour) };
+    const [{ data: rows }, { data: settings }] = await Promise.all([
+      supabaseAdmin
+        .from("bookings")
+        .select("scheduled_hour")
+        .eq("scheduled_date", data.date)
+        .neq("status", "cancelled"),
+      supabaseAdmin
+        .from("site_settings")
+        .select("crew_capacity_enabled, crew_capacity")
+        .eq("singleton", true)
+        .maybeSingle(),
+    ]);
+    const capacity = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    const counts: Record<number, number> = {};
+    for (const r of rows ?? []) counts[r.scheduled_hour] = (counts[r.scheduled_hour] ?? 0) + 1;
+    const hours = Object.entries(counts)
+      .filter(([, c]) => c >= capacity)
+      .map(([h]) => Number(h));
+    return { hours, counts, capacity };
   });
+
 
 // ---------- Create booking ----------
 const bookingSchema = z.object({
