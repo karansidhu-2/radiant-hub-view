@@ -83,16 +83,8 @@ function CheckoutPage() {
     } finally { setBusy(false); }
   };
 
-  if (authed === false) {
-    return (
-      <section className="mx-auto max-w-md px-4 py-16">
-        <Card><CardContent className="p-6 text-center">
-          <h1 className="text-xl font-bold">Sign in to check out</h1>
-          <Button onClick={() => navigate({ to: "/auth", search: { redirect: "/checkout" } })} className="mt-4 gradient-cool text-primary-foreground">Sign in / Sign up</Button>
-        </CardContent></Card>
-      </section>
-    );
-  }
+
+
   if (detailed.length === 0) {
     return <div className="mx-auto max-w-md px-4 py-16 text-center">
       <p>Your cart is empty.</p>
