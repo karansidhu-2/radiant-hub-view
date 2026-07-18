@@ -84,7 +84,7 @@
    * ring        : inset-like 1px ring opacity around the card (0–1)
    * border      : hover border color mix % against --border
    * ----------------------------------------------------------- */
-  --card-hover-lift: 5px;
+  --card-hover-lift: 3px;
   --card-hover-blur: 42px;
   --card-hover-spread: 22px;
   --card-hover-strength: 0.42;
