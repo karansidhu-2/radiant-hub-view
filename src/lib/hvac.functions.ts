@@ -64,6 +64,38 @@ const bookingSchema = z.object({
 
 const BUSINESS_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
+/**
+ * Compute slot capacity as the number of active, qualified technicians.
+ * - If serviceSlug is provided AND the service defines a required_skill,
+ *   capacity = active technicians whose skills[] contains that skill.
+ * - Else capacity = total active technicians.
+ * - Falls back to site_settings.crew_capacity (or 1) when no technicians exist,
+ *   preserving previous behavior for projects that haven't onboarded a crew yet.
+ */
+async function computeCapacity(admin: any, serviceSlug?: string | null) {
+  let requiredSkill: string | null = null;
+  if (serviceSlug) {
+    const { data: svc } = await admin
+      .from("services").select("required_skill").eq("slug", serviceSlug).maybeSingle();
+    requiredSkill = svc?.required_skill?.trim() || null;
+  }
+  const { data: techs } = await admin
+    .from("technicians").select("skills").eq("active", true);
+  if (techs && techs.length > 0) {
+    if (requiredSkill) {
+      const qualified = techs.filter((t: any) =>
+        Array.isArray(t.skills) && t.skills.some((s: string) => s?.toLowerCase() === requiredSkill!.toLowerCase())
+      ).length;
+      return Math.max(1, qualified);
+    }
+    return techs.length;
+  }
+  const { data: settings } = await admin
+    .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
+  return settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+}
+
+
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
   .handler(async ({ data }) => {
