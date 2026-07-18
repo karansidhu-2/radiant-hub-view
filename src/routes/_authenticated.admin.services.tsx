@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/services")({
   component: AdminServices,
 });
 
-const empty = { slug: "", name: "", category: "cooling", short: "", description: "", starting_at: 0, icon: "Wrench", published: true, bullets: [] as string[] };
+const empty = { slug: "", name: "", category: "cooling", short: "", description: "", starting_at: 0, icon: "Wrench", published: true, bullets: [] as string[], required_skill: "" };
 
 function AdminServices() {
   const [items, setItems] = useState<any[]>([]);
@@ -55,6 +55,19 @@ function AdminServices() {
             <div className="flex items-center gap-2 mt-6"><Switch checked={editing.published} onCheckedChange={(v) => setEditing({ ...editing, published: v })} /><Label>Published</Label></div>
           </div>
           <div><Label>Short</Label><Input value={editing.short} onChange={(e) => setEditing({ ...editing, short: e.target.value })} /></div>
+          <div>
+            <Label>Required skill (optional)</Label>
+            <Input
+              value={editing.required_skill ?? ""}
+              onChange={(e) => setEditing({ ...editing, required_skill: e.target.value })}
+              placeholder="e.g. hvac_install, furnace, mini_split"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Only active technicians whose skills include this value count toward slot capacity for this service.
+              Leave blank to use total active crew.
+            </p>
+          </div>
+
           <div><Label>Description</Label><textarea rows={3} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
           <div><Label>Bullets (one per line)</Label>
             <textarea rows={4} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"

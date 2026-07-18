@@ -9,6 +9,8 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { StarRating } from "@/components/StarRating";
 import { listServiceReviews } from "@/lib/hvac.functions";
+import { JsonLd } from "@/components/JsonLd";
+
 
 export const Route = createFileRoute("/_site/services/$slug")({
   head: ({ params }) => ({
@@ -69,7 +71,26 @@ function ServiceDetail() {
   });
   return (
     <>
+      <JsonLd id={`service-${svc.slug}`} data={{
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: svc.name,
+        description: svc.short || svc.description,
+        serviceType: svc.name,
+        provider: { "@type": "LocalBusiness", "@id": "https://radiant-hub-view.lovable.app/#business", name: "HVAC Pro" },
+        areaServed: { "@type": "Country", name: "United States" },
+        offers: { "@type": "Offer", price: svc.starting_at, priceCurrency: "USD", availability: "https://schema.org/InStock" },
+        ...(rv && rv.count > 0 ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(rv.avg ?? 0).toFixed(1),
+            reviewCount: rv.count,
+          },
+        } : {}),
+
+      }} />
       <section className="border-b border-border bg-secondary/40">
+
         <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
           <Link to="/services" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> All services

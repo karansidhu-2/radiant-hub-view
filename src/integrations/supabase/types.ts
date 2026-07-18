@@ -574,6 +574,7 @@ export type Database = {
           id: string
           name: string
           published: boolean
+          required_skill: string | null
           short: string
           slug: string
           starting_at: number
@@ -588,6 +589,7 @@ export type Database = {
           id?: string
           name: string
           published?: boolean
+          required_skill?: string | null
           short: string
           slug: string
           starting_at?: number
@@ -602,6 +604,7 @@ export type Database = {
           id?: string
           name?: string
           published?: boolean
+          required_skill?: string | null
           short?: string
           slug?: string
           starting_at?: number
@@ -674,6 +677,42 @@ export type Database = {
           tagline?: string
           technicians?: string[]
           twilio_from_phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      technicians: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          skills: string[]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          skills?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          skills?: string[]
           updated_at?: string
         }
         Relationships: []

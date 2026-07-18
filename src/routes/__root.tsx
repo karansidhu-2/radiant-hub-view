@@ -99,7 +99,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "@id": "https://radiant-hub-view.lovable.app/#business",
+          name: "HVAC Pro",
+          description: "US-based HVAC experts offering AC, furnace and heat-pump service, repair and installation, plus top-brand HVAC systems with professional installation.",
+          url: "https://radiant-hub-view.lovable.app/",
+          telephone: "+1-800-000-0000",
+          priceRange: "$$",
+          areaServed: { "@type": "Country", name: "United States" },
+          address: { "@type": "PostalAddress", addressCountry: "US" },
+          openingHoursSpecification: [{
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+            opens: "08:00", closes: "18:00",
+          }],
+          sameAs: [],
+        }),
+      },
+    ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

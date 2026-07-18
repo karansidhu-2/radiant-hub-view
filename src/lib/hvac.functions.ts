@@ -21,22 +21,17 @@ export const checkZip = createServerFn({ method: "POST" })
 
 // ---------- Booked slots for a date ----------
 export const getBookedSlots = createServerFn({ method: "POST" })
-  .inputValidator((d: { date: string }) => d)
+  .inputValidator((d: { date: string; service_slug?: string | null }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: rows }, { data: settings }] = await Promise.all([
+    const [{ data: rows }, capacity] = await Promise.all([
       supabaseAdmin
         .from("bookings")
         .select("scheduled_hour")
         .eq("scheduled_date", data.date)
         .neq("status", "cancelled"),
-      supabaseAdmin
-        .from("site_settings")
-        .select("crew_capacity_enabled, crew_capacity")
-        .eq("singleton", true)
-        .maybeSingle(),
+      computeCapacity(supabaseAdmin, data.service_slug ?? null),
     ]);
-    const capacity = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
     const counts: Record<number, number> = {};
     for (const r of rows ?? []) counts[r.scheduled_hour] = (counts[r.scheduled_hour] ?? 0) + 1;
     const hours = Object.entries(counts)
@@ -44,6 +39,7 @@ export const getBookedSlots = createServerFn({ method: "POST" })
       .map(([h]) => Number(h));
     return { hours, counts, capacity };
   });
+
 
 
 // ---------- Create booking ----------
@@ -64,6 +60,38 @@ const bookingSchema = z.object({
 
 const BUSINESS_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
+/**
+ * Compute slot capacity as the number of active, qualified technicians.
+ * - If serviceSlug is provided AND the service defines a required_skill,
+ *   capacity = active technicians whose skills[] contains that skill.
+ * - Else capacity = total active technicians.
+ * - Falls back to site_settings.crew_capacity (or 1) when no technicians exist,
+ *   preserving previous behavior for projects that haven't onboarded a crew yet.
+ */
+async function computeCapacity(admin: any, serviceSlug?: string | null) {
+  let requiredSkill: string | null = null;
+  if (serviceSlug) {
+    const { data: svc } = await admin
+      .from("services").select("required_skill").eq("slug", serviceSlug).maybeSingle();
+    requiredSkill = svc?.required_skill?.trim() || null;
+  }
+  const { data: techs } = await admin
+    .from("technicians").select("skills").eq("active", true);
+  if (techs && techs.length > 0) {
+    if (requiredSkill) {
+      const qualified = techs.filter((t: any) =>
+        Array.isArray(t.skills) && t.skills.some((s: string) => s?.toLowerCase() === requiredSkill!.toLowerCase())
+      ).length;
+      return Math.max(1, qualified);
+    }
+    return techs.length;
+  }
+  const { data: settings } = await admin
+    .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
+  return settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+}
+
+
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
   .handler(async ({ data }) => {
@@ -76,10 +104,9 @@ export const createBooking = createServerFn({ method: "POST" })
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
-    // enforce crew capacity per slot
-    const { data: settings } = await supabaseAdmin
-      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
-    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    // enforce per-slot capacity based on active qualified technicians (or settings fallback)
+    const cap = await computeCapacity(supabaseAdmin, data.service_slug ?? null);
+
     const { count } = await supabaseAdmin
       .from("bookings")
       .select("id", { count: "exact", head: true })
@@ -498,10 +525,12 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.scheduled_hour) || data.scheduled_hour < 8 || data.scheduled_hour > 18) {
       throw new Error("Hour must be between 8 and 18");
     }
-    // enforce crew capacity (excluding the booking itself)
-    const { data: settings } = await context.supabase
-      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
-    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    // enforce per-slot capacity (excluding the booking itself), skill-aware
+    const { supabaseAdmin: _adminForCap } = await import("@/integrations/supabase/client.server");
+    const { data: svcRow } = await context.supabase
+      .from("bookings").select("service_slug").eq("id", data.id).maybeSingle();
+    const cap = await computeCapacity(_adminForCap, svcRow?.service_slug ?? null);
+
     const { count } = await context.supabase
       .from("bookings")
       .select("id", { count: "exact", head: true })
@@ -1254,4 +1283,57 @@ export const adminActionOptions = createServerFn({ method: "GET" })
     const actions = new Set<string>(); const entities = new Set<string>();
     for (const r of data ?? []) { if (r.action) actions.add(r.action); if (r.entity_type) entities.add(r.entity_type); }
     return { actions: Array.from(actions).sort(), entities: Array.from(entities).sort() };
+  });
+
+// ---------- Admin: technicians (skill-based routing) ----------
+export const adminListTechnicians = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase.from("technicians").select("*").order("name");
+    return data ?? [];
+  });
+
+export const adminUpsertTechnician = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id?: string | null; name: string; email?: string | null; phone?: string | null; skills?: string[]; active?: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const patch: any = {
+      name: String(data.name).trim().slice(0, 120),
+      email: data.email?.trim() || null,
+      phone: data.phone?.trim() || null,
+      skills: Array.isArray(data.skills) ? data.skills.map((s) => String(s).trim()).filter(Boolean).slice(0, 20) : [],
+      active: data.active ?? true,
+    };
+    let before: any = null;
+    if (data.id) {
+      const { data: prev } = await context.supabase.from("technicians").select("*").eq("id", data.id).maybeSingle();
+      before = prev;
+      const { error } = await context.supabase.from("technicians").update(patch).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase.from("technicians").insert(patch);
+      if (error) throw new Error(error.message);
+    }
+    await logAdminAction(context, {
+      action: before ? "technician.update" : "technician.create",
+      entity_type: "technician", entity_id: data.id ?? null,
+      before, after: patch,
+    });
+    return { ok: true };
+  });
+
+export const adminDeleteTechnician = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("technicians").select("*").eq("id", data.id).maybeSingle();
+    const { error } = await context.supabase.from("technicians").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "technician.delete", entity_type: "technician", entity_id: data.id, before });
+    return { ok: true };
   });

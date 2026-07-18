@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import {
   Calendar, DollarSign, MapPin, MessageSquare, Package, Plus, Star, Trash2, User, Wallet, Wrench, Reply,
 } from "lucide-react";
+import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
+
 
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
@@ -106,6 +108,14 @@ function AccountPage() {
   const orders = ordersQ.data ?? [];
   const reviews = reviewsQ.data ?? [];
   const addresses = addressesQ.data ?? [];
+
+  // Live updates: refetch bookings/orders as their status changes.
+  useRealtimeInvalidate(
+    ["bookings", "orders"],
+    [["acct-bookings", uid], ["acct-orders", uid]],
+    { filter: uid ? `user_id=eq.${uid}` : undefined, enabled: !!uid },
+  );
+
 
   const orderSpend = orders
     .filter((o: any) => !["cancelled", "refunded"].includes(o.status))
