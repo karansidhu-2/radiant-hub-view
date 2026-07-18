@@ -283,7 +283,10 @@ function ShopPage() {
                   </div>
                 </Link>
                 <CardContent className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                    <AutoRatingBadge rating={autoRatings?.[p.slug]} compact />
+                  </div>
                   <Link to="/shop/$slug" params={{ slug: p.slug }}>
                     <h3 className="mt-1 text-base font-semibold leading-tight hover:text-primary">{p.name}</h3>
                   </Link>
