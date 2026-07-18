@@ -265,38 +265,35 @@ function AdminProducts() {
 
       <div className="mt-4 grid gap-2">
         {items.map((p) => (
-          <Card key={p.id}><CardContent className="flex items-center justify-between gap-3 p-3 sm:p-4">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-                {p.image_url && thumbs[p.image_url] ? (
-                  <img src={thumbs[p.image_url]} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="grid h-full w-full place-items-center text-muted-foreground"><ImageOff className="h-5 w-5" /></div>
+          <Card key={p.id}><CardContent className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 p-3 sm:p-4">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+              {p.image_url && thumbs[p.image_url] ? (
+                <img src={thumbs[p.image_url]} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="grid h-full w-full place-items-center text-muted-foreground"><ImageOff className="h-5 w-5" /></div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-semibold">{p.brand} — {p.name}</p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                {!p.published && <Badge variant="secondary" className="text-[10px]">draft</Badge>}
+                {!p.available && <Badge variant="destructive" className="text-[10px]">unavailable</Badge>}
+                {Array.isArray(p.media) && p.media.length > 0 && (
+                  <Badge variant="outline" className="text-[10px]">{p.media.length} media</Badge>
                 )}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <p className="min-w-0 truncate font-semibold">{p.brand} — {p.name}</p>
-                  {!p.published && <Badge variant="secondary">draft</Badge>}
-                  {!p.available && <Badge variant="destructive">unavailable</Badge>}
-                  {Array.isArray(p.media) && p.media.length > 0 && (
-                    <Badge variant="outline" className="text-[10px]">{p.media.length} media</Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  ${p.price} • Stock: {p.stock}
-                  {p.low_stock_threshold != null && p.stock <= p.low_stock_threshold && (
-                    <span className="ml-2 inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
-                      Low stock (≤ {p.low_stock_threshold})
-                    </span>
-                  )}
-                </p>
-
-              </div>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                ${p.price} • Stock: {p.stock}
+                {p.low_stock_threshold != null && p.stock <= p.low_stock_threshold && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                    Low (≤ {p.low_stock_threshold})
+                  </span>
+                )}
+              </p>
             </div>
-            <div className="flex shrink-0 gap-2">
-              <Button variant="outline" size="sm" onClick={() => setEditing({ ...p, media: Array.isArray(p.media) ? p.media : [] })}><Pencil className="h-4 w-4" /></Button>
-              <Button variant="outline" size="sm" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+            <div className="flex shrink-0 flex-col gap-1.5 sm:flex-row sm:gap-2">
+              <Button variant="outline" size="icon" className="h-8 w-8" aria-label="Edit product" onClick={() => setEditing({ ...p, media: Array.isArray(p.media) ? p.media : [] })}><Pencil className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" aria-label="Delete product" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </CardContent></Card>
         ))}
