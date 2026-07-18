@@ -1,16 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { adminListReviews, adminSetReviewPublished, adminDeleteReview, adminReplyReview } from "@/lib/hvac.functions";
+import {
+  adminListReviews, adminSetReviewPublished, adminDeleteReview, adminReplyReview,
+  adminBulkModerateReviews,
+} from "@/lib/hvac.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Star, Eye, EyeOff, Trash2, MessageSquare, Search } from "lucide-react";
+import { Star, Eye, EyeOff, Trash2, MessageSquare, Search, FileText, MessageSquareOff } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/reviews")({
   component: AdminReviews,
@@ -40,6 +44,7 @@ function AdminReviews() {
   const setPub = useServerFn(adminSetReviewPublished);
   const del = useServerFn(adminDeleteReview);
   const reply = useServerFn(adminReplyReview);
+  const bulk = useServerFn(adminBulkModerateReviews);
   const qc = useQueryClient();
 
   const [status, setStatus] = useState<"all" | "published" | "hidden">("all");
@@ -49,10 +54,16 @@ function AdminReviews() {
     queryFn: () => list({ data: { status, q } }) as Promise<Review[]>,
   });
 
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleOne = (id: string) => setSelected((s) => {
+    const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n;
+  });
+  const allSelected = reviews.length > 0 && reviews.every((r) => selected.has(r.id));
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(reviews.map((r) => r.id)));
+
   const [editing, setEditing] = useState<Review | null>(null);
   const [replyText, setReplyText] = useState("");
   const [noteText, setNoteText] = useState("");
-
   const openReply = (r: Review) => { setEditing(r); setReplyText(r.admin_reply ?? ""); setNoteText(r.admin_note ?? ""); };
 
   const stats = useMemo(() => {
@@ -66,7 +77,7 @@ function AdminReviews() {
 
   const pubMut = useMutation({
     mutationFn: (p: { id: string; published: boolean }) => setPub({ data: p }),
-    onSuccess: (_d, v) => { toast.success(v.published ? "Review approved & shown" : "Review hidden"); invalidate(); },
+    onSuccess: (_d, v) => { toast.success(v.published ? "Review approved" : "Review hidden"); invalidate(); },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
   const delMut = useMutation({
@@ -82,12 +93,33 @@ function AdminReviews() {
     onSuccess: () => { toast.success("Response saved"); invalidate(); setEditing(null); },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
+  const bulkMut = useMutation({
+    mutationFn: (action: "approve" | "hide" | "delete" | "clear_reply") =>
+      bulk({ data: { ids: Array.from(selected), action } }) as Promise<{ count: number }>,
+    onSuccess: (res, action) => {
+      toast.success(`${action.replace("_", " ")}: ${res.count} review(s)`);
+      setSelected(new Set()); invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed"),
+  });
+
+  const runBulk = (action: "approve" | "hide" | "delete" | "clear_reply") => {
+    if (!selected.size) return;
+    if ((action === "delete" || action === "clear_reply") &&
+      !confirm(`${action === "delete" ? "Delete" : "Clear replies from"} ${selected.size} review(s)?`)) return;
+    bulkMut.mutate(action);
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Review Moderation</h1>
-        <p className="text-sm text-muted-foreground">Approve, hide, delete or respond to customer reviews.</p>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Review Moderation</h1>
+          <p className="text-sm text-muted-foreground">Approve, hide, delete or respond to customer reviews.</p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/reviews/audit"><FileText className="mr-1.5 h-4 w-4" />Audit log</Link>
+        </Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
@@ -117,6 +149,35 @@ function AdminReviews() {
         </div>
       </div>
 
+      {reviews.length > 0 && (
+        <Card>
+          <CardContent className="flex flex-wrap items-center gap-2 p-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
+              <span>{selected.size ? `${selected.size} selected` : "Select all"}</span>
+            </label>
+            <div className="ml-auto flex flex-wrap gap-1.5">
+              <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
+                onClick={() => runBulk("approve")}>
+                <Eye className="mr-1 h-3.5 w-3.5" />Approve
+              </Button>
+              <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
+                onClick={() => runBulk("hide")}>
+                <EyeOff className="mr-1 h-3.5 w-3.5" />Hide
+              </Button>
+              <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
+                onClick={() => runBulk("clear_reply")}>
+                <MessageSquareOff className="mr-1 h-3.5 w-3.5" />Clear replies
+              </Button>
+              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive"
+                disabled={!selected.size || bulkMut.isPending} onClick={() => runBulk("delete")}>
+                <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {isLoading ? (
         <p className="py-16 text-center text-sm text-muted-foreground">Loading reviews…</p>
       ) : reviews.length === 0 ? (
@@ -127,16 +188,19 @@ function AdminReviews() {
             <Card key={r.id} className="card-pop">
               <CardContent className="p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold">{r.author}</span>
-                      <Stars n={r.rating} />
-                      <Badge variant={r.published ? "default" : "secondary"}>{r.published ? "Published" : "Hidden"}</Badge>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <Checkbox className="mt-1" checked={selected.has(r.id)} onCheckedChange={() => toggleOne(r.id)} />
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold">{r.author}</span>
+                        <Stars n={r.rating} />
+                        <Badge variant={r.published ? "default" : "secondary"}>{r.published ? "Published" : "Hidden"}</Badge>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {r.author_email && <span>{r.author_email} · </span>}
+                        {r.service_name} · {new Date(r.created_at).toLocaleDateString()}
+                      </p>
                     </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {r.author_email && <span>{r.author_email} · </span>}
-                      {r.service_name} · {new Date(r.created_at).toLocaleDateString()}
-                    </p>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     <Button size="sm" variant="outline" onClick={() => pubMut.mutate({ id: r.id, published: !r.published })}>

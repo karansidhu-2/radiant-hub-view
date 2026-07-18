@@ -559,14 +559,43 @@ export const adminListReviews = createServerFn({ method: "POST" })
     return list;
   });
 
+async function logReviewAudit(
+  ctx: { supabase: any; userId: string; claims: any },
+  entry: { action: string; review_id?: string | null; service_name?: string | null; target_user_id?: string | null; details?: any },
+) {
+  try {
+    const email = ctx.claims?.email ?? null;
+    await ctx.supabase.from("review_audit_log").insert({
+      admin_id: ctx.userId,
+      admin_email: email,
+      action: entry.action,
+      review_id: entry.review_id ?? null,
+      service_name: entry.service_name ?? null,
+      target_user_id: entry.target_user_id ?? null,
+      details: entry.details ?? {},
+    });
+  } catch {
+    // audit failure must not block moderation
+  }
+}
+
 export const adminSetReviewPublished = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; published: boolean }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: before } = await context.supabase
+      .from("reviews").select("service_name, user_id, published").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("reviews").update({ published: data.published }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logReviewAudit(context, {
+      action: data.published ? "approve" : "hide",
+      review_id: data.id,
+      service_name: (before as any)?.service_name ?? null,
+      target_user_id: (before as any)?.user_id ?? null,
+      details: { from: (before as any)?.published, to: data.published },
+    });
     return { ok: true };
   });
 
@@ -575,8 +604,17 @@ export const adminDeleteReview = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: before } = await context.supabase
+      .from("reviews").select("service_name, user_id, rating, comment").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("reviews").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logReviewAudit(context, {
+      action: "delete",
+      review_id: data.id,
+      service_name: (before as any)?.service_name ?? null,
+      target_user_id: (before as any)?.user_id ?? null,
+      details: { rating: (before as any)?.rating, comment: (before as any)?.comment },
+    });
     return { ok: true };
   });
 
@@ -589,9 +627,87 @@ export const adminReplyReview = createServerFn({ method: "POST" })
     const note = data.note == null ? null : String(data.note).slice(0, 2000);
     const patch: any = { admin_reply: reply, admin_reply_at: reply ? new Date().toISOString() : null };
     if (data.note !== undefined) patch.admin_note = note;
+    const { data: before } = await context.supabase
+      .from("reviews").select("service_name, user_id, admin_reply, admin_note").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("reviews").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
+    const b: any = before;
+    const actions: string[] = [];
+    if ((b?.admin_reply ?? null) !== reply) actions.push(reply ? (b?.admin_reply ? "reply_edit" : "reply_add") : "reply_remove");
+    if (data.note !== undefined && (b?.admin_note ?? null) !== note) actions.push(note ? "note_set" : "note_clear");
+    for (const a of actions) {
+      await logReviewAudit(context, {
+        action: a,
+        review_id: data.id,
+        service_name: b?.service_name ?? null,
+        target_user_id: b?.user_id ?? null,
+        details: a.startsWith("reply") ? { reply } : { note },
+      });
+    }
     return { ok: true };
+  });
+
+export const adminBulkModerateReviews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ids: string[]; action: "approve" | "hide" | "delete" | "clear_reply" }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const ids = Array.from(new Set((data.ids || []).filter(Boolean))).slice(0, 500);
+    if (!ids.length) return { ok: true, count: 0 };
+    const { data: before } = await context.supabase
+      .from("reviews").select("id, service_name, user_id, published, admin_reply").in("id", ids);
+    const map = new Map((before ?? []).map((r: any) => [r.id, r]));
+
+    if (data.action === "delete") {
+      const { error } = await context.supabase.from("reviews").delete().in("id", ids);
+      if (error) throw new Error(error.message);
+    } else if (data.action === "approve" || data.action === "hide") {
+      const { error } = await context.supabase
+        .from("reviews").update({ published: data.action === "approve" }).in("id", ids);
+      if (error) throw new Error(error.message);
+    } else if (data.action === "clear_reply") {
+      const { error } = await context.supabase
+        .from("reviews").update({ admin_reply: null, admin_reply_at: null }).in("id", ids);
+      if (error) throw new Error(error.message);
+    }
+
+    for (const id of ids) {
+      const b: any = map.get(id);
+      await logReviewAudit(context, {
+        action: `bulk_${data.action}`,
+        review_id: id,
+        service_name: b?.service_name ?? null,
+        target_user_id: b?.user_id ?? null,
+        details: { bulk_size: ids.length },
+      });
+    }
+    return { ok: true, count: ids.length };
+  });
+
+export const adminListReviewAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; action?: string; q?: string; limit?: number }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const days = Math.min(Math.max(data.days ?? 30, 1), 365);
+    const since = new Date(); since.setDate(since.getDate() - days);
+    let q = context.supabase
+      .from("review_audit_log")
+      .select("id, admin_id, admin_email, action, review_id, service_name, target_user_id, details, created_at")
+      .gte("created_at", since.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(Math.min(Math.max(data.limit ?? 500, 1), 5000));
+    if (data.action && data.action !== "all") q = q.eq("action", data.action);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const term = (data.q || "").trim().toLowerCase();
+    let list = rows ?? [];
+    if (term) list = list.filter((r: any) =>
+      (r.admin_email || "").toLowerCase().includes(term) ||
+      (r.service_name || "").toLowerCase().includes(term) ||
+      (r.action || "").toLowerCase().includes(term) ||
+      (r.review_id || "").toLowerCase().includes(term));
+    return list;
   });
 
 

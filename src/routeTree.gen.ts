@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenti
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
+import { Route as AuthenticatedAdminReviewsAuditRouteImport } from './routes/_authenticated.admin.reviews.audit'
 
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
@@ -205,6 +206,12 @@ const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
   path: '/confirmation/$kind/$ref',
   getParentRoute: () => SiteRoute,
 } as any)
+const AuthenticatedAdminReviewsAuditRoute =
+  AuthenticatedAdminReviewsAuditRouteImport.update({
+    id: '/audit',
+    path: '/audit',
+    getParentRoute: () => AuthenticatedAdminReviewsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -228,13 +235,14 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
-  '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
+  '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRoutesByTo {
@@ -258,13 +266,14 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
-  '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
+  '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/services/$slug': typeof SiteServicesSlugRoute
   '/shop/$slug': typeof SiteShopSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRoutesById {
@@ -292,13 +301,14 @@ export interface FileRoutesById {
   '/_authenticated/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
-  '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
+  '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/zips': typeof AuthenticatedAdminZipsRoute
   '/_site/services/$slug': typeof SiteServicesSlugRoute
   '/_site/shop/$slug': typeof SiteShopSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/_site/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
 }
 export interface FileRouteTypes {
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/shop/$slug'
     | '/admin/'
+    | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/shop/$slug'
     | '/admin'
+    | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
   id:
     | '__root__'
@@ -395,6 +407,7 @@ export interface FileRouteTypes {
     | '/_site/services/$slug'
     | '/_site/shop/$slug'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/reviews/audit'
     | '/_site/confirmation/$kind/$ref'
   fileRoutesById: FileRoutesById
 }
@@ -627,8 +640,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteConfirmationKindRefRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_authenticated/admin/reviews/audit': {
+      id: '/_authenticated/admin/reviews/audit'
+      path: '/audit'
+      fullPath: '/admin/reviews/audit'
+      preLoaderRoute: typeof AuthenticatedAdminReviewsAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminReviewsRoute
+    }
   }
 }
+
+interface AuthenticatedAdminReviewsRouteChildren {
+  AuthenticatedAdminReviewsAuditRoute: typeof AuthenticatedAdminReviewsAuditRoute
+}
+
+const AuthenticatedAdminReviewsRouteChildren: AuthenticatedAdminReviewsRouteChildren =
+  {
+    AuthenticatedAdminReviewsAuditRoute: AuthenticatedAdminReviewsAuditRoute,
+  }
+
+const AuthenticatedAdminReviewsRouteWithChildren =
+  AuthenticatedAdminReviewsRoute._addFileChildren(
+    AuthenticatedAdminReviewsRouteChildren,
+  )
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminsRoute: typeof AuthenticatedAdminAdminsRoute
@@ -636,7 +670,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
-  AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRoute
+  AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRouteWithChildren
   AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminZipsRoute: typeof AuthenticatedAdminZipsRoute
@@ -649,7 +683,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
-  AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRoute,
+  AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRouteWithChildren,
   AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminZipsRoute: AuthenticatedAdminZipsRoute,

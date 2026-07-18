@@ -310,6 +310,42 @@ export type Database = {
         }
         Relationships: []
       }
+      review_audit_log: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string
+          created_at: string
+          details: Json
+          id: string
+          review_id: string | null
+          service_name: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          review_id?: string | null
+          service_name?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          review_id?: string | null
+          service_name?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           admin_note: string | null
