@@ -265,8 +265,11 @@ function Lightbox({
 }) {
   const total = items.length;
   const closeRef = useRef<HTMLButtonElement>(null);
-  const touchStartX = useRef<number | null>(null);
-  const touchDeltaX = useRef(0);
+  const swipeAreaRef = useRef<HTMLDivElement>(null);
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const touchDelta = useRef({ x: 0, y: 0 });
+  const swipeLocked = useRef<"h" | "v" | null>(null);
+  const [dragX, setDragX] = useState(0);
 
   const go = useCallback((dir: number) => {
     if (total <= 1) return;
@@ -291,20 +294,61 @@ function Lightbox({
     };
   }, [go, onClose, onIndex, total]);
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchDeltaX.current = 0;
-  };
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX.current == null) return;
-    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
-  };
-  const onTouchEnd = () => {
-    const dx = touchDeltaX.current;
-    touchStartX.current = null;
-    touchDeltaX.current = 0;
-    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
-  };
+  // Native listeners with {passive:false} so we can preventDefault during horizontal swipes
+  useEffect(() => {
+    const el = swipeAreaRef.current;
+    if (!el) return;
+    const H_LOCK = 8;   // px before we decide axis
+    const V_LOCK = 10;
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStart.current = { x: t.clientX, y: t.clientY, t: performance.now() };
+      touchDelta.current = { x: 0, y: 0 };
+      swipeLocked.current = null;
+      setDragX(0);
+    };
+    const onMove = (e: TouchEvent) => {
+      if (!touchStart.current) return;
+      const t = e.touches[0];
+      const dx = t.clientX - touchStart.current.x;
+      const dy = t.clientY - touchStart.current.y;
+      touchDelta.current = { x: dx, y: dy };
+      if (!swipeLocked.current) {
+        if (Math.abs(dx) > H_LOCK && Math.abs(dx) > Math.abs(dy)) swipeLocked.current = "h";
+        else if (Math.abs(dy) > V_LOCK) swipeLocked.current = "v";
+      }
+      if (swipeLocked.current === "h") {
+        e.preventDefault(); // block page scroll during horizontal drag
+        setDragX(dx);
+      }
+    };
+    const onEnd = () => {
+      const start = touchStart.current;
+      const { x: dx } = touchDelta.current;
+      touchStart.current = null;
+      const locked = swipeLocked.current;
+      swipeLocked.current = null;
+      setDragX(0);
+      if (!start || locked !== "h") return;
+      const width = el.clientWidth || 1;
+      const elapsed = Math.max(1, performance.now() - start.t);
+      const velocity = Math.abs(dx) / elapsed; // px/ms
+      const distanceHit = Math.abs(dx) > Math.max(60, width * 0.18);
+      const velocityHit = velocity > 0.5 && Math.abs(dx) > 30;
+      if (distanceHit || velocityHit) go(dx < 0 ? 1 : -1);
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    el.addEventListener("touchcancel", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
+  }, [go]);
+
 
   const current = items[index];
 
