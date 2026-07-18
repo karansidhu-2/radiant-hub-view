@@ -1,11 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Loader2 } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Loader2, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { StarRating } from "@/components/StarRating";
+import { listServiceReviews } from "@/lib/hvac.functions";
 
 export const Route = createFileRoute("/_site/services/$slug")({
   head: ({ params }) => ({
@@ -26,6 +29,7 @@ type Svc = {
 function ServiceDetail() {
   const { slug } = Route.useParams();
 
+  const reviewsFn = useServerFn(listServiceReviews);
   const { data, isLoading } = useQuery({
     queryKey: ["service", slug],
     queryFn: async () => {
@@ -59,6 +63,10 @@ function ServiceDetail() {
   }
 
   const svc = data.svc;
+  const { data: rv } = useQuery({
+    queryKey: ["service-reviews", slug],
+    queryFn: () => reviewsFn({ data: { service_slug: slug } }),
+  });
   return (
     <>
       <section className="border-b border-border bg-secondary/40">
@@ -72,6 +80,13 @@ function ServiceDetail() {
                 <DynamicIcon name={svc.icon} className="h-7 w-7" />
               </div>
               <h1 className="text-3xl font-bold md:text-4xl">{svc.name}</h1>
+              {rv && rv.count > 0 && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <StarRating value={rv.avg} readOnly size={16} />
+                  <span className="font-semibold">{rv.avg.toFixed(1)}</span>
+                  <span className="text-muted-foreground">({rv.count} review{rv.count === 1 ? "" : "s"})</span>
+                </div>
+              )}
               <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{svc.description}</p>
             </div>
             <Card className="md:min-w-[260px]">
@@ -100,6 +115,33 @@ function ServiceDetail() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-14 md:px-6">
+        <div className="mb-5 flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-bold">Customer reviews</h2>
+        </div>
+        {!rv || rv.count === 0 ? (
+          <Card><CardContent className="p-6 text-sm text-muted-foreground">
+            No reviews yet. Be the first — book this service and share your experience.
+          </CardContent></Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {rv.list.map((r: any) => (
+              <Card key={r.id} className="card-pop">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">{r.author}</p>
+                    <StarRating value={r.rating} readOnly size={16} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                  {r.comment && <p className="mt-2 text-sm">{r.comment}</p>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
 
       {data.others.length > 0 && (
