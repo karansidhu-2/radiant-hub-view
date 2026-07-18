@@ -24,9 +24,12 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/inbox", label: "Inbox", icon: Inbox },
 
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
+  { to: "/admin/technicians", label: "Technicians", icon: Users },
   { to: "/admin/admins", label: "Admins", icon: UserCog },
   { to: "/admin/audit", label: "Audit log", icon: ScrollText },
+  { to: "/admin/security", label: "Security (2FA)", icon: KeyRound },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
+
 ];
 
 function AdminLayout() {
