@@ -325,6 +325,24 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminRescheduleBooking = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; scheduled_date: string; scheduled_hour: number }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.scheduled_date)) throw new Error("Invalid date");
+    if (!Number.isInteger(data.scheduled_hour) || data.scheduled_hour < 8 || data.scheduled_hour > 18) {
+      throw new Error("Hour must be between 8 and 18");
+    }
+    const { error } = await context.supabase
+      .from("bookings")
+      .update({ scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
