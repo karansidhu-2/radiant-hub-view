@@ -117,6 +117,33 @@ function ServiceDetail() {
         </ul>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 pb-14 md:px-6">
+        <div className="mb-5 flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-bold">Customer reviews</h2>
+        </div>
+        {!rv || rv.count === 0 ? (
+          <Card><CardContent className="p-6 text-sm text-muted-foreground">
+            No reviews yet. Be the first — book this service and share your experience.
+          </CardContent></Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {rv.list.map((r: any) => (
+              <Card key={r.id} className="card-pop">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">{r.author}</p>
+                    <StarRating value={r.rating} readOnly size={16} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
+                  {r.comment && <p className="mt-2 text-sm">{r.comment}</p>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
       {data.others.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-16 md:px-6">
           <h2 className="mb-5 text-xl font-bold">Other services you might need</h2>
