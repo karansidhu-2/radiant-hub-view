@@ -594,8 +594,15 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: prev } = await context.supabase.from("orders").select("status, reference").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("orders").update({ status: data.status as any }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "order.status", entity_type: "order", entity_id: data.id,
+      before: { status: prev?.status }, after: { status: data.status },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
@@ -612,8 +619,19 @@ export const adminUpsertArea = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    let before: any = null;
+    if (data.zip) {
+      const { data: existing } = await context.supabase.from("service_areas").select("*").eq("zip", data.zip).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("service_areas").upsert(data, { onConflict: "zip" });
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: before ? "area.update" : "area.create",
+      entity_type: "service_area", entity_id: data.zip ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -622,8 +640,11 @@ export const adminDeleteArea = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: before } = await context.supabase.from("service_areas").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("service_areas").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, { action: "area.delete", entity_type: "service_area", entity_id: data.id, before });
     return { ok: true };
   });
 
