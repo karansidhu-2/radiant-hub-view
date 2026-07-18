@@ -62,7 +62,7 @@ export default function Home() {
               Licensed heating, cooling, and air quality experts. Book same-day repair, order a new system with professional installation, or get a free replacement quote in minutes.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/book" search={{}}>
+              <Link to="/book" search={{ service: undefined }}>
                 <Button size="lg" className="bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90">
                   Book Service <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
@@ -238,7 +238,7 @@ export default function Home() {
                 Every job is backed by our 100% satisfaction guarantee. Financing available with 0% APR for qualified buyers. No hidden fees. Ever.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/book" search={{}}><Button size="lg" className="bg-white text-primary hover:bg-white/90">Book Now</Button></Link>
+                <Link to="/book" search={{ service: undefined }}><Button size="lg" className="bg-white text-primary hover:bg-white/90">Book Now</Button></Link>
                 <a href="tel:18005551234">
                   <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
                     <PhoneCall className="mr-1 h-4 w-4" /> (800) 555-1234

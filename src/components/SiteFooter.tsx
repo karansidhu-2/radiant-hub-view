@@ -32,7 +32,7 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/about" className="hover:text-foreground">About Us</Link></li>
             <li><Link to="/shop" className="hover:text-foreground">Shop Systems</Link></li>
-            <li><Link to="/book" search={{}} className="hover:text-foreground">Book Service</Link></li>
+            <li><Link to="/book" search={{ service: undefined }} className="hover:text-foreground">Book Service</Link></li>
             <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
           </ul>
         </div>
