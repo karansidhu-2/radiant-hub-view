@@ -21,6 +21,8 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/inbox", label: "Inbox", icon: Inbox },
+
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
   { to: "/admin/admins", label: "Admins", icon: UserCog },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
