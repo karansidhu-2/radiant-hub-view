@@ -67,20 +67,20 @@ function AdminLayout() {
         </div>
       </div>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
-        <aside>
-          <nav className="flex flex-col gap-1">
+        <aside className="md:sticky md:top-4 md:self-start">
+          <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0">
             {nav.map((n) => {
               const active = n.exact ? path === n.to : path.startsWith(n.to);
               return (
                 <Link key={n.to} to={n.to as any}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${active ? "bg-primary text-primary-foreground" : "hover:bg-accent"}`}>
+                  className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors md:rounded-md md:px-3 ${active ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-accent md:bg-transparent"}`}>
                   <n.icon className="h-4 w-4" /> {n.label}
                 </Link>
               );
             })}
           </nav>
         </aside>
-        <main><Outlet /></main>
+        <main className="min-w-0"><Outlet /></main>
       </div>
     </div>
   );
