@@ -1,11 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Loader2 } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Loader2, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { StarRating } from "@/components/StarRating";
+import { listServiceReviews } from "@/lib/hvac.functions";
 
 export const Route = createFileRoute("/_site/services/$slug")({
   head: ({ params }) => ({
