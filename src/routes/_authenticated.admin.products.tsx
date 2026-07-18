@@ -188,8 +188,8 @@ function AdminProducts() {
 
           {/* Gallery editor */}
           <div className="rounded-lg border border-border p-4">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <Label className="text-sm font-semibold">Product gallery</Label>
                 <p className="text-[11px] text-muted-foreground">Add multiple photos and videos. Drag order with the arrows. YouTube links supported.</p>
               </div>
