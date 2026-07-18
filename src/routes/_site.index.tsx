@@ -118,7 +118,7 @@ export default function Home() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {homeServices.map((s) => (
             <Link key={s.slug} to="/services/$slug" params={{ slug: s.slug }} className="group">
-              <Card className="h-full hover:border-primary/35">
+              <Card className="card-pop h-full hover:border-primary/35">
                 <CardContent className="p-6">
                   <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg gradient-cool text-primary-foreground">
                     <DynamicIcon name={s.icon} className="h-5 w-5" />
@@ -150,7 +150,7 @@ export default function Home() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((p) => (
               <Link key={p.slug} to="/shop/$slug" params={{ slug: p.slug }}>
-                <Card className="group h-full overflow-hidden hover:border-primary/35">
+                <Card className="card-pop group h-full overflow-hidden hover:border-primary/35">
                   <div className="relative aspect-[4/3] gradient-cool">
                     <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
                       <DynamicIcon

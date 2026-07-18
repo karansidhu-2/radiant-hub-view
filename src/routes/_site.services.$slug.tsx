@@ -108,7 +108,7 @@ function ServiceDetail() {
           <div className="grid gap-4 sm:grid-cols-3">
             {data.others.map((s: any) => (
               <Link key={s.slug} to="/services/$slug" params={{ slug: s.slug }}>
-                <Card className="h-full hover:border-primary/35">
+                <Card className="card-pop h-full hover:border-primary/35">
                   <CardContent className="p-5">
                     <div className="mb-3 grid h-10 w-10 place-items-center rounded-lg bg-accent text-primary">
                       <DynamicIcon name={s.icon} className="h-5 w-5" />
