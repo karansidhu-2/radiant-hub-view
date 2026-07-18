@@ -90,7 +90,12 @@ function ConfirmationPage() {
           <Badge variant={statusColor(data.status) as any}>{String(data.status).replace("_", " ").toUpperCase()}</Badge>
         </div>
         <StatusTimeline kind={kind} status={data.status} />
-        <Button variant="outline" size="sm" onClick={load}>Refresh status</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={load}>Refresh status</Button>
+          {kind === "booking" && data.status === "completed" && (
+            <a href="/reviews"><Button size="sm">Leave a review</Button></a>
+          )}
+        </div>
       </CardContent></Card>
 
       <Card className="mt-4"><CardContent className="p-6 space-y-3 text-sm">
