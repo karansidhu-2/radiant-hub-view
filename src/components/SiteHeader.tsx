@@ -29,13 +29,13 @@ export function SiteHeader() {
           <span>{settings.company_name}</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
           {nav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              activeProps={{ className: "text-foreground" }}
+              className="rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              activeProps={{ className: "text-foreground", "aria-current": "page" } as any}
             >
               {n.label}
             </Link>
@@ -45,17 +45,18 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <a
             href={telHref(settings.support_phone)}
-            className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent md:inline-flex"
+            aria-label={`Call ${settings.support_phone}`}
+            className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
           >
-            <Phone className="h-4 w-4" />
+            <Phone className="h-4 w-4" aria-hidden="true" />
             {settings.support_phone}
           </a>
           <Link to="/cart" className="relative hidden md:block">
-            <Button variant="outline" size="icon" aria-label="Cart">
-              <ShoppingCart className="h-4 w-4" />
+            <Button variant="outline" size="icon" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}>
+              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             </Button>
             {hydrated && count > 0 && (
-              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[color:var(--ember)] px-1 text-[11px] font-bold text-[color:var(--ember-foreground)]">
+              <span aria-hidden="true" className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[color:var(--ember)] px-1 text-[11px] font-bold text-[color:var(--ember-foreground)]">
                 {count}
               </span>
             )}
