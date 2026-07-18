@@ -107,6 +107,57 @@ export type Database = {
         }
         Relationships: []
       }
+      capacity_conflicts: {
+        Row: {
+          booking_id: string | null
+          capacity: number
+          count: number
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          scheduled_date: string
+          scheduled_hour: number
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          capacity: number
+          count: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scheduled_date: string
+          scheduled_hour: number
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          capacity?: number
+          count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scheduled_date?: string
+          scheduled_hour?: number
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           brand: string | null
@@ -233,6 +284,7 @@ export type Database = {
           id: string
           image_url: string | null
           installation_fee: number
+          low_stock_threshold: number | null
           media: Json
           name: string
           price: number
@@ -255,6 +307,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           installation_fee?: number
+          low_stock_threshold?: number | null
           media?: Json
           name: string
           price: number
@@ -277,6 +330,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           installation_fee?: number
+          low_stock_threshold?: number | null
           media?: Json
           name?: string
           price?: number
