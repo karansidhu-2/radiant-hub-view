@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProductGallery } from "@/components/ProductGallery";
 import type { MediaItem } from "@/lib/product-image";
+import { useAutoRatings } from "@/hooks/useAutoRatings";
+import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 
 export const Route = createFileRoute("/_site/shop/$slug")({
   head: ({ params }) => ({
@@ -32,6 +34,7 @@ function ProductDetail() {
   const { slug } = Route.useParams();
   const { addItem } = useCart();
   const [withInstall, setWithInstall] = useState(true);
+  const { data: autoRatings } = useAutoRatings();
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", slug],
@@ -89,6 +92,9 @@ function ProductDetail() {
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
             <h1 className="mt-1 text-3xl font-bold md:text-4xl">{p.name}</h1>
             <p className="mt-3 text-muted-foreground">{p.description}</p>
+            {autoRatings?.[p.slug] && (
+              <div className="mt-4"><AutoRatingBadge rating={autoRatings[p.slug]} /></div>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2 text-xs">
               {p.seer && <span className="rounded-full bg-accent px-3 py-1 font-semibold text-accent-foreground">{p.seer} SEER2</span>}

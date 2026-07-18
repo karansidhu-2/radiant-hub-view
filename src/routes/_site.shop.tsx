@@ -10,6 +10,8 @@ import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Search, X, SlidersHorizontal } from "lucide-react";
+import { useAutoRatings } from "@/hooks/useAutoRatings";
+import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
@@ -42,7 +44,7 @@ type ProductRow = {
   tag: string | null; available: boolean; image_url: string | null;
 };
 
-type SortKey = "featured" | "price-asc" | "price-desc" | "name";
+type SortKey = "featured" | "price-asc" | "price-desc" | "name" | "top-rated";
 
 function ShopPage() {
   const [filter, setFilter] = useState<ProductCategory | "all">("all");
@@ -53,6 +55,7 @@ function ShopPage() {
   const [priceMax, setPriceMax] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const { addItem } = useCart();
+  const { data: autoRatings } = useAutoRatings();
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "public"],
@@ -96,10 +99,19 @@ function ShopPage() {
       case "price-asc": list = [...list].sort((a, b) => Number(a.price) - Number(b.price)); break;
       case "price-desc": list = [...list].sort((a, b) => Number(b.price) - Number(a.price)); break;
       case "name": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
+      case "top-rated":
+        list = [...list].sort((a, b) => {
+          const ra = autoRatings?.[a.slug];
+          const rb = autoRatings?.[b.slug];
+          const sa = ra ? Number(ra.auto_rating) + Number(ra.auto_confidence) * 0.5 : 0;
+          const sb = rb ? Number(rb.auto_rating) + Number(rb.auto_confidence) * 0.5 : 0;
+          return sb - sa;
+        });
+        break;
       default: /* featured = default from db */ break;
     }
     return list;
-  }, [products, filter, brand, inStockOnly, priceMax, query, sort]);
+  }, [products, filter, brand, inStockOnly, priceMax, query, sort, autoRatings]);
 
   const handleAdd = (slug: string, name: string) => {
     addItem(slug, { includeInstallation: true });
@@ -156,6 +168,7 @@ function ShopPage() {
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="featured">Featured</option>
+            <option value="top-rated">Top auto-rated</option>
             <option value="price-asc">Price: low to high</option>
             <option value="price-desc">Price: high to low</option>
             <option value="name">Name: A → Z</option>
@@ -270,7 +283,10 @@ function ShopPage() {
                   </div>
                 </Link>
                 <CardContent className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                    <AutoRatingBadge rating={autoRatings?.[p.slug]} compact />
+                  </div>
                   <Link to="/shop/$slug" params={{ slug: p.slug }}>
                     <h3 className="mt-1 text-base font-semibold leading-tight hover:text-primary">{p.name}</h3>
                   </Link>
