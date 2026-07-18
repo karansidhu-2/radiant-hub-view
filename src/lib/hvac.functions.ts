@@ -65,27 +65,28 @@ const bookingSchema = z.object({
 const BUSINESS_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
 export const createBooking = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { optionalUserId } = await import("./optional-auth.server");
+    const userId = await optionalUserId();
+
     // verify ZIP is served
-    const { data: area } = await context.supabase
+    const { data: area } = await supabaseAdmin
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
     // enforce crew capacity per slot
-    const { data: settings } = await context.supabase
+    const { data: settings } = await supabaseAdmin
       .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
     const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
-    const { count } = await context.supabase
+    const { count } = await supabaseAdmin
       .from("bookings")
       .select("id", { count: "exact", head: true })
       .eq("scheduled_date", data.scheduled_date)
       .eq("scheduled_hour", data.scheduled_hour)
       .neq("status", "cancelled");
     if ((count ?? 0) >= cap) {
-      // build alternatives: open hours on requested date + next 2 days
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const [y, m, d] = data.scheduled_date.split("-").map(Number);
       const base = new Date(Date.UTC(y, m - 1, d));
       const dates = [0, 1, 2].map((i) => {
@@ -103,12 +104,10 @@ export const createBooking = createServerFn({ method: "POST" })
         counts[r.scheduled_date][r.scheduled_hour] = (counts[r.scheduled_date][r.scheduled_hour] ?? 0) + 1;
       }
       const suggestions: { date: string; hour: number }[] = [];
-      // same-day slots first, sorted by proximity to requested hour
       const sameDayOpen = BUSINESS_HOURS
         .filter((h) => h !== data.scheduled_hour && (counts[data.scheduled_date]?.[h] ?? 0) < cap)
         .sort((a, b) => Math.abs(a - data.scheduled_hour) - Math.abs(b - data.scheduled_hour));
       for (const h of sameDayOpen) suggestions.push({ date: data.scheduled_date, hour: h });
-      // then next-day slots
       for (const dt of dates.slice(1)) {
         for (const h of BUSINESS_HOURS) {
           if ((counts[dt]?.[h] ?? 0) < cap) suggestions.push({ date: dt, hour: h });
@@ -121,16 +120,15 @@ export const createBooking = createServerFn({ method: "POST" })
         capacity: cap,
         count: (count ?? 0) + 1,
         source: "booking",
-        note: `Customer booking blocked for ${data.service_name} — ${data.full_name}`,
-        created_by: context.userId,
+        note: `${userId ? "Customer" : "Guest"} booking blocked for ${data.service_name} — ${data.full_name}`,
+        created_by: userId,
       }).then(() => {}, () => {});
       throw new Error(`That time slot is fully booked. Please pick another.||ALTS||${JSON.stringify(alts)}`);
-
     }
 
-    const { data: row, error } = await context.supabase
+    const { data: row, error } = await supabaseAdmin
       .from("bookings")
-      .insert({ ...data, user_id: context.userId, notes: data.notes ?? null })
+      .insert({ ...data, user_id: userId, notes: data.notes ?? null })
       .select("id, reference")
       .single();
     if (error) throw new Error(error.message);
@@ -162,10 +160,13 @@ const orderSchema = z.object({
 });
 
 export const createOrder = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof orderSchema>) => orderSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    const { data: area } = await context.supabase
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { optionalUserId } = await import("./optional-auth.server");
+    const userId = await optionalUserId();
+
+    const { data: area } = await supabaseAdmin
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
@@ -174,10 +175,10 @@ export const createOrder = createServerFn({ method: "POST" })
       (s, it) => s + (it.include_installation ? it.installation_fee * it.quantity : 0), 0);
     const total = subtotal + installationTotal;
 
-    const { data: order, error } = await context.supabase
+    const { data: order, error } = await supabaseAdmin
       .from("orders")
       .insert({
-        user_id: context.userId,
+        user_id: userId,
         full_name: data.full_name, email: data.email, phone: data.phone,
         street: data.street, city: data.city, state: data.state, zip: data.zip,
         scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour,
@@ -188,15 +189,14 @@ export const createOrder = createServerFn({ method: "POST" })
       .single();
     if (error || !order) throw new Error(error?.message || "Failed to create order");
 
-    const { error: itemErr } = await context.supabase.from("order_items").insert(
+    const { error: itemErr } = await supabaseAdmin.from("order_items").insert(
       data.items.map((it) => ({ ...it, order_id: order.id, brand: it.brand ?? null }))
     );
     if (itemErr) throw new Error(itemErr.message);
 
-    // create installation booking if a slot chosen
     if (data.scheduled_date && data.scheduled_hour) {
-      await context.supabase.from("bookings").insert({
-        user_id: context.userId,
+      await supabaseAdmin.from("bookings").insert({
+        user_id: userId,
         full_name: data.full_name, email: data.email, phone: data.phone,
         street: data.street, city: data.city, state: data.state, zip: data.zip,
         service_slug: "new-system-install", service_name: `Installation for order ${order.reference}`,
@@ -207,27 +207,45 @@ export const createOrder = createServerFn({ method: "POST" })
     return order;
   });
 
-// ---------- Get booking / order for confirmation ----------
+// ---------- Get booking / order for confirmation (public: reference acts as capability token) ----------
 export const getBookingByRef = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: { reference: string }) => d)
-  .handler(async ({ data, context }) => {
-    const { data: row } = await context.supabase
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
       .from("bookings").select("*").eq("reference", data.reference).maybeSingle();
     return row;
   });
 
 export const getOrderByRef = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: { reference: string }) => d)
-  .handler(async ({ data, context }) => {
-    const { data: row } = await context.supabase
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
       .from("orders").select("*").eq("reference", data.reference).maybeSingle();
     if (!row) return null;
-    const { data: items } = await context.supabase
+    const { data: items } = await supabaseAdmin
       .from("order_items").select("*").eq("order_id", row.id);
     return { ...row, items: items ?? [] };
   });
+
+// ---------- Claim guest bookings/orders by email after sign-in ----------
+export const claimGuestRecords = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    const email = u?.user?.email;
+    if (!email) return { bookings: 0, orders: 0 };
+    const [b, o] = await Promise.all([
+      supabaseAdmin.from("bookings").update({ user_id: context.userId })
+        .is("user_id", null).ilike("email", email).select("id"),
+      supabaseAdmin.from("orders").update({ user_id: context.userId })
+        .is("user_id", null).ilike("email", email).select("id"),
+    ]);
+    return { bookings: b.data?.length ?? 0, orders: o.data?.length ?? 0 };
+  });
+
 
 // ---------- Admin: list & CRUD ----------
 async function assertAdmin(ctx: { supabase: any; userId: string }) {

@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getBookingByRef, getOrderByRef } from "@/lib/hvac.functions";
+import { getBookingByRef, getOrderByRef, claimGuestRecords } from "@/lib/hvac.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, MapPin, Calendar, Clock } from "lucide-react";
+import { CheckCircle2, Download, MapPin, Calendar, Clock, UserPlus } from "lucide-react";
 import { formatMoney } from "@/data/products";
 import jsPDF from "jspdf";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_site/confirmation/$kind/$ref")({
   head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }] }),
   component: ConfirmationPage,
 });
+
 
 const fmtHour = (h: number) => `${h === 12 ? 12 : h % 12}:00 ${h < 12 ? "AM" : "PM"}`;
 
@@ -56,8 +58,10 @@ function ConfirmationPage() {
   const { kind, ref } = Route.useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const getBooking = useServerFn(getBookingByRef);
   const getOrder = useServerFn(getOrderByRef);
+  const claimFn = useServerFn(claimGuestRecords);
 
   const load = async () => {
     setLoading(true);
@@ -66,6 +70,20 @@ function ConfirmationPage() {
     setLoading(false);
   };
   useEffect(() => { load(); }, [kind, ref]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+  }, []);
+
+  // If the guest signs in later, auto-claim their guest records by email.
+  useEffect(() => {
+    if (!authed || !data || data.user_id) return;
+    claimFn({}).then((r) => {
+      if ((r?.bookings ?? 0) + (r?.orders ?? 0) > 0) load();
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, data?.user_id]);
+
 
   if (loading) return <div className="p-16 text-center text-muted-foreground">Loading…</div>;
   if (!data) return <div className="p-16 text-center">
@@ -82,7 +100,30 @@ function ConfirmationPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">Reference <span className="font-mono font-semibold">{data.reference}</span></p>
         <p className="mt-2 text-sm">We'll call {data.phone} within 1 business hour to confirm.</p>
+        <p className="mt-1 text-xs text-muted-foreground">A copy of this confirmation was sent to {data.email}.</p>
       </div>
+
+      {authed === false && !data.user_id && (
+        <Card className="mt-4 border-primary/40 bg-primary/5">
+          <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+            <div className="flex items-start gap-3">
+              <UserPlus className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">Create an account to track this {kind}</p>
+                <p className="text-xs text-muted-foreground">Sign up with <span className="font-medium">{data.email}</span> and we'll link this {kind} — and any future ones — to your account automatically.</p>
+              </div>
+            </div>
+            <Link
+              to="/auth"
+              search={{ redirect: `/confirmation/${kind}/${ref}` }}
+              className="shrink-0"
+            >
+              <Button size="sm" className="gradient-cool text-primary-foreground">Create account</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
 
       <Card className="mt-6"><CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">

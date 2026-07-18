@@ -50,10 +50,18 @@ function BookPage() {
     [services, serviceSlug]
   );
 
-  const [authed, setAuthed] = useState<boolean | null>(null);
+  // Guest-friendly: no auth required. If signed in, we prefill and link the booking.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) setForm((f) => ({
+        ...f,
+        email: f.email || u.email || "",
+        full_name: f.full_name || (u.user_metadata?.full_name as string) || "",
+      }));
+    });
   }, []);
+
 
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "",
@@ -142,17 +150,6 @@ function BookPage() {
 
 
 
-  if (authed === false) {
-    return (
-      <section className="mx-auto max-w-md px-4 py-16">
-        <Card><CardContent className="p-6 text-center">
-          <h1 className="text-xl font-bold">Sign in to book</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Create an account to track your booking and status.</p>
-          <Button onClick={() => navigate({ to: "/auth", search: { redirect: "/book" } })} className="mt-4 gradient-cool text-primary-foreground">Sign in / Sign up</Button>
-        </CardContent></Card>
-      </section>
-    );
-  }
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-12 md:px-6">

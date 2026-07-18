@@ -25,14 +25,23 @@ const tomorrowISO = () => { const d = new Date(); d.setDate(d.getDate() + 1); re
 function CheckoutPage() {
   const { detailed, subtotal, installationTotal, total, clear } = useCart();
   const navigate = useNavigate();
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  useEffect(() => { supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session)); }, []);
-
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "",
     street: "", city: "", state: "", zip: "",
     scheduled_date: tomorrowISO(), scheduled_hour: 10, notes: "",
   });
+  // Guest-friendly: prefill if signed in, otherwise proceed as guest.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) setForm((f) => ({
+        ...f,
+        email: f.email || u.email || "",
+        full_name: f.full_name || (u.user_metadata?.full_name as string) || "",
+      }));
+    });
+  }, []);
+
   const [zipState, setZipState] = useState<"idle" | "checking" | "ok" | "bad">("idle");
   const [zipMsg, setZipMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -74,16 +83,8 @@ function CheckoutPage() {
     } finally { setBusy(false); }
   };
 
-  if (authed === false) {
-    return (
-      <section className="mx-auto max-w-md px-4 py-16">
-        <Card><CardContent className="p-6 text-center">
-          <h1 className="text-xl font-bold">Sign in to check out</h1>
-          <Button onClick={() => navigate({ to: "/auth", search: { redirect: "/checkout" } })} className="mt-4 gradient-cool text-primary-foreground">Sign in / Sign up</Button>
-        </CardContent></Card>
-      </section>
-    );
-  }
+
+
   if (detailed.length === 0) {
     return <div className="mx-auto max-w-md px-4 py-16 text-center">
       <p>Your cart is empty.</p>
