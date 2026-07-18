@@ -45,7 +45,16 @@ function AdminBookings() {
     });
   useEffect(() => {
     reload();
+    const channel = supabase
+      .channel("admin-bookings-rt")
+      .on("postgres_changes" as any, { event: "*", schema: "public", table: "bookings" }, () => {
+        reload();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const setStatus = async (id: string, status: string) => {
     await upd({ data: { id, status } });
