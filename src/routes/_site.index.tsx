@@ -39,7 +39,7 @@ const testimonials = [
   { name: "Jenna T.", city: "Charlotte, NC", quote: "Signed up for the maintenance plan two years ago. Zero surprise breakdowns since." },
 ];
 
-export default function Home() {
+function Home() {
   const featured = products.slice(0, 4);
   const homeServices = services.slice(0, 6);
   return (
