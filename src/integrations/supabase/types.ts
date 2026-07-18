@@ -39,6 +39,7 @@ export type Database = {
         Row: {
           city: string
           created_at: string
+          customer_phone_notify: string | null
           email: string
           full_name: string
           id: string
@@ -53,6 +54,7 @@ export type Database = {
           state: string
           status: Database["public"]["Enums"]["booking_status"]
           street: string
+          technician: string | null
           updated_at: string
           user_id: string | null
           zip: string
@@ -60,6 +62,7 @@ export type Database = {
         Insert: {
           city: string
           created_at?: string
+          customer_phone_notify?: string | null
           email: string
           full_name: string
           id?: string
@@ -74,6 +77,7 @@ export type Database = {
           state: string
           status?: Database["public"]["Enums"]["booking_status"]
           street: string
+          technician?: string | null
           updated_at?: string
           user_id?: string | null
           zip: string
@@ -81,6 +85,7 @@ export type Database = {
         Update: {
           city?: string
           created_at?: string
+          customer_phone_notify?: string | null
           email?: string
           full_name?: string
           id?: string
@@ -95,6 +100,7 @@ export type Database = {
           state?: string
           status?: Database["public"]["Enums"]["booking_status"]
           street?: string
+          technician?: string | null
           updated_at?: string
           user_id?: string | null
           zip?: string
@@ -440,10 +446,16 @@ export type Database = {
           created_at: string
           emergency_phone: string
           id: string
+          notify_email_enabled: boolean
+          notify_on_reschedule: boolean
+          notify_on_status_change: boolean
+          notify_sms_enabled: boolean
           singleton: boolean
           support_email: string
           support_phone: string
           tagline: string
+          technicians: string[]
+          twilio_from_phone: string
           updated_at: string
         }
         Insert: {
@@ -453,10 +465,16 @@ export type Database = {
           created_at?: string
           emergency_phone?: string
           id?: string
+          notify_email_enabled?: boolean
+          notify_on_reschedule?: boolean
+          notify_on_status_change?: boolean
+          notify_sms_enabled?: boolean
           singleton?: boolean
           support_email?: string
           support_phone?: string
           tagline?: string
+          technicians?: string[]
+          twilio_from_phone?: string
           updated_at?: string
         }
         Update: {
@@ -466,10 +484,16 @@ export type Database = {
           created_at?: string
           emergency_phone?: string
           id?: string
+          notify_email_enabled?: boolean
+          notify_on_reschedule?: boolean
+          notify_on_status_change?: boolean
+          notify_sms_enabled?: boolean
           singleton?: boolean
           support_email?: string
           support_phone?: string
           tagline?: string
+          technicians?: string[]
+          twilio_from_phone?: string
           updated_at?: string
         }
         Relationships: []
