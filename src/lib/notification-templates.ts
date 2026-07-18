@@ -30,7 +30,38 @@ export type TemplateEntry = {
   sms_body: string;
 };
 
-export type NotificationTemplates = Partial<Record<NotificationKind, Partial<TemplateEntry>>>;
+/**
+ * Easy-mode composer state. The admin edits friendly fields (greeting,
+ * message, checkboxes) and we compile these into the actual template strings
+ * on save. Persisted per-kind so the composer round-trips.
+ */
+export type ComposerState = {
+  greeting: string;              // e.g. "Hi {name}," — {name} auto-fills customer_name
+  message: string;               // plain text, no code
+  include: {
+    reference?: boolean;
+    dateTime?: boolean;
+    address?: boolean;
+    technician?: boolean;
+    serviceCharge?: boolean;
+    trackLink?: boolean;
+    supportPhone?: boolean;
+  };
+  signature: string;             // e.g. "— {company}"
+  subjectMode: "auto" | "custom";
+  subject: string;               // used when subjectMode === "custom"
+  sms: {
+    message: string;
+    includeReference?: boolean;
+    includeDateTime?: boolean;
+    includeTrackLink?: boolean;
+  };
+};
+
+export type NotificationTemplates = Partial<
+  Record<NotificationKind, Partial<TemplateEntry> & { composer?: ComposerState }>
+>;
+
 
 export const DEFAULT_TEMPLATES: Record<NotificationKind, TemplateEntry> = {
   pending: {
