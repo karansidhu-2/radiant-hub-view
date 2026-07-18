@@ -424,16 +424,24 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
   .inputValidator((d: {
     company_name: string; tagline: string; support_phone: string;
     support_email: string; address: string; business_hours: string; emergency_phone: string;
+    notify_email_enabled?: boolean; notify_sms_enabled?: boolean;
+    notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
+    twilio_from_phone?: string; technicians?: string[];
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const patch: any = { ...data };
+    if (Array.isArray(patch.technicians)) {
+      patch.technicians = patch.technicians.map((t: string) => String(t).trim()).filter(Boolean).slice(0, 100);
+    }
     const { error } = await context.supabase
       .from("site_settings")
-      .update(data)
+      .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 
 // ---------- Reviews ----------
