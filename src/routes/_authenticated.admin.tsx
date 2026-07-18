@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell } from "lucide-react";
+import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
 
 
