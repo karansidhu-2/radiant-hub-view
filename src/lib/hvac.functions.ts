@@ -62,6 +62,8 @@ const bookingSchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
 });
 
+const BUSINESS_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+
 export const createBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
@@ -81,7 +83,40 @@ export const createBooking = createServerFn({ method: "POST" })
       .eq("scheduled_date", data.scheduled_date)
       .eq("scheduled_hour", data.scheduled_hour)
       .neq("status", "cancelled");
-    if ((count ?? 0) >= cap) throw new Error("That time slot is fully booked. Please pick another.");
+    if ((count ?? 0) >= cap) {
+      // build alternatives: open hours on requested date + next 2 days
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const [y, m, d] = data.scheduled_date.split("-").map(Number);
+      const base = new Date(Date.UTC(y, m - 1, d));
+      const dates = [0, 1, 2].map((i) => {
+        const dt = new Date(base); dt.setUTCDate(base.getUTCDate() + i);
+        return dt.toISOString().slice(0, 10);
+      });
+      const { data: rows } = await supabaseAdmin
+        .from("bookings")
+        .select("scheduled_date, scheduled_hour")
+        .in("scheduled_date", dates)
+        .neq("status", "cancelled");
+      const counts: Record<string, Record<number, number>> = {};
+      for (const r of rows ?? []) {
+        counts[r.scheduled_date] ??= {};
+        counts[r.scheduled_date][r.scheduled_hour] = (counts[r.scheduled_date][r.scheduled_hour] ?? 0) + 1;
+      }
+      const suggestions: { date: string; hour: number }[] = [];
+      // same-day slots first, sorted by proximity to requested hour
+      const sameDayOpen = BUSINESS_HOURS
+        .filter((h) => h !== data.scheduled_hour && (counts[data.scheduled_date]?.[h] ?? 0) < cap)
+        .sort((a, b) => Math.abs(a - data.scheduled_hour) - Math.abs(b - data.scheduled_hour));
+      for (const h of sameDayOpen) suggestions.push({ date: data.scheduled_date, hour: h });
+      // then next-day slots
+      for (const dt of dates.slice(1)) {
+        for (const h of BUSINESS_HOURS) {
+          if ((counts[dt]?.[h] ?? 0) < cap) suggestions.push({ date: dt, hour: h });
+        }
+      }
+      const alts = suggestions.slice(0, 6);
+      throw new Error(`That time slot is fully booked. Please pick another.||ALTS||${JSON.stringify(alts)}`);
+    }
 
     const { data: row, error } = await context.supabase
       .from("bookings")
