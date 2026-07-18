@@ -105,14 +105,24 @@ function BookPage() {
     e.preventDefault();
     if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
     setBusy(true);
+    setCapacityConflict(null);
     try {
       const res = await bookFn({ data: { ...form, notes: form.notes || null } });
       toast.success("Booking confirmed!");
       navigate({ to: "/confirmation/$kind/$ref", params: { kind: "booking", ref: res.reference } });
     } catch (err: any) {
-      toast.error(err?.message || "Failed to book");
+      const msg = err?.message || "Failed to book";
+      if (/fully booked|capacity/i.test(msg)) {
+        setCapacityConflict("That time slot just filled up (crew capacity reached). Please pick another available time below — we've refreshed the list.");
+        // refresh booked slots so the picker reflects the new state
+        bookedFn({ data: { date: form.scheduled_date } }).then((r) => setBookedHours(r.hours)).catch(() => {});
+        toast.error("Slot is at crew capacity — pick another time");
+      } else {
+        toast.error(msg);
+      }
     } finally { setBusy(false); }
   };
+
 
   if (authed === false) {
     return (
