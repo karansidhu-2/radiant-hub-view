@@ -225,6 +225,7 @@ export type Database = {
           features: Json
           hspf: number | null
           id: string
+          image_url: string | null
           installation_fee: number
           name: string
           price: number
@@ -245,6 +246,7 @@ export type Database = {
           features?: Json
           hspf?: number | null
           id?: string
+          image_url?: string | null
           installation_fee?: number
           name: string
           price: number
@@ -265,6 +267,7 @@ export type Database = {
           features?: Json
           hspf?: number | null
           id?: string
+          image_url?: string | null
           installation_fee?: number
           name?: string
           price?: number
