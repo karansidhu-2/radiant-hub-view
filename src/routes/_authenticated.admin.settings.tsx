@@ -1,19 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { adminUpdateSiteSettings } from "@/lib/hvac.functions";
+import { adminUpdateSiteSettings, adminGetCapacityOverflow } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: SettingsPage,
 });
+
+type OverflowSlot = {
+  date: string; hour: number; capacity: number; count: number;
+  bookings: Array<{ id: string; reference: string; service_name: string | null; technician: string | null; full_name: string | null; status: string }>;
+};
+
 
 type S = {
   company_name: string; tagline: string; support_phone: string;
@@ -33,16 +39,35 @@ const empty: S = {
 
 function SettingsPage() {
   const update = useServerFn(adminUpdateSiteSettings);
+  const getOverflow = useServerFn(adminGetCapacityOverflow);
   const [form, setForm] = useState<S>(empty);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [techInput, setTechInput] = useState("");
+  const [overflow, setOverflow] = useState<OverflowSlot[]>([]);
+  const [checkingOverflow, setCheckingOverflow] = useState(false);
+
+  const refreshOverflow = async (override?: { capacity?: number; enabled?: boolean }) => {
+    setCheckingOverflow(true);
+    try {
+      const res = await getOverflow({ data: override ?? {} });
+      setOverflow(res.overflow as OverflowSlot[]);
+      return res;
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to check capacity overflow");
+    } finally { setCheckingOverflow(false); }
+  };
 
   useEffect(() => {
     supabase.from("site_settings")
       .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians,crew_capacity_enabled,crew_capacity")
       .eq("singleton", true).maybeSingle()
-      .then(({ data }) => { if (data) setForm({ ...empty, ...data } as S); setLoading(false); });
+      .then(({ data }) => {
+        if (data) setForm({ ...empty, ...data } as S);
+        setLoading(false);
+        refreshOverflow();
+      });
+     
   }, []);
 
   const save = async (e: React.FormEvent) => {
@@ -51,9 +76,15 @@ function SettingsPage() {
     try {
       await update({ data: form });
       toast.success("Site settings saved");
+      // Re-validate existing bookings against the new capacity
+      const res = await refreshOverflow({ capacity: form.crew_capacity, enabled: form.crew_capacity_enabled });
+      if (res && res.overflow.length > 0) {
+        toast.warning(`${res.overflow.length} time slot(s) now exceed crew capacity — review below`);
+      }
     } catch (err: any) { toast.error(err?.message || "Failed to save"); }
     finally { setBusy(false); }
   };
+
 
   if (loading) return <div className="p-8 text-center text-muted-foreground"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
 
@@ -165,8 +196,59 @@ function SettingsPage() {
                 </p>
               </div>
             </div>
+            <div className="mt-5 border-t pt-4">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <AlertTriangle className={`h-4 w-4 ${overflow.length ? "text-destructive" : "text-muted-foreground"}`} />
+                    Capacity check
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Existing upcoming bookings are re-validated against the current capacity ({form.crew_capacity_enabled ? form.crew_capacity : 1}).
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="outline" disabled={checkingOverflow}
+                  onClick={() => refreshOverflow({ capacity: form.crew_capacity, enabled: form.crew_capacity_enabled })}>
+                  {checkingOverflow ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
+                  Re-check now
+                </Button>
+              </div>
+              {overflow.length === 0 ? (
+                <p className="mt-3 text-xs text-muted-foreground">No overflow — every upcoming slot fits within capacity.</p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  {overflow.map((o) => (
+                    <div key={`${o.date}-${o.hour}`} className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-destructive">
+                          {o.date} · {String(o.hour).padStart(2, "0")}:00 — {o.count} bookings for {o.capacity} crew{o.capacity === 1 ? "" : "s"}
+                        </div>
+                        <Link to="/admin/calendar" className="text-xs font-medium text-primary hover:underline">Open calendar →</Link>
+                      </div>
+                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        {o.bookings.map((b) => (
+                          <li key={b.id} className="flex items-center justify-between gap-2">
+                            <span className="truncate">
+                              <span className="font-mono">{b.reference}</span> · {b.full_name || "—"} · {b.service_name || "—"}
+                              {b.technician ? ` · 👷 ${b.technician}` : " · unassigned"}
+                            </span>
+                            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase">{b.status}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-xs">
+                        Reassign or reschedule the extra booking(s) from the calendar, or increase capacity above.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
+
+
+
 
 
         <Button type="submit" disabled={busy} className="gradient-cool text-primary-foreground">

@@ -71,6 +71,8 @@ function BookPage() {
   const [zipMsg, setZipMsg] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [bookedHours, setBookedHours] = useState<number[]>([]);
+  const [capacityConflict, setCapacityConflict] = useState<string | null>(null);
+
 
   const checkZipFn = useServerFn(checkZip);
   const bookedFn = useServerFn(getBookedSlots);
@@ -103,14 +105,24 @@ function BookPage() {
     e.preventDefault();
     if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
     setBusy(true);
+    setCapacityConflict(null);
     try {
       const res = await bookFn({ data: { ...form, notes: form.notes || null } });
       toast.success("Booking confirmed!");
       navigate({ to: "/confirmation/$kind/$ref", params: { kind: "booking", ref: res.reference } });
     } catch (err: any) {
-      toast.error(err?.message || "Failed to book");
+      const msg = err?.message || "Failed to book";
+      if (/fully booked|capacity/i.test(msg)) {
+        setCapacityConflict("That time slot just filled up (crew capacity reached). Please pick another available time below — we've refreshed the list.");
+        // refresh booked slots so the picker reflects the new state
+        bookedFn({ data: { date: form.scheduled_date } }).then((r) => setBookedHours(r.hours)).catch(() => {});
+        toast.error("Slot is at crew capacity — pick another time");
+      } else {
+        toast.error(msg);
+      }
     } finally { setBusy(false); }
   };
+
 
   if (authed === false) {
     return (
@@ -170,6 +182,13 @@ function BookPage() {
             <Input type="date" required min={tomorrowISO()} value={form.scheduled_date}
               onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
           </div>
+          {capacityConflict && (
+            <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{capacityConflict}</span>
+            </div>
+          )}
+
           <div>
             <Label>Available time slots</Label>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">

@@ -98,8 +98,18 @@ function AdminReviews() {
       bulk({ data: { ids: Array.from(selected), action } }) as Promise<{ count: number }>,
     onSuccess: (res, action) => {
       toast.success(`${action.replace("_", " ")}: ${res.count} review(s)`);
-      setSelected(new Set()); invalidate();
-      setBulkConfirm(null); setBulkAck(false);
+      // Reset selection & close modal automatically
+      setSelected(new Set());
+      setBulkConfirm(null);
+      setBulkAck(false);
+      const shouldRefresh = bulkRefresh;
+      setBulkRefresh(false);
+      // Always revalidate the list; optionally hard-refresh the page
+      invalidate();
+      if (shouldRefresh) {
+        // give the toast a moment before reloading
+        setTimeout(() => window.location.reload(), 400);
+      }
     },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
@@ -107,11 +117,15 @@ function AdminReviews() {
   type BulkAction = "approve" | "hide" | "delete" | "clear_reply";
   const [bulkConfirm, setBulkConfirm] = useState<BulkAction | null>(null);
   const [bulkAck, setBulkAck] = useState(false);
+  const [bulkRefresh, setBulkRefresh] = useState(false);
   const openBulk = (action: BulkAction) => {
     if (!selected.size) return;
     setBulkAck(false);
+    setBulkRefresh(false);
     setBulkConfirm(action);
   };
+
+
 
   const BULK_META: Record<BulkAction, { title: string; verb: string; body: string; destructive: boolean; ack: string }> = {
     approve:     { title: "Approve reviews",   verb: "Approve",      body: "These reviews will be published and visible to customers.",   destructive: false, ack: "I want to publish these reviews." },
@@ -271,7 +285,7 @@ function AdminReviews() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); } }}>
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); setBulkRefresh(false); } }}>
         <DialogContent>
           {bulkConfirm && (
             <>
@@ -292,9 +306,16 @@ function AdminReviews() {
                   <Checkbox checked={bulkAck} onCheckedChange={(v) => setBulkAck(v === true)} className="mt-0.5" />
                   <span>{BULK_META[bulkConfirm].ack}</span>
                 </label>
+                <label className="flex items-start gap-2 rounded-md border border-dashed border-border p-3 text-sm">
+                  <Checkbox checked={bulkRefresh} onCheckedChange={(v) => setBulkRefresh(v === true)} className="mt-0.5" />
+                  <span>
+                    Also refresh the page after applying
+                    <span className="block text-xs text-muted-foreground">Optional — the list is always re-fetched automatically. Enable this for a full page reload.</span>
+                  </span>
+                </label>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); }}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); setBulkRefresh(false); }}>Cancel</Button>
                 <Button
                   variant={BULK_META[bulkConfirm].destructive ? "destructive" : "default"}
                   disabled={!bulkAck || bulkMut.isPending}
@@ -306,6 +327,7 @@ function AdminReviews() {
           )}
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
