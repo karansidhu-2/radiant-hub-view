@@ -461,7 +461,7 @@ export const listServiceReviews = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("reviews")
-      .select("id, rating, comment, created_at, user_id")
+      .select("id, rating, comment, created_at, user_id, admin_reply, admin_reply_at")
       .eq("service_slug", data.service_slug)
       .eq("published", true)
       .order("created_at", { ascending: false })
@@ -476,6 +476,7 @@ export const listServiceReviews = createServerFn({ method: "POST" })
     const list = (rows ?? []).map((r: any) => ({
       id: r.id, rating: r.rating, comment: r.comment, created_at: r.created_at,
       author: names.get(r.user_id) ?? "Customer",
+      admin_reply: r.admin_reply, admin_reply_at: r.admin_reply_at,
     }));
     const count = list.length;
     const avg = count ? list.reduce((s, r) => s + r.rating, 0) / count : 0;
