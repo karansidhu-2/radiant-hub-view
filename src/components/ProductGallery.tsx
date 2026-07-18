@@ -174,6 +174,24 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         )}
       </div>
 
+      <div
+        id={helpId}
+        role="note"
+        aria-label="Keyboard shortcuts for the media gallery"
+        className={showHelp ? "rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground" : "sr-only"}
+      >
+        <p className="font-semibold text-foreground">Keyboard shortcuts</p>
+        <ul className="mt-1 grid gap-1 sm:grid-cols-2">
+          <li><kbd className="rounded border px-1">←</kbd> / <kbd className="rounded border px-1">→</kbd> Previous / next</li>
+          <li><kbd className="rounded border px-1">Home</kbd> / <kbd className="rounded border px-1">End</kbd> First / last</li>
+          <li><kbd className="rounded border px-1">Enter</kbd> or <kbd className="rounded border px-1">Space</kbd> Open full screen</li>
+          <li><kbd className="rounded border px-1">Esc</kbd> Close full screen</li>
+          <li className="sm:col-span-2">Touch: swipe left or right to change media in full screen.</li>
+        </ul>
+      </div>
+
+
+
       {total > 1 && (
         <div
           role="tablist"
