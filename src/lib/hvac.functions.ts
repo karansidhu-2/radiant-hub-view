@@ -525,10 +525,12 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.scheduled_hour) || data.scheduled_hour < 8 || data.scheduled_hour > 18) {
       throw new Error("Hour must be between 8 and 18");
     }
-    // enforce crew capacity (excluding the booking itself)
-    const { data: settings } = await context.supabase
-      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
-    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    // enforce per-slot capacity (excluding the booking itself), skill-aware
+    const { supabaseAdmin: _adminForCap } = await import("@/integrations/supabase/client.server");
+    const { data: svcRow } = await context.supabase
+      .from("bookings").select("service_slug").eq("id", data.id).maybeSingle();
+    const cap = await computeCapacity(_adminForCap, svcRow?.service_slug ?? null);
+
     const { count } = await context.supabase
       .from("bookings")
       .select("id", { count: "exact", head: true })
