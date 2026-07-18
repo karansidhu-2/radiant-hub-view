@@ -475,11 +475,17 @@ export const adminSetBookingTechnician = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const tech = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { data: prev } = await context.supabase.from("bookings").select("technician").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("bookings")
       .update({ technician: tech })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.technician", entity_type: "booking", entity_id: data.id,
+      before: { technician: prev?.technician }, after: { technician: tech },
+    });
     return { ok: true };
   });
 
