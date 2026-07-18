@@ -3,12 +3,13 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { productCategories, formatMoney, type ProductCategory } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, X, SlidersHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
@@ -41,8 +42,16 @@ type ProductRow = {
   tag: string | null; available: boolean; image_url: string | null;
 };
 
+type SortKey = "featured" | "price-asc" | "price-desc" | "name";
+
 function ShopPage() {
   const [filter, setFilter] = useState<ProductCategory | "all">("all");
+  const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState<string>("all");
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [sort, setSort] = useState<SortKey>("featured");
+  const [priceMax, setPriceMax] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const { addItem } = useCart();
 
   const { data: products = [], isLoading } = useQuery({
@@ -61,14 +70,52 @@ function ShopPage() {
     },
   });
 
-  const filtered = useMemo(
-    () => filter === "all" ? products : products.filter((p) => p.category === filter),
-    [products, filter]
+  const brands = useMemo(
+    () => Array.from(new Set(products.map((p) => p.brand))).sort(),
+    [products]
   );
+  const maxPrice = useMemo(
+    () => products.reduce((m, p) => Math.max(m, Number(p.price) || 0), 0),
+    [products]
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let list = products.filter((p) => {
+      if (filter !== "all" && p.category !== filter) return false;
+      if (brand !== "all" && p.brand !== brand) return false;
+      if (inStockOnly && !p.available) return false;
+      if (priceMax != null && Number(p.price) > priceMax) return false;
+      if (q) {
+        const hay = `${p.name} ${p.brand} ${p.category} ${p.tag ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    switch (sort) {
+      case "price-asc": list = [...list].sort((a, b) => Number(a.price) - Number(b.price)); break;
+      case "price-desc": list = [...list].sort((a, b) => Number(b.price) - Number(a.price)); break;
+      case "name": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
+      default: /* featured = default from db */ break;
+    }
+    return list;
+  }, [products, filter, brand, inStockOnly, priceMax, query, sort]);
 
   const handleAdd = (slug: string, name: string) => {
     addItem(slug, { includeInstallation: true });
     toast.success(`${name} added to cart`, { description: "Installation included by default." });
+  };
+
+  const activeFilterCount =
+    (filter !== "all" ? 1 : 0) +
+    (brand !== "all" ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (priceMax != null ? 1 : 0) +
+    (query.trim() ? 1 : 0);
+
+  const clearAll = () => {
+    setFilter("all"); setBrand("all"); setInStockOnly(false);
+    setPriceMax(null); setQuery(""); setSort("featured");
   };
 
   return (
@@ -84,7 +131,82 @@ function ShopPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-        <div className="mb-8 flex flex-wrap gap-2">
+        {/* Search + sort bar */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name, brand, or tag…"
+              className="pl-9 pr-9"
+              aria-label="Search products"
+            />
+            {query && (
+              <button type="button" onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-accent">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <select
+            value={sort} onChange={(e) => setSort(e.target.value as SortKey)}
+            aria-label="Sort products"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="name">Name: A → Z</option>
+          </select>
+          <Button variant="outline" size="sm" onClick={() => setShowFilters((s) => !s)} className="sm:hidden">
+            <SlidersHorizontal className="mr-1 h-4 w-4" /> Filters
+            {activeFilterCount > 0 && <span className="ml-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{activeFilterCount}</span>}
+          </Button>
+        </div>
+
+        {/* Filters panel */}
+        <div className={`mb-6 grid gap-4 rounded-lg border border-border bg-card p-4 sm:grid-cols-3 ${showFilters ? "grid" : "hidden sm:grid"}`}>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Brand</label>
+            <select
+              value={brand} onChange={(e) => setBrand(e.target.value)}
+              aria-label="Filter by brand"
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="all">All brands</option>
+              {brands.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Max price {priceMax != null ? `— ${formatMoney(priceMax)}` : "— any"}
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={Math.max(1000, Math.ceil(maxPrice / 500) * 500)}
+              step={100}
+              value={priceMax ?? Math.max(1000, Math.ceil(maxPrice / 500) * 500)}
+              onChange={(e) => setPriceMax(Number(e.target.value))}
+              aria-label="Maximum price"
+              className="w-full"
+            />
+            {priceMax != null && (
+              <button className="text-[11px] text-primary underline" onClick={() => setPriceMax(null)}>Reset</button>
+            )}
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} />
+              In stock only
+            </label>
+          </div>
+        </div>
+
+        {/* Category chips */}
+        <div className="mb-6 flex flex-wrap gap-2">
           <button
             onClick={() => setFilter("all")}
             className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${filter === "all" ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-accent"}`}
@@ -106,8 +228,22 @@ function ShopPage() {
           })}
         </div>
 
+        {/* Results summary */}
+        <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+          <p>{filtered.length} product{filtered.length === 1 ? "" : "s"}</p>
+          {activeFilterCount > 0 && (
+            <button onClick={clearAll} className="text-primary hover:underline">Clear all filters</button>
+          )}
+        </div>
+
         {isLoading ? (
           <div className="grid place-items-center py-20 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border p-10 text-center">
+            <p className="font-semibold">No products match your filters</p>
+            <p className="mt-1 text-sm text-muted-foreground">Try adjusting your search or clearing filters.</p>
+            <Button onClick={clearAll} variant="outline" size="sm" className="mt-4">Clear all filters</Button>
+          </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((p) => (
