@@ -114,15 +114,31 @@ function CalendarPage() {
 
   const shift = (n: number) => { const d = new Date(anchor); d.setDate(d.getDate() + (view === "week" ? 7 * n : n)); setAnchor(d); };
 
-  const openEdit = (b: Booking) => { setSelected(b); setEditDate(b.scheduled_date); setEditHour(b.scheduled_hour); setEditTech(b.technician ?? ""); };
+  const openEdit = (b: Booking) => { setSelected(b); setEditDate(b.scheduled_date); setEditHour(b.scheduled_hour); setEditTech(b.technician ?? ""); setAlts([]); setConflict(null); };
+
+  const [alts, setAlts] = useState<{ date: string; hour: number }[]>([]);
+  const [conflict, setConflict] = useState<string | null>(null);
 
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!selected) return;
       await reschedule({ data: { id: selected.id, scheduled_date: editDate, scheduled_hour: editHour, technician: editTech.trim() || null } });
     },
-    onSuccess: () => { toast.success("Booking rescheduled — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); setSelected(null); },
-    onError: (e: any) => toast.error(e?.message || "Failed to reschedule"),
+    onSuccess: () => { toast.success("Booking rescheduled — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); setSelected(null); setAlts([]); setConflict(null); },
+    onError: (e: any) => {
+      const msg = String(e?.message || "Failed to reschedule");
+      const marker = msg.indexOf("||ALTS||");
+      if (marker >= 0) {
+        setConflict(msg.slice(0, marker));
+        try {
+          const list = JSON.parse(msg.slice(marker + "||ALTS||".length));
+          if (Array.isArray(list)) setAlts(list);
+        } catch { /* noop */ }
+        toast.error("Slot at capacity — pick a suggested alternative");
+      } else {
+        toast.error(msg);
+      }
+    },
   });
 
   const statusMut = useMutation({
@@ -130,6 +146,22 @@ function CalendarPage() {
     onSuccess: () => { toast.success("Status updated — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
+
+  // Deep-link support: /admin/calendar?date=YYYY-MM-DD&hour=13 focuses that slot
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const p = new URLSearchParams(window.location.search);
+    const d = p.get("date");
+    const h = p.get("hour");
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const [y, mo, da] = d.split("-").map(Number);
+      const dt = new Date(y, mo - 1, da); dt.setHours(0, 0, 0, 0);
+      setAnchor(dt);
+      setView("day");
+      if (h) toast.message(`Focused ${d} @ ${h}:00`);
+    }
+  }, []);
+
 
   const todayKey = fmtDate(new Date());
   const rangeLabel = view === "week"
