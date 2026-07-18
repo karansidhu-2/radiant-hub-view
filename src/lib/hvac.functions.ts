@@ -554,6 +554,7 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     }
     const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
     if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { data: prevRow } = await context.supabase.from("bookings").select("scheduled_date, scheduled_hour, technician, reference").eq("id", data.id).maybeSingle();
     const { data: row, error } = await context.supabase
       .from("bookings")
       .update(patch)
@@ -567,6 +568,12 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
         console.error("booking notification failed", e),
       );
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.reschedule", entity_type: "booking", entity_id: data.id,
+      before: { scheduled_date: prevRow?.scheduled_date, scheduled_hour: prevRow?.scheduled_hour, technician: prevRow?.technician },
+      after: patch, details: { reference: prevRow?.reference },
+    });
     return { ok: true };
   });
 
