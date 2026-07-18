@@ -145,6 +145,29 @@ function SettingsPage() {
             )}
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="mb-1 text-lg font-semibold">Crew capacity</h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              When on, multiple bookings can share the same time slot — up to the number of technicians/crews you have available.
+              A slot appears "Booked" only after it hits capacity.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {toggle("crew_capacity_enabled", "Allow multiple bookings per slot", "Turn off to keep the classic 1-booking-per-hour rule.")}
+              <div className={`rounded-md border border-border p-3 ${form.crew_capacity_enabled ? "" : "opacity-60"}`}>
+                <Label>Technicians / crews available</Label>
+                <Input type="number" min={1} max={50} value={form.crew_capacity}
+                  disabled={!form.crew_capacity_enabled}
+                  onChange={(e) => setForm({ ...form, crew_capacity: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Bookings adjust automatically: up to {form.crew_capacity_enabled ? form.crew_capacity : 1} per hour.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
 
         <Button type="submit" disabled={busy} className="gradient-cool text-primary-foreground">
           {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
