@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminZipsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminTechniciansRouteImport } from './routes/_authenticated.admin.technicians'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated.admin.settings'
 import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
+import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated.admin.security'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
@@ -170,6 +171,12 @@ const AuthenticatedAdminServicesRoute =
     path: '/services',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSecurityRoute =
+  AuthenticatedAdminSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReviewsRoute =
   AuthenticatedAdminReviewsRouteImport.update({
     id: '/reviews',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
+  '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
@@ -308,6 +316,7 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
+  '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
@@ -348,6 +357,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
+  '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/technicians': typeof AuthenticatedAdminTechniciansRoute
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reviews'
+    | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/technicians'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reviews'
+    | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/technicians'
@@ -462,6 +474,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/reviews'
+    | '/_authenticated/admin/security'
     | '/_authenticated/admin/services'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/technicians'
@@ -653,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServicesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/security': {
+      id: '/_authenticated/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AuthenticatedAdminSecurityRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reviews': {
       id: '/_authenticated/admin/reviews'
       path: '/reviews'
@@ -771,6 +791,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRouteWithChildren
+  AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
   AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminTechniciansRoute: typeof AuthenticatedAdminTechniciansRoute
@@ -788,6 +809,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRouteWithChildren,
+  AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
   AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminTechniciansRoute: AuthenticatedAdminTechniciansRoute,
