@@ -20,33 +20,27 @@ type Props = {
 export function BackButton({ label = "Back", className, fallback }: Props) {
   const router = useRouter();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const [canGoBack, setCanGoBack] = useState(false);
-
-  // Track whether the user has navigated within this SPA session.
-  // sessionStorage persists across in-tab navigations but resets on hard refresh
-  // and doesn't exist for freshly-opened deep links.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const KEY = "__nav_depth__";
-    const prev = Number(window.sessionStorage.getItem(KEY) ?? "0");
-    const next = prev + 1;
-    window.sessionStorage.setItem(KEY, String(next));
-    setCanGoBack(next > 1);
-  }, [pathname]);
 
   const defaultFallback = pathname.startsWith("/admin") ? "/admin" : "/";
   const target = fallback ?? defaultFallback;
 
   const onClick = () => {
-    if (canGoBack) {
-      router.history.back();
-      return;
+    // Prefer the router index recorded in history.state — it's authoritative
+    // for whether there's a real prior SPA entry in this tab. If we can't
+    // determine that (deep link, refresh, external referrer), navigate to
+    // the fallback route so the user always lands somewhere useful.
+    if (typeof window !== "undefined") {
+      const state: any = window.history.state;
+      const idx = state?.__TSR_index ?? state?.index;
+      const sameOriginReferrer =
+        !!document.referrer && document.referrer.startsWith(window.location.origin);
+      const canGoBack = (typeof idx === "number" && idx > 0) || sameOriginReferrer;
+      if (canGoBack) {
+        router.history.back();
+        return;
+      }
     }
-    if (pathname !== target) {
-      router.navigate({ to: target });
-    } else {
-      router.navigate({ to: "/" });
-    }
+    router.navigate({ to: target });
   };
 
   return (
@@ -54,7 +48,7 @@ export function BackButton({ label = "Back", className, fallback }: Props) {
       variant="ghost"
       size="sm"
       onClick={onClick}
-      aria-label={canGoBack ? "Go back" : `Go to ${target}`}
+      aria-label={`Back to ${target === "/" ? "home" : target}`}
       className={`gap-1 -ml-2 ${className ?? ""}`}
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {label}
