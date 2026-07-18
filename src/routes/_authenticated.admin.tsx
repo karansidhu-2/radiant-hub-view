@@ -83,7 +83,7 @@ function AdminLayout() {
             })}
           </nav>
         </aside>
-        <main className="min-w-0"><Outlet /></main>
+        <main className="min-w-0"><CapacityAlerts /><Outlet /></main>
       </div>
     </div>
   );
