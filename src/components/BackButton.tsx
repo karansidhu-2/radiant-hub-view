@@ -7,6 +7,8 @@ type Props = {
   className?: string;
   /** Route to navigate to when there's no prior history (e.g. direct deep link or refresh). */
   fallback?: string;
+  /** Always navigate to the fallback route instead of browser history. */
+  alwaysUseFallback?: boolean;
 };
 
 /**
@@ -16,7 +18,7 @@ type Props = {
  *   (refresh resets our session marker even though window.history.length may be > 1).
  * - Never navigates back to the same URL we're already on.
  */
-export function BackButton({ label = "Back", className, fallback }: Props) {
+export function BackButton({ label = "Back", className, fallback, alwaysUseFallback = false }: Props) {
   const router = useRouter();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
 
@@ -24,6 +26,11 @@ export function BackButton({ label = "Back", className, fallback }: Props) {
   const target = fallback ?? defaultFallback;
 
   const onClick = () => {
+    if (alwaysUseFallback) {
+      router.navigate({ to: target });
+      return;
+    }
+
     // Prefer the router index recorded in history.state — it's authoritative
     // for whether there's a real prior SPA entry in this tab. If we can't
     // determine that (deep link, refresh, external referrer), navigate to
