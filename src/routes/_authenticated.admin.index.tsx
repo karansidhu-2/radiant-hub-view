@@ -171,6 +171,87 @@ function AdminDashboard() {
         ))}
       </div>
 
+      <Card className="mt-6 border-primary/30">
+        <CardContent className="p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Reset</h2>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Start a new tracking period from $0. Previous records are preserved in history and remain in the database.
+              </p>
+              {active ? (
+                <p className="mt-2 text-sm">
+                  <span className="font-medium">Active checkpoint:</span>{" "}
+                  {active.label ?? active.period_type} — since{" "}
+                  {new Date(active.started_at).toLocaleString()}
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">No active checkpoint — showing last {days} days.</p>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => startPeriod("week")}>Start new week</Button>
+              <Button size="sm" variant="outline" onClick={() => startPeriod("month")}>Start new month</Button>
+              <Button size="sm" variant="outline" onClick={() => startPeriod("year")}>Start new year</Button>
+              {active && (
+                <Button size="sm" variant="ghost" onClick={async () => {
+                  await setActive({ data: { id: null } });
+                  toast.success("Reverted to rolling range");
+                  reloadCheckpoints();
+                }}>Clear</Button>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t pt-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Custom start date</label>
+              <Input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="h-9 w-44" />
+            </div>
+            <Button size="sm" variant="outline" disabled={!customDate}
+              onClick={() => startPeriod("custom", new Date(customDate + "T00:00:00").toISOString())}>
+              Start from date
+            </Button>
+          </div>
+          {checkpoints.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">History</p>
+              <div className="max-h-52 overflow-y-auto divide-y rounded border">
+                {checkpoints.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between gap-2 p-2 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
+                        {c.label ?? c.period_type}
+                        {c.active && <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">Active</span>}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {c.period_type} · started {new Date(c.started_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      {!c.active && (
+                        <Button size="icon" variant="ghost" title="Activate"
+                          onClick={async () => { await setActive({ data: { id: c.id } }); toast.success("Checkpoint activated"); reloadCheckpoints(); }}>
+                          <Play className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" title="Delete"
+                        onClick={async () => { await delCheckpoint({ data: { id: c.id } }); toast.success("Deleted"); reloadCheckpoints(); }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
+
       <Card className="mt-6">
         <CardContent className="p-5">
           <div className="mb-3 flex items-center gap-2">
