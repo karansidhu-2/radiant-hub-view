@@ -125,8 +125,10 @@ function attachSwipe(
 describe("swipe listener integration", () => {
   let el: HTMLDivElement;
   let cleanup: () => void;
-  let nav: ReturnType<typeof vi.fn>;
+  let nav: ((dir: -1 | 1) => void) & ReturnType<typeof vi.fn>;
   let clock: number;
+
+
 
   beforeEach(() => {
     clock = 1000;
