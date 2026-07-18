@@ -99,10 +99,19 @@ function ShopPage() {
       case "price-asc": list = [...list].sort((a, b) => Number(a.price) - Number(b.price)); break;
       case "price-desc": list = [...list].sort((a, b) => Number(b.price) - Number(a.price)); break;
       case "name": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
+      case "top-rated":
+        list = [...list].sort((a, b) => {
+          const ra = autoRatings?.[a.slug];
+          const rb = autoRatings?.[b.slug];
+          const sa = ra ? Number(ra.auto_rating) + Number(ra.auto_confidence) * 0.5 : 0;
+          const sb = rb ? Number(rb.auto_rating) + Number(rb.auto_confidence) * 0.5 : 0;
+          return sb - sa;
+        });
+        break;
       default: /* featured = default from db */ break;
     }
     return list;
-  }, [products, filter, brand, inStockOnly, priceMax, query, sort]);
+  }, [products, filter, brand, inStockOnly, priceMax, query, sort, autoRatings]);
 
   const handleAdd = (slug: string, name: string) => {
     addItem(slug, { includeInstallation: true });
