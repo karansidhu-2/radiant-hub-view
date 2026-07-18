@@ -80,6 +80,13 @@ function ServiceDetail() {
                 <DynamicIcon name={svc.icon} className="h-7 w-7" />
               </div>
               <h1 className="text-3xl font-bold md:text-4xl">{svc.name}</h1>
+              {rv && rv.count > 0 && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <StarRating value={rv.avg} readOnly size={16} />
+                  <span className="font-semibold">{rv.avg.toFixed(1)}</span>
+                  <span className="text-muted-foreground">({rv.count} review{rv.count === 1 ? "" : "s"})</span>
+                </div>
+              )}
               <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{svc.description}</p>
             </div>
             <Card className="md:min-w-[260px]">
