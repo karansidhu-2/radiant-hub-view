@@ -273,8 +273,19 @@ export const adminUpsertService = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    let before: any = null;
+    if (data.slug) {
+      const { data: existing } = await context.supabase.from("services").select("*").eq("slug", data.slug).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("services").upsert(data, { onConflict: "slug" });
     if (error) throw new Error(error.message);
+    await logAdminAction(context, {
+      action: before ? "service.update" : "service.create",
+      entity_type: "service", entity_id: data.slug ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -283,8 +294,11 @@ export const adminDeleteService = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("services").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("services").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "service.delete", entity_type: "service", entity_id: data.id, before });
     return { ok: true };
   });
 
@@ -301,8 +315,19 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    let before: any = null;
+    if (data.slug) {
+      const { data: existing } = await context.supabase.from("products").select("*").eq("slug", data.slug).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("products").upsert(data, { onConflict: "slug" });
     if (error) throw new Error(error.message);
+    await logAdminAction(context, {
+      action: before ? "product.update" : "product.create",
+      entity_type: "product", entity_id: data.slug ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -311,8 +336,11 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("products").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "product.delete", entity_type: "product", entity_id: data.id, before });
     return { ok: true };
   });
 
