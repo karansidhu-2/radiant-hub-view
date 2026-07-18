@@ -39,16 +39,35 @@ const empty: S = {
 
 function SettingsPage() {
   const update = useServerFn(adminUpdateSiteSettings);
+  const getOverflow = useServerFn(adminGetCapacityOverflow);
   const [form, setForm] = useState<S>(empty);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [techInput, setTechInput] = useState("");
+  const [overflow, setOverflow] = useState<OverflowSlot[]>([]);
+  const [checkingOverflow, setCheckingOverflow] = useState(false);
+
+  const refreshOverflow = async (override?: { capacity?: number; enabled?: boolean }) => {
+    setCheckingOverflow(true);
+    try {
+      const res = await getOverflow({ data: override ?? {} });
+      setOverflow(res.overflow as OverflowSlot[]);
+      return res;
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to check capacity overflow");
+    } finally { setCheckingOverflow(false); }
+  };
 
   useEffect(() => {
     supabase.from("site_settings")
       .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians,crew_capacity_enabled,crew_capacity")
       .eq("singleton", true).maybeSingle()
-      .then(({ data }) => { if (data) setForm({ ...empty, ...data } as S); setLoading(false); });
+      .then(({ data }) => {
+        if (data) setForm({ ...empty, ...data } as S);
+        setLoading(false);
+        refreshOverflow();
+      });
+     
   }, []);
 
   const save = async (e: React.FormEvent) => {
@@ -57,9 +76,15 @@ function SettingsPage() {
     try {
       await update({ data: form });
       toast.success("Site settings saved");
+      // Re-validate existing bookings against the new capacity
+      const res = await refreshOverflow({ capacity: form.crew_capacity, enabled: form.crew_capacity_enabled });
+      if (res && res.overflow.length > 0) {
+        toast.warning(`${res.overflow.length} time slot(s) now exceed crew capacity — review below`);
+      }
     } catch (err: any) { toast.error(err?.message || "Failed to save"); }
     finally { setBusy(false); }
   };
+
 
   if (loading) return <div className="p-8 text-center text-muted-foreground"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>;
 
