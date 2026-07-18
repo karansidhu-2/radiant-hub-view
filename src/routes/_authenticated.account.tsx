@@ -15,6 +15,8 @@ import {
   Calendar, DollarSign, MapPin, MessageSquare, Package, Plus, Star, Trash2, User, Wallet, Wrench, Reply,
 } from "lucide-react";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 
 export const Route = createFileRoute("/_authenticated/account")({
