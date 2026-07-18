@@ -182,6 +182,13 @@ function BookPage() {
             <Input type="date" required min={tomorrowISO()} value={form.scheduled_date}
               onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
           </div>
+          {capacityConflict && (
+            <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{capacityConflict}</span>
+            </div>
+          )}
+
           <div>
             <Label>Available time slots</Label>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
