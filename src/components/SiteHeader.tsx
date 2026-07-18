@@ -62,6 +62,9 @@ export function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link to="/account" className="hidden md:block" title="My account">
+                <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
+              </Link>
               <Link to="/admin" className="hidden md:block" title="Admin">
                 <Button variant="outline" size="icon"><Shield className="h-4 w-4" /></Button>
               </Link>
