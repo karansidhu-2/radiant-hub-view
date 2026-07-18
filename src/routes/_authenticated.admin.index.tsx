@@ -6,12 +6,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DollarSign, ShoppingBag, Calendar, TrendingUp, Users, Star,
-  CheckCircle2, XCircle, Repeat, Wrench,
+  CheckCircle2, XCircle, Repeat, Wrench, Download,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
+
+function csvEscape(v: any) {
+  const s = v == null ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function toCsv(rows: (string | number)[][]) {
+  return rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+}
+function downloadCsv(name: string, content: string) {
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
