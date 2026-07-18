@@ -63,23 +63,32 @@ export function SiteHeader() {
           {user ? (
             <>
               <Link to="/account" className="md:hidden" title="My account" aria-label="My account">
-                <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <UserIcon className="h-4 w-4" />
+                  <span className="text-xs font-semibold">Account</span>
+                </Button>
               </Link>
               <Link to="/account" className="hidden md:block" title="My account">
-                <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon" aria-label="My account"><UserIcon className="h-4 w-4" /></Button>
               </Link>
               <Link to="/admin" className="hidden md:block" title="Admin">
-                <Button variant="outline" size="icon"><Shield className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
               </Link>
-              <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out"><LogOut className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
             </>
           ) : (
             <>
               <Link to="/auth" search={{ redirect: "/" }} className="md:hidden" aria-label="Sign in">
-                <Button variant="outline" size="icon" title="Sign in"><UserIcon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <LogIn className="h-4 w-4" />
+                  <span className="text-xs font-semibold">Sign in</span>
+                </Button>
               </Link>
               <Link to="/auth" search={{ redirect: "/" }} className="hidden md:block">
-                <Button variant="outline" size="icon" title="Sign in"><LogIn className="h-4 w-4" /></Button>
+                <Button variant="outline" size="sm" className="gap-1.5" title="Sign in" aria-label="Sign in">
+                  <LogIn className="h-4 w-4" />
+                  <span className="text-xs font-semibold">Sign in</span>
+                </Button>
               </Link>
             </>
           )}
