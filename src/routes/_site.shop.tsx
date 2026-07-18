@@ -38,7 +38,7 @@ type ProductRow = {
   slug: string; name: string; brand: string; category: string;
   price: number; installation_fee: number;
   seer: number | null; capacity_btu: number | null; hspf: number | null;
-  tag: string | null; available: boolean;
+  tag: string | null; available: boolean; image_url: string | null;
 };
 
 function ShopPage() {
@@ -50,11 +50,14 @@ function ShopPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,tag,available")
+        .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,tag,available,image_url")
         .eq("published", true)
         .order("name");
       if (error) throw error;
-      return (data ?? []) as ProductRow[];
+      const rows = (data ?? []) as ProductRow[];
+      const paths = rows.map((r) => r.image_url).filter(Boolean) as string[];
+      const urls = paths.length ? await (await import("@/lib/product-image")).resolveProductImageUrls(paths) : {};
+      return rows.map((r) => ({ ...r, resolved_image: r.image_url ? urls[r.image_url] ?? null : null }));
     },
   });
 
@@ -110,10 +113,14 @@ function ShopPage() {
             {filtered.map((p) => (
               <Card key={p.slug} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-elevated">
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
-                  <div className="relative aspect-[4/3] gradient-cool">
-                    <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-                      <DynamicIcon name={iconForCategory(p.category)} className="h-16 w-16 opacity-90" />
-                    </div>
+                  <div className="relative aspect-[4/3] gradient-cool overflow-hidden">
+                    {(p as any).resolved_image ? (
+                      <img src={(p as any).resolved_image} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
+                        <DynamicIcon name={iconForCategory(p.category)} className="h-16 w-16 opacity-90" />
+                      </div>
+                    )}
                     {p.tag && (
                       <span className="absolute left-3 top-3 rounded-full bg-[color:var(--ember)] px-2 py-0.5 text-xs font-semibold text-[color:var(--ember-foreground)]">
                         {p.tag}
