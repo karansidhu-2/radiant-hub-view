@@ -51,7 +51,7 @@ export function SiteHeader() {
             <Phone className="h-4 w-4" aria-hidden="true" />
             {settings.support_phone}
           </a>
-          <Link to="/cart" className="relative hidden md:block">
+          <Link to="/cart" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"} className="relative hidden md:block">
             <Button variant="outline" size="icon" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}>
               <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             </Button>
