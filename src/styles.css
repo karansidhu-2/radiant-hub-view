@@ -158,12 +158,22 @@
   }
   /* Touch feedback for mobile (no hover) */
   @media (hover: none) {
+    /* Press-down settles halfway between rest and the 2px hover lift. */
     .card-pop:active {
-      transform: translateY(-2px);
-      border-color: color-mix(in oklab, var(--color-primary) 45%, var(--color-border));
-      box-shadow: 0 10px 22px -14px oklch(0.45 0.15 250 / 0.35);
+      transform: translateY(calc(var(--card-hover-lift) * -0.5));
+      border-color: color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-border) * 0.8), var(--color-border));
+      box-shadow:
+        0 calc(var(--card-hover-spread) * 0.5px) calc(var(--card-hover-blur) * 0.55px)
+          calc(var(--card-hover-spread) * -0.7px)
+          color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-strength) * 70%), transparent),
+        0 0 0 1px color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-ring) * 80%), transparent);
+      transition-duration: 180ms;
     }
-    a:active, button:active, [role="button"]:active { opacity: 0.85; }
+    a:active, button:active, [role="button"]:active {
+      opacity: 0.9;
+      transform: translateY(1px) scale(0.985);
+      transition: transform 140ms cubic-bezier(0.25, 0.8, 0.25, 1), opacity 140ms ease;
+    }
   }
   /* Larger tap targets on small screens */
   @media (max-width: 640px) {
