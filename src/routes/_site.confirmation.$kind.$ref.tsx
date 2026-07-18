@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getBookingByRef, getOrderByRef } from "@/lib/hvac.functions";
+import { getBookingByRef, getOrderByRef, claimGuestRecords } from "@/lib/hvac.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, MapPin, Calendar, Clock } from "lucide-react";
+import { CheckCircle2, Download, MapPin, Calendar, Clock, UserPlus } from "lucide-react";
 import { formatMoney } from "@/data/products";
 import jsPDF from "jspdf";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_site/confirmation/$kind/$ref")({
   head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }] }),
   component: ConfirmationPage,
 });
+
 
 const fmtHour = (h: number) => `${h === 12 ? 12 : h % 12}:00 ${h < 12 ? "AM" : "PM"}`;
 
