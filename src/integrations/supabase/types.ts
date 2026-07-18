@@ -406,6 +406,36 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_checkpoints: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          period_type: string
+          started_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          period_type: string
+          started_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          period_type?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
       review_audit_log: {
         Row: {
           action: string

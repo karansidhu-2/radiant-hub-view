@@ -1,13 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { adminAnalytics } from "@/lib/hvac.functions";
+import {
+  adminAnalytics,
+  adminListCheckpoints,
+  adminCreateCheckpoint,
+  adminSetCheckpointActive,
+  adminDeleteCheckpoint,
+} from "@/lib/hvac.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import {
   DollarSign, ShoppingBag, Calendar, TrendingUp, Users, Star,
-  CheckCircle2, XCircle, Repeat, Wrench, Download,
+  CheckCircle2, XCircle, Repeat, Wrench, Download, RotateCcw, Trash2, Play,
 } from "lucide-react";
+
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
@@ -45,18 +54,38 @@ function AdminDashboard() {
   const [days, setDays] = useState<number>(30);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const listCheckpoints = useServerFn(adminListCheckpoints);
+  const createCheckpoint = useServerFn(adminCreateCheckpoint);
+  const setActive = useServerFn(adminSetCheckpointActive);
+  const delCheckpoint = useServerFn(adminDeleteCheckpoint);
+  const [checkpoints, setCheckpoints] = useState<any[]>([]);
+  const [customDate, setCustomDate] = useState("");
+  const active = checkpoints.find((c) => c.active) ?? null;
+  const sinceOverride = active ? active.started_at : null;
+
+  const reloadCheckpoints = () => listCheckpoints().then(setCheckpoints).catch(() => {});
+  useEffect(() => { reloadCheckpoints(); /* eslint-disable-next-line */ }, []);
 
   useEffect(() => {
     setLoading(true);
-    analyticsFn({ data: { days } })
+    analyticsFn({ data: { days, sinceOverride } })
       .then((d) => setData(d))
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
-  }, [analyticsFn, days]);
+  }, [analyticsFn, days, sinceOverride]);
+
+  const startPeriod = async (period_type: "week" | "month" | "year" | "custom", started_at?: string) => {
+    try {
+      await createCheckpoint({ data: { period_type, started_at, label: period_type === "custom" ? `From ${started_at?.slice(0,10)}` : `New ${period_type}` } });
+      toast.success(`Revenue reset — tracking from new ${period_type}. History preserved.`);
+      await reloadCheckpoints();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
 
   if (loading || !data) {
     return <div className="py-16 text-center text-muted-foreground">Loading analytics…</div>;
   }
+
 
   const t = data.totals;
   const daily = data.daily.map((d: any) => ({
@@ -141,6 +170,87 @@ function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      <Card className="mt-6 border-primary/30">
+        <CardContent className="p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Reset</h2>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Start a new tracking period from $0. Previous records are preserved in history and remain in the database.
+              </p>
+              {active ? (
+                <p className="mt-2 text-sm">
+                  <span className="font-medium">Active checkpoint:</span>{" "}
+                  {active.label ?? active.period_type} — since{" "}
+                  {new Date(active.started_at).toLocaleString()}
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">No active checkpoint — showing last {days} days.</p>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => startPeriod("week")}>Start new week</Button>
+              <Button size="sm" variant="outline" onClick={() => startPeriod("month")}>Start new month</Button>
+              <Button size="sm" variant="outline" onClick={() => startPeriod("year")}>Start new year</Button>
+              {active && (
+                <Button size="sm" variant="ghost" onClick={async () => {
+                  await setActive({ data: { id: null } });
+                  toast.success("Reverted to rolling range");
+                  reloadCheckpoints();
+                }}>Clear</Button>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t pt-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Custom start date</label>
+              <Input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="h-9 w-44" />
+            </div>
+            <Button size="sm" variant="outline" disabled={!customDate}
+              onClick={() => startPeriod("custom", new Date(customDate + "T00:00:00").toISOString())}>
+              Start from date
+            </Button>
+          </div>
+          {checkpoints.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">History</p>
+              <div className="max-h-52 overflow-y-auto divide-y rounded border">
+                {checkpoints.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between gap-2 p-2 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
+                        {c.label ?? c.period_type}
+                        {c.active && <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">Active</span>}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {c.period_type} · started {new Date(c.started_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      {!c.active && (
+                        <Button size="icon" variant="ghost" title="Activate"
+                          onClick={async () => { await setActive({ data: { id: c.id } }); toast.success("Checkpoint activated"); reloadCheckpoints(); }}>
+                          <Play className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" title="Delete"
+                        onClick={async () => { await delCheckpoint({ data: { id: c.id } }); toast.success("Deleted"); reloadCheckpoints(); }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
 
       <Card className="mt-6">
         <CardContent className="p-5">

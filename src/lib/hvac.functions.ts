@@ -1080,12 +1080,24 @@ export const adminListReviewAudit = createServerFn({ method: "POST" })
 // ---------- Admin analytics ----------
 export const adminAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { days?: number }) => ({ days: Math.min(Math.max(d.days ?? 30, 7), 180) }))
+  .inputValidator((d: { days?: number; sinceOverride?: string | null }) => ({
+    days: Math.min(Math.max(d.days ?? 30, 7), 180),
+    sinceOverride: d.sinceOverride ?? null,
+  }))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const since = new Date();
-    since.setDate(since.getDate() - data.days);
-    const sinceIso = since.toISOString();
+    const rangeSince = new Date();
+    rangeSince.setDate(rangeSince.getDate() - data.days);
+    const effective =
+      data.sinceOverride && new Date(data.sinceOverride) > rangeSince
+        ? new Date(data.sinceOverride)
+        : rangeSince;
+    const sinceIso = effective.toISOString();
+    const daysSpan = Math.max(
+      1,
+      Math.ceil((Date.now() - effective.getTime()) / 86400000),
+    );
+
 
     const [ordersRes, bookingsRes, reviewsRes, servicesRes] = await Promise.all([
       context.supabase.from("orders")
@@ -1106,11 +1118,12 @@ export const adminAnalytics = createServerFn({ method: "POST" })
 
     // Daily buckets
     const days: { date: string; orderRevenue: number; serviceRevenue: number; orders: number; bookings: number }[] = [];
-    for (let i = data.days - 1; i >= 0; i--) {
+    for (let i = daysSpan - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       days.push({ date: d.toISOString().slice(0, 10), orderRevenue: 0, serviceRevenue: 0, orders: 0, bookings: 0 });
     }
+
     const idx = new Map(days.map((d, i) => [d.date, i]));
     for (const o of orders) {
       const k = String(o.created_at).slice(0, 10);
@@ -1160,7 +1173,7 @@ export const adminAnalytics = createServerFn({ method: "POST" })
     const avgRating = reviewCount ? reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount : 0;
 
     return {
-      range: { days: data.days, since: sinceIso },
+      range: { days: daysSpan, since: sinceIso, checkpointApplied: !!data.sinceOverride },
       totals: {
         totalRevenue, orderRevenue, serviceRevenue,
         orderCount: orders.length, bookingCount: bookings.length,
@@ -1174,6 +1187,80 @@ export const adminAnalytics = createServerFn({ method: "POST" })
       topServices,
     };
   });
+
+// ---------- Revenue checkpoints (reset-from-zero markers, history preserved) ----------
+export const adminListCheckpoints = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase
+      .from("revenue_checkpoints")
+      .select("*")
+      .order("started_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const adminCreateCheckpoint = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period_type: "week" | "month" | "year" | "custom"; started_at?: string; label?: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const now = new Date();
+    let started = data.started_at ? new Date(data.started_at) : now;
+    if (!data.started_at) {
+      if (data.period_type === "week") {
+        const day = started.getDay();
+        started = new Date(started.getFullYear(), started.getMonth(), started.getDate() - day);
+      } else if (data.period_type === "month") {
+        started = new Date(started.getFullYear(), started.getMonth(), 1);
+      } else if (data.period_type === "year") {
+        started = new Date(started.getFullYear(), 0, 1);
+      }
+    }
+    await context.supabase.from("revenue_checkpoints").update({ active: false }).eq("active", true);
+    const { data: row, error } = await context.supabase
+      .from("revenue_checkpoints")
+      .insert({
+        period_type: data.period_type,
+        started_at: started.toISOString(),
+        label: data.label ?? null,
+        active: true,
+        created_by: context.userId,
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const adminSetCheckpointActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    await context.supabase.from("revenue_checkpoints").update({ active: false }).eq("active", true);
+    if (data.id) {
+      const { error } = await context.supabase
+        .from("revenue_checkpoints")
+        .update({ active: true })
+        .eq("id", data.id);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const adminDeleteCheckpoint = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("revenue_checkpoints").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 // ---------- Capacity conflict inbox ----------
 export const adminListConflicts = createServerFn({ method: "POST" })
