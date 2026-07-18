@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { formatMoney } from "@/data/products";
-import { DynamicIcon } from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ProductGallery } from "@/components/ProductGallery";
+import type { MediaItem } from "@/lib/product-image";
 
 export const Route = createFileRoute("/_site/shop/$slug")({
   head: ({ params }) => ({
@@ -24,7 +25,7 @@ type P = {
   price: number; installation_fee: number;
   seer: number | null; capacity_btu: number | null; hspf: number | null;
   description: string; features: string[]; tag: string | null; available: boolean;
-  image_url: string | null; resolved_image: string | null;
+  image_url: string | null; media: MediaItem[];
 };
 
 function ProductDetail() {
@@ -37,20 +38,15 @@ function ProductDetail() {
     queryFn: async () => {
       const [main, others] = await Promise.all([
         supabase.from("products")
-          .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,description,features,tag,available,image_url")
+          .select("slug,name,brand,category,price,installation_fee,seer,capacity_btu,hspf,description,features,tag,available,image_url,media")
           .eq("slug", slug).eq("published", true).maybeSingle(),
         supabase.from("products").select("slug,name,brand,price,category").eq("published", true).neq("slug", slug).limit(6),
       ]);
       if (main.error) throw main.error;
-      let resolved: string | null = null;
-      if (main.data?.image_url) {
-        const { resolveProductImageUrl } = await import("@/lib/product-image");
-        resolved = await resolveProductImageUrl(main.data.image_url);
-      }
       const p = main.data ? {
         ...main.data,
         features: Array.isArray(main.data.features) ? main.data.features as string[] : [],
-        resolved_image: resolved,
+        media: Array.isArray((main.data as any).media) ? (main.data as any).media as MediaItem[] : [],
       } as P : null;
       const related = (others.data ?? []).filter((r: any) => r.category === (p?.category ?? "")).slice(0, 3);
       return { p, related };
@@ -72,6 +68,7 @@ function ProductDetail() {
   const p = data.p;
   const price = Number(p.price);
   const install = Number(p.installation_fee);
+  const emptyIcon = p.category === "furnace" ? "Flame" : p.category === "thermostat" ? "Thermometer" : p.category === "filter" ? "Filter" : "Snowflake";
 
   return (
     <>
@@ -80,19 +77,10 @@ function ProductDetail() {
           <ArrowLeft className="h-4 w-4" /> Back to shop
         </Link>
         <div className="grid gap-10 md:grid-cols-2">
-          <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated">
-            {p.resolved_image ? (
-              <img src={p.resolved_image} alt={p.name} className="h-full w-full object-cover" />
-            ) : (
-              <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-                <DynamicIcon
-                  name={p.category === "furnace" ? "Flame" : p.category === "thermostat" ? "Thermometer" : p.category === "filter" ? "Filter" : "Snowflake"}
-                  className="h-40 w-40 opacity-90"
-                />
-              </div>
-            )}
+          <div className="relative">
+            <ProductGallery media={p.media} fallbackImage={p.image_url} name={p.name} emptyIcon={emptyIcon} />
             {p.tag && (
-              <span className="absolute left-4 top-4 rounded-full bg-[color:var(--ember)] px-3 py-1 text-xs font-semibold text-[color:var(--ember-foreground)]">
+              <span className="absolute left-4 top-4 z-10 rounded-full bg-[color:var(--ember)] px-3 py-1 text-xs font-semibold text-[color:var(--ember-foreground)]">
                 {p.tag}
               </span>
             )}
