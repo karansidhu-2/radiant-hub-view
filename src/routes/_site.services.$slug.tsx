@@ -29,6 +29,7 @@ type Svc = {
 function ServiceDetail() {
   const { slug } = Route.useParams();
 
+  const reviewsFn = useServerFn(listServiceReviews);
   const { data, isLoading } = useQuery({
     queryKey: ["service", slug],
     queryFn: async () => {
