@@ -102,21 +102,20 @@ function BookPage() {
     setForm((f) => ({ ...f, service_slug: s.slug, service_name: s.name }));
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const runBooking = async (override?: { scheduled_date: string; scheduled_hour: number }) => {
     if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
+    const payload = { ...form, ...(override ?? {}), notes: form.notes || null };
     setBusy(true);
     setCapacityConflict(null);
     setAlternatives([]);
     try {
-      const res = await bookFn({ data: { ...form, notes: form.notes || null } });
+      const res = await bookFn({ data: payload });
       toast.success("Booking confirmed!");
       navigate({ to: "/confirmation/$kind/$ref", params: { kind: "booking", ref: res.reference } });
     } catch (err: any) {
       const msg = err?.message || "Failed to book";
       if (/fully booked|capacity/i.test(msg)) {
         setCapacityConflict("That time slot just filled up (crew capacity reached). Pick one of the suggested alternatives below, or choose another time.");
-        // parse alternatives if present
         const marker = msg.indexOf("||ALTS||");
         if (marker >= 0) {
           try {
@@ -124,13 +123,16 @@ function BookPage() {
             if (Array.isArray(alts)) setAlternatives(alts);
           } catch { /* ignore */ }
         }
-        bookedFn({ data: { date: form.scheduled_date } }).then((r) => setBookedHours(r.hours)).catch(() => {});
+        bookedFn({ data: { date: payload.scheduled_date } }).then((r) => setBookedHours(r.hours)).catch(() => {});
         toast.error("Slot is at crew capacity — pick another time");
       } else {
         toast.error(msg);
       }
     } finally { setBusy(false); }
   };
+
+  const submit = (e: React.FormEvent) => { e.preventDefault(); runBooking(); };
+
 
 
   if (authed === false) {
