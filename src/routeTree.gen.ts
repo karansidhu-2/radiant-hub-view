@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
 import { Route as AuthenticatedAdminBookingsRouteImport } from './routes/_authenticated.admin.bookings'
 import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated.admin.admins'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
 
 const SiteRoute = SiteRouteImport.update({
@@ -147,6 +148,11 @@ const AuthenticatedAdminAdminsRoute =
     path: '/admins',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
   id: '/confirmation/$kind/$ref',
   path: '/confirmation/$kind/$ref',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof SiteContactRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/contact': typeof SiteContactRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/_site/services': typeof SiteServicesRouteWithChildren
   '/_site/shop': typeof SiteShopRouteWithChildren
   '/_site/': typeof SiteIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/_authenticated/admin/bookings': typeof AuthenticatedAdminBookingsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/services'
     | '/shop'
+    | '/.lovable/oauth/consent'
     | '/admin/admins'
     | '/admin/bookings'
     | '/admin/orders'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/services'
     | '/shop'
+    | '/.lovable/oauth/consent'
     | '/admin/admins'
     | '/admin/bookings'
     | '/admin/orders'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/_site/services'
     | '/_site/shop'
     | '/_site/'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/admin/admins'
     | '/_authenticated/admin/bookings'
     | '/_authenticated/admin/orders'
@@ -300,6 +312,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SiteRoute: typeof SiteRouteWithChildren
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_site/confirmation/$kind/$ref': {
       id: '/_site/confirmation/$kind/$ref'
       path: '/confirmation/$kind/$ref'
@@ -559,6 +579,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SiteRoute: SiteRouteWithChildren,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
