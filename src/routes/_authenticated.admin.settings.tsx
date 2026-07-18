@@ -21,12 +21,14 @@ type S = {
   notify_email_enabled: boolean; notify_sms_enabled: boolean;
   notify_on_reschedule: boolean; notify_on_status_change: boolean;
   twilio_from_phone: string; technicians: string[];
+  crew_capacity_enabled: boolean; crew_capacity: number;
 };
 
 const empty: S = {
   company_name: "", tagline: "", support_phone: "", support_email: "", address: "", business_hours: "", emergency_phone: "",
   notify_email_enabled: true, notify_sms_enabled: false, notify_on_reschedule: true, notify_on_status_change: true,
   twilio_from_phone: "", technicians: [],
+  crew_capacity_enabled: false, crew_capacity: 1,
 };
 
 function SettingsPage() {
@@ -38,7 +40,7 @@ function SettingsPage() {
 
   useEffect(() => {
     supabase.from("site_settings")
-      .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians")
+      .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians,crew_capacity_enabled,crew_capacity")
       .eq("singleton", true).maybeSingle()
       .then(({ data }) => { if (data) setForm({ ...empty, ...data } as S); setLoading(false); });
   }, []);
