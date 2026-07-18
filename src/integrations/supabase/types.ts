@@ -402,6 +402,45 @@ export type Database = {
           },
         ]
       }
+      saved_addresses: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          state: string
+          street: string
+          updated_at: string
+          user_id: string
+          zip: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          state: string
+          street: string
+          updated_at?: string
+          user_id: string
+          zip: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          state?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+          zip?: string
+        }
+        Relationships: []
+      }
       service_areas: {
         Row: {
           active: boolean

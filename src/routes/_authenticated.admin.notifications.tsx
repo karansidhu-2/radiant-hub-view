@@ -198,19 +198,49 @@ function NotificationsPage() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">Available variables</CardTitle></CardHeader>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Variable helper</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Click a placeholder to copy. These are the exact example values used in the previews on the right.
+              </p>
+            </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-1.5">
-                {TEMPLATE_VARIABLES.map((v) => (
-                  <button key={v} type="button"
-                    onClick={() => navigator.clipboard?.writeText(`{{${v}}}`)}
-                    className="rounded border border-border bg-secondary px-2 py-1 font-mono text-[11px] hover:bg-accent"
-                    title="Click to copy">
-                    {`{{${v}}}`}
-                  </button>
-                ))}
+              <div className="overflow-hidden rounded-md border border-border">
+                <table className="w-full text-xs">
+                  <thead className="bg-secondary/60 text-muted-foreground">
+                    <tr>
+                      <th className="px-2 py-1.5 text-left font-medium">Placeholder</th>
+                      <th className="px-2 py-1.5 text-left font-medium">Example value (used in preview)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TEMPLATE_VARIABLES.map((v) => (
+                      <tr key={v} className="border-t border-border/70">
+                        <td className="px-2 py-1.5 align-top">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(`{{${v}}}`);
+                              toast.success(`Copied {{${v}}}`);
+                            }}
+                            className="rounded border border-border bg-secondary px-2 py-0.5 font-mono text-[11px] hover:bg-accent"
+                            title="Click to copy"
+                          >
+                            {`{{${v}}}`}
+                          </button>
+                        </td>
+                        <td className="break-all px-2 py-1.5 font-mono text-[11px] text-foreground/90">
+                          {(vars as any)[v]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Click a variable to copy. Missing values render as "—".</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Missing values render as "—" in real messages. <span className="font-medium text-foreground">company_name</span> and{" "}
+                <span className="font-medium text-foreground">support_phone</span> come from Site Settings; the rest come from the booking.
+              </p>
             </CardContent>
           </Card>
         </div>

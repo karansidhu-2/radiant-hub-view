@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, Wind, X } from "lucide-react";
+import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, User as UserIcon, Wind, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -62,6 +62,9 @@ export function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link to="/account" className="hidden md:block" title="My account">
+                <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
+              </Link>
               <Link to="/admin" className="hidden md:block" title="Admin">
                 <Button variant="outline" size="icon"><Shield className="h-4 w-4" /></Button>
               </Link>
@@ -107,6 +110,9 @@ export function SiteHeader() {
             </a>
             {user ? (
               <>
+                <Link to="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  <UserIcon className="h-4 w-4" /> My account
+                </Link>
                 <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
                   <Shield className="h-4 w-4" /> Admin panel
                 </Link>
