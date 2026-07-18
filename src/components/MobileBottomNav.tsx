@@ -28,14 +28,16 @@ export function MobileBottomNav() {
             <li key={n.to} className="flex">
               <Link
                 to={n.to}
-                className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition-colors ${
+                aria-label={n.to === "/cart" && hydrated && count > 0 ? `${n.label}, ${count} item${count === 1 ? "" : "s"}` : n.label}
+                aria-current={active ? "page" : undefined}
+                className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
                 <span>{n.label}</span>
                 {n.to === "/cart" && hydrated && count > 0 && (
-                  <span className="absolute right-3 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[color:var(--ember)] px-1 text-[10px] font-bold text-[color:var(--ember-foreground)]">
+                  <span aria-hidden="true" className="absolute right-3 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[color:var(--ember)] px-1 text-[10px] font-bold text-[color:var(--ember-foreground)]">
                     {count}
                   </span>
                 )}
@@ -47,9 +49,10 @@ export function MobileBottomNav() {
           <Link
             to="/book"
             search={{ service: undefined }}
-            className="mx-1 my-1.5 flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg gradient-cool text-[11px] font-semibold text-primary-foreground shadow-soft active:opacity-90"
+            aria-label="Book a service"
+            className="mx-1 my-1.5 flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg gradient-cool text-[11px] font-semibold text-primary-foreground shadow-soft transition-opacity active:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <CalendarPlus className="h-5 w-5" strokeWidth={2.4} />
+            <CalendarPlus className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
             <span>Book</span>
           </Link>
         </li>
