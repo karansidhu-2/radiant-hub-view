@@ -24,13 +24,27 @@ export const getBookedSlots = createServerFn({ method: "POST" })
   .inputValidator((d: { date: string }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin
-      .from("bookings")
-      .select("scheduled_hour")
-      .eq("scheduled_date", data.date)
-      .neq("status", "cancelled");
-    return { hours: (rows ?? []).map((r) => r.scheduled_hour) };
+    const [{ data: rows }, { data: settings }] = await Promise.all([
+      supabaseAdmin
+        .from("bookings")
+        .select("scheduled_hour")
+        .eq("scheduled_date", data.date)
+        .neq("status", "cancelled"),
+      supabaseAdmin
+        .from("site_settings")
+        .select("crew_capacity_enabled, crew_capacity")
+        .eq("singleton", true)
+        .maybeSingle(),
+    ]);
+    const capacity = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    const counts: Record<number, number> = {};
+    for (const r of rows ?? []) counts[r.scheduled_hour] = (counts[r.scheduled_hour] ?? 0) + 1;
+    const hours = Object.entries(counts)
+      .filter(([, c]) => c >= capacity)
+      .map(([h]) => Number(h));
+    return { hours, counts, capacity };
   });
+
 
 // ---------- Create booking ----------
 const bookingSchema = z.object({
@@ -56,6 +70,18 @@ export const createBooking = createServerFn({ method: "POST" })
     const { data: area } = await context.supabase
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
+
+    // enforce crew capacity per slot
+    const { data: settings } = await context.supabase
+      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
+    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    const { count } = await context.supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("scheduled_date", data.scheduled_date)
+      .eq("scheduled_hour", data.scheduled_hour)
+      .neq("status", "cancelled");
+    if ((count ?? 0) >= cap) throw new Error("That time slot is fully booked. Please pick another.");
 
     const { data: row, error } = await context.supabase
       .from("bookings")
@@ -427,6 +453,7 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     notify_email_enabled?: boolean; notify_sms_enabled?: boolean;
     notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
     twilio_from_phone?: string; technicians?: string[];
+    crew_capacity_enabled?: boolean; crew_capacity?: number;
     notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string }>;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -434,6 +461,10 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     const patch: any = { ...data };
     if (Array.isArray(patch.technicians)) {
       patch.technicians = patch.technicians.map((t: string) => String(t).trim()).filter(Boolean).slice(0, 100);
+    }
+    if (patch.crew_capacity != null) {
+      const n = Math.floor(Number(patch.crew_capacity));
+      patch.crew_capacity = Math.min(50, Math.max(1, Number.isFinite(n) ? n : 1));
     }
     if (patch.notification_templates && typeof patch.notification_templates === "object") {
       const allowed = ["pending", "confirmed", "completed", "cancelled", "rescheduled"];

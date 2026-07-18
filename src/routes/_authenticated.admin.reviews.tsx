@@ -99,16 +99,27 @@ function AdminReviews() {
     onSuccess: (res, action) => {
       toast.success(`${action.replace("_", " ")}: ${res.count} review(s)`);
       setSelected(new Set()); invalidate();
+      setBulkConfirm(null); setBulkAck(false);
     },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
 
-  const runBulk = (action: "approve" | "hide" | "delete" | "clear_reply") => {
+  type BulkAction = "approve" | "hide" | "delete" | "clear_reply";
+  const [bulkConfirm, setBulkConfirm] = useState<BulkAction | null>(null);
+  const [bulkAck, setBulkAck] = useState(false);
+  const openBulk = (action: BulkAction) => {
     if (!selected.size) return;
-    if ((action === "delete" || action === "clear_reply") &&
-      !confirm(`${action === "delete" ? "Delete" : "Clear replies from"} ${selected.size} review(s)?`)) return;
-    bulkMut.mutate(action);
+    setBulkAck(false);
+    setBulkConfirm(action);
   };
+
+  const BULK_META: Record<BulkAction, { title: string; verb: string; body: string; destructive: boolean; ack: string }> = {
+    approve:     { title: "Approve reviews",   verb: "Approve",      body: "These reviews will be published and visible to customers.",   destructive: false, ack: "I want to publish these reviews." },
+    hide:        { title: "Hide reviews",      verb: "Hide",         body: "These reviews will be hidden from public service pages.",     destructive: false, ack: "I want to hide these reviews." },
+    clear_reply: { title: "Clear replies",     verb: "Clear replies", body: "Public admin replies on these reviews will be removed. Ratings and comments stay.", destructive: false, ack: "I want to clear the public replies." },
+    delete:      { title: "Delete reviews",    verb: "Delete",       body: "These reviews will be permanently deleted. This cannot be undone.", destructive: true, ack: "I understand this permanently deletes the selected reviews." },
+  };
+
 
   return (
     <div className="space-y-4">
@@ -158,19 +169,19 @@ function AdminReviews() {
             </label>
             <div className="ml-auto flex flex-wrap gap-1.5">
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("approve")}>
+                onClick={() => openBulk("approve")}>
                 <Eye className="mr-1 h-3.5 w-3.5" />Approve
               </Button>
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("hide")}>
+                onClick={() => openBulk("hide")}>
                 <EyeOff className="mr-1 h-3.5 w-3.5" />Hide
               </Button>
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("clear_reply")}>
+                onClick={() => openBulk("clear_reply")}>
                 <MessageSquareOff className="mr-1 h-3.5 w-3.5" />Clear replies
               </Button>
               <Button size="sm" variant="outline" className="text-destructive hover:text-destructive"
-                disabled={!selected.size || bulkMut.isPending} onClick={() => runBulk("delete")}>
+                disabled={!selected.size || bulkMut.isPending} onClick={() => openBulk("delete")}>
                 <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
               </Button>
             </div>
@@ -257,6 +268,42 @@ function AdminReviews() {
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
             <Button onClick={() => replyMut.mutate()} disabled={replyMut.isPending}>{replyMut.isPending ? "Saving…" : "Save"}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); } }}>
+        <DialogContent>
+          {bulkConfirm && (
+            <>
+              <DialogHeader>
+                <DialogTitle className={BULK_META[bulkConfirm].destructive ? "text-destructive" : ""}>
+                  {BULK_META[bulkConfirm].title}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className={`rounded-md border p-3 ${BULK_META[bulkConfirm].destructive ? "border-destructive/40 bg-destructive/5" : "border-border bg-secondary/40"}`}>
+                  <p className="text-sm">
+                    You are about to <span className="font-semibold">{BULK_META[bulkConfirm].verb.toLowerCase()}</span>{" "}
+                    <span className="font-semibold">{selected.size}</span> review{selected.size === 1 ? "" : "s"}.
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{BULK_META[bulkConfirm].body}</p>
+                </div>
+                <label className="flex items-start gap-2 rounded-md border border-border p-3 text-sm">
+                  <Checkbox checked={bulkAck} onCheckedChange={(v) => setBulkAck(v === true)} className="mt-0.5" />
+                  <span>{BULK_META[bulkConfirm].ack}</span>
+                </label>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); }}>Cancel</Button>
+                <Button
+                  variant={BULK_META[bulkConfirm].destructive ? "destructive" : "default"}
+                  disabled={!bulkAck || bulkMut.isPending}
+                  onClick={() => bulkMut.mutate(bulkConfirm)}>
+                  {bulkMut.isPending ? "Applying…" : `${BULK_META[bulkConfirm].verb} ${selected.size}`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
