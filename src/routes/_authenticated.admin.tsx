@@ -79,9 +79,9 @@ function AdminLayout() {
           </div>
         </div>
       </div>
-      <div className="mx-auto grid max-w-7xl gap-6 px-3 py-5 md:grid-cols-[220px_1fr] md:px-6 md:py-6">
-        <aside className="md:sticky md:top-4 md:self-start">
-          <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0">
+      <div className="mx-auto grid max-w-7xl gap-6 px-3 py-5 md:grid-cols-[220px_minmax(0,1fr)] md:px-6 md:py-6">
+        <aside className="min-w-0 max-w-full overflow-hidden md:sticky md:top-4 md:self-start md:overflow-visible">
+          <nav className="-mx-3 flex gap-1 overflow-x-auto px-3 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0">
             {nav.map((n) => {
               const active = n.exact ? path === n.to : path.startsWith(n.to);
               return (
@@ -93,7 +93,7 @@ function AdminLayout() {
             })}
           </nav>
         </aside>
-        <main className="min-w-0"><CapacityAlerts /><Outlet /></main>
+        <main className="min-w-0 max-w-full overflow-x-hidden"><CapacityAlerts /><Outlet /></main>
       </div>
     </div>
   );
