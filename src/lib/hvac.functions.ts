@@ -304,7 +304,7 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (row && (data.status === "confirmed" || data.status === "completed")) {
       const { sendBookingStatusEmail } = await import("./booking-email.server");
-      await sendBookingStatusEmail(row, data.status).catch((e) => console.error("booking email failed", e));
+      await sendBookingStatusEmail(row, data.status).catch((e: unknown) => console.error("booking email failed", e));
     }
     return { ok: true };
   });
