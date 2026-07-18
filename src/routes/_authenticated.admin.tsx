@@ -25,6 +25,7 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
   { to: "/admin/admins", label: "Admins", icon: UserCog },
+  { to: "/admin/audit", label: "Audit log", icon: ScrollText },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
 ];
 
