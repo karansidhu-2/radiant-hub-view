@@ -463,7 +463,18 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
         }
       }
       const alts = suggestions.slice(0, 6);
+      await supabaseAdmin.from("capacity_conflicts").insert({
+        scheduled_date: data.scheduled_date,
+        scheduled_hour: data.scheduled_hour,
+        capacity: cap,
+        count: (count ?? 0) + 1,
+        source: "reschedule",
+        note: `Reschedule blocked for booking ${data.id.slice(0, 8)}`,
+        booking_id: data.id,
+        created_by: context.userId,
+      }).then(() => {}, () => {});
       throw new Error(`That time slot is fully booked (crew capacity reached). Pick another.||ALTS||${JSON.stringify(alts)}`);
+
     }
     const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
     if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
