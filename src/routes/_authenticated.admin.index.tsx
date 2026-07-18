@@ -74,10 +74,49 @@ function AdminDashboard() {
       .finally(() => setLoading(false));
   }, [analyticsFn, days, sinceOverride]);
 
+  const buildClosingReport = (label: string) => {
+    if (!data) return;
+    const t = data.totals;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const sinceLabel = data.range?.since ? new Date(data.range.since).toISOString().slice(0, 10) : "start";
+    const lines: string[] = [];
+    lines.push(`Period Report — ${label}`);
+    lines.push(`Period,${sinceLabel} to ${stamp}`);
+    lines.push(`Days,${data.range?.days ?? ""}`);
+    lines.push("");
+    lines.push("KPI,Value");
+    const kpiMap: [string, any][] = [
+      ["Total revenue", t.totalRevenue], ["Order revenue", t.orderRevenue],
+      ["Service revenue", t.serviceRevenue], ["Orders", t.orderCount],
+      ["Bookings", t.bookingCount], ["Completed", t.completed],
+      ["Cancelled", t.cancelled], ["Completion rate (%)", Number(t.conversion.toFixed(2))],
+      ["Average order value", Number(t.aov.toFixed(2))],
+      ["Average service charge", Number(t.avgTicket.toFixed(2))],
+      ["Unique customers", t.uniqueCustomers], ["Repeat customers", t.repeatCustomers],
+      ["Reviews", t.reviewCount], ["Avg rating", Number((t.avgRating || 0).toFixed(2))],
+    ];
+    for (const [k, v] of kpiMap) lines.push(`${csvEscape(k)},${csvEscape(v)}`);
+    lines.push("");
+    lines.push("Daily trend");
+    lines.push("date,orders,order_revenue,bookings,service_revenue,total_revenue");
+    for (const d of data.daily) lines.push([d.date, d.orders, d.orderRevenue, d.bookings, d.serviceRevenue, d.orderRevenue + d.serviceRevenue].map(csvEscape).join(","));
+    lines.push("");
+    lines.push("Top services");
+    lines.push("service,slug,bookings,revenue");
+    for (const s of data.topServices) lines.push([s.name, s.slug ?? "", s.bookings, s.revenue].map(csvEscape).join(","));
+    lines.push("");
+    lines.push("Booking status counts");
+    lines.push("status,count");
+    for (const [k, v] of Object.entries(data.statusCounts)) lines.push(`${csvEscape(k)},${csvEscape(v as any)}`);
+    downloadCsv(`period_report_${label.replace(/\s+/g, "_")}_${stamp}.csv`, lines.join("\n"));
+  };
+
   const startPeriod = async (period_type: "week" | "month" | "year" | "custom", started_at?: string) => {
     try {
+      const closingLabel = active ? (active.label ?? active.period_type) : `last_${days}d`;
+      buildClosingReport(closingLabel);
       await createCheckpoint({ data: { period_type, started_at, label: period_type === "custom" ? `From ${started_at?.slice(0,10)}` : `New ${period_type}` } });
-      toast.success(`Revenue reset — tracking from new ${period_type}. History preserved.`);
+      toast.success(`New ${period_type} started — all metrics reset to 0. Closing report downloaded. History preserved.`);
       await reloadCheckpoints();
     } catch (e: any) { toast.error(e?.message ?? "Failed"); }
   };
