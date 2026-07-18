@@ -58,8 +58,10 @@ function ConfirmationPage() {
   const { kind, ref } = Route.useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const getBooking = useServerFn(getBookingByRef);
   const getOrder = useServerFn(getOrderByRef);
+  const claimFn = useServerFn(claimGuestRecords);
 
   const load = async () => {
     setLoading(true);
@@ -68,6 +70,20 @@ function ConfirmationPage() {
     setLoading(false);
   };
   useEffect(() => { load(); }, [kind, ref]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+  }, []);
+
+  // If the guest signs in later, auto-claim their guest records by email.
+  useEffect(() => {
+    if (!authed || !data || data.user_id) return;
+    claimFn({}).then((r) => {
+      if ((r?.bookings ?? 0) + (r?.orders ?? 0) > 0) load();
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, data?.user_id]);
+
 
   if (loading) return <div className="p-16 text-center text-muted-foreground">Loading…</div>;
   if (!data) return <div className="p-16 text-center">
