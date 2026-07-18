@@ -302,9 +302,12 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    if (row && (data.status === "confirmed" || data.status === "completed")) {
-      const { sendBookingStatusEmail } = await import("./booking-email.server");
-      await sendBookingStatusEmail(row, data.status).catch((e: unknown) => console.error("booking email failed", e));
+    const kinds = ["pending", "confirmed", "completed", "cancelled"] as const;
+    if (row && (kinds as readonly string[]).includes(data.status)) {
+      const { notifyBookingEvent } = await import("./booking-email.server");
+      await notifyBookingEvent(row as any, data.status as any).catch((e) =>
+        console.error("booking notification failed", e),
+      );
     }
     return { ok: true };
   });
@@ -325,22 +328,48 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminSetBookingTechnician = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; technician: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const tech = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { error } = await context.supabase
+      .from("bookings")
+      .update({ technician: tech })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const adminRescheduleBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; scheduled_date: string; scheduled_hour: number }) => d)
+  .inputValidator((d: { id: string; scheduled_date: string; scheduled_hour: number; technician?: string | null }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(data.scheduled_date)) throw new Error("Invalid date");
     if (!Number.isInteger(data.scheduled_hour) || data.scheduled_hour < 8 || data.scheduled_hour > 18) {
       throw new Error("Hour must be between 8 and 18");
     }
-    const { error } = await context.supabase
+    const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
+    if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { data: row, error } = await context.supabase
       .from("bookings")
-      .update({ scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour })
-      .eq("id", data.id);
+      .update(patch)
+      .eq("id", data.id)
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
+    if (row) {
+      const { notifyBookingEvent } = await import("./booking-email.server");
+      await notifyBookingEvent(row as any, "rescheduled").catch((e) =>
+        console.error("booking notification failed", e),
+      );
+    }
     return { ok: true };
   });
+
+
 
 
 export const adminListOrders = createServerFn({ method: "GET" })
@@ -395,16 +424,24 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
   .inputValidator((d: {
     company_name: string; tagline: string; support_phone: string;
     support_email: string; address: string; business_hours: string; emergency_phone: string;
+    notify_email_enabled?: boolean; notify_sms_enabled?: boolean;
+    notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
+    twilio_from_phone?: string; technicians?: string[];
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const patch: any = { ...data };
+    if (Array.isArray(patch.technicians)) {
+      patch.technicians = patch.technicians.map((t: string) => String(t).trim()).filter(Boolean).slice(0, 100);
+    }
     const { error } = await context.supabase
       .from("site_settings")
-      .update(data)
+      .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 
 // ---------- Reviews ----------
