@@ -137,6 +137,12 @@ function ServiceDetail() {
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p>
                   {r.comment && <p className="mt-2 text-sm">{r.comment}</p>}
+                  {r.admin_reply && (
+                    <div className="mt-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                      <p className="text-xs font-semibold uppercase text-primary">Response from the team</p>
+                      <p className="mt-1">{r.admin_reply}</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

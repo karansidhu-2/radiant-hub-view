@@ -6,12 +6,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DollarSign, ShoppingBag, Calendar, TrendingUp, Users, Star,
-  CheckCircle2, XCircle, Repeat, Wrench,
+  CheckCircle2, XCircle, Repeat, Wrench, Download,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
+
+function csvEscape(v: any) {
+  const s = v == null ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function toCsv(rows: (string | number)[][]) {
+  return rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+}
+function downloadCsv(name: string, content: string) {
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -66,12 +82,48 @@ function AdminDashboard() {
           <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
           <p className="text-sm text-muted-foreground">Overview of the last {days} days.</p>
         </div>
-        <div className="flex flex-wrap gap-1">
-          {RANGES.map((r) => (
-            <Button key={r} size="sm" variant={r === days ? "default" : "outline"} onClick={() => setDays(r)}>
-              {r}d
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-1">
+            {RANGES.map((r) => (
+              <Button key={r} size="sm" variant={r === days ? "default" : "outline"} onClick={() => setDays(r)}>
+                {r}d
+              </Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1 border-l border-border pl-2">
+            <Button size="sm" variant="outline" onClick={() => {
+              const rows: (string | number)[][] = [["Metric", "Value"]];
+              const map: [string, any][] = [
+                ["Range (days)", days],
+                ["Total revenue", t.totalRevenue],
+                ["Order revenue", t.orderRevenue],
+                ["Service revenue", t.serviceRevenue],
+                ["Orders", t.orderCount],
+                ["Bookings", t.bookingCount],
+                ["Completed", t.completed],
+                ["Cancelled", t.cancelled],
+                ["Completion rate (%)", Number(t.conversion.toFixed(2))],
+                ["Average order value", Number(t.aov.toFixed(2))],
+                ["Average service charge", Number(t.avgTicket.toFixed(2))],
+                ["Unique customers", t.uniqueCustomers],
+                ["Repeat customers", t.repeatCustomers],
+                ["Reviews", t.reviewCount],
+                ["Avg rating", Number((t.avgRating || 0).toFixed(2))],
+              ];
+              for (const [k, v] of map) rows.push([k, v]);
+              downloadCsv(`kpis_${days}d_${new Date().toISOString().slice(0,10)}.csv`, toCsv(rows));
+            }}><Download className="mr-1 h-3.5 w-3.5" />KPIs</Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              const rows: (string | number)[][] = [["date","orders","order_revenue","bookings","service_revenue","total_revenue"]];
+              for (const d of data.daily) rows.push([d.date, d.orders, d.orderRevenue, d.bookings, d.serviceRevenue, d.orderRevenue + d.serviceRevenue]);
+              downloadCsv(`revenue_trend_${days}d_${new Date().toISOString().slice(0,10)}.csv`, toCsv(rows));
+            }}><Download className="mr-1 h-3.5 w-3.5" />Revenue</Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              const rows: (string | number)[][] = [["service","slug","bookings","revenue"]];
+              for (const s of data.topServices) rows.push([s.name, s.slug ?? "", s.bookings, s.revenue]);
+              downloadCsv(`top_services_${days}d_${new Date().toISOString().slice(0,10)}.csv`, toCsv(rows));
+            }}><Download className="mr-1 h-3.5 w-3.5" />Top services</Button>
+          </div>
         </div>
       </div>
 

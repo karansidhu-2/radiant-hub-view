@@ -1,0 +1,200 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { adminListReviews, adminSetReviewPublished, adminDeleteReview, adminReplyReview } from "@/lib/hvac.functions";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Star, Eye, EyeOff, Trash2, MessageSquare, Search } from "lucide-react";
+
+export const Route = createFileRoute("/_authenticated/admin/reviews")({
+  component: AdminReviews,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  notFoundComponent: () => <div className="p-6">Not found</div>,
+});
+
+type Review = {
+  id: string; rating: number; comment: string | null; published: boolean;
+  admin_reply: string | null; admin_reply_at: string | null; admin_note: string | null;
+  service_slug: string | null; service_name: string; booking_id: string;
+  user_id: string; created_at: string; author: string; author_email: string;
+};
+
+function Stars({ n }: { n: number }) {
+  return (
+    <span className="inline-flex">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} className={`h-3.5 w-3.5 ${i < n ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
+      ))}
+    </span>
+  );
+}
+
+function AdminReviews() {
+  const list = useServerFn(adminListReviews);
+  const setPub = useServerFn(adminSetReviewPublished);
+  const del = useServerFn(adminDeleteReview);
+  const reply = useServerFn(adminReplyReview);
+  const qc = useQueryClient();
+
+  const [status, setStatus] = useState<"all" | "published" | "hidden">("all");
+  const [q, setQ] = useState("");
+  const { data: reviews = [], isLoading } = useQuery({
+    queryKey: ["admin-reviews", status, q],
+    queryFn: () => list({ data: { status, q } }) as Promise<Review[]>,
+  });
+
+  const [editing, setEditing] = useState<Review | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [noteText, setNoteText] = useState("");
+
+  const openReply = (r: Review) => { setEditing(r); setReplyText(r.admin_reply ?? ""); setNoteText(r.admin_note ?? ""); };
+
+  const stats = useMemo(() => {
+    const total = reviews.length;
+    const pub = reviews.filter((r) => r.published).length;
+    const avg = total ? reviews.reduce((s, r) => s + r.rating, 0) / total : 0;
+    return { total, pub, hidden: total - pub, avg };
+  }, [reviews]);
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+
+  const pubMut = useMutation({
+    mutationFn: (p: { id: string; published: boolean }) => setPub({ data: p }),
+    onSuccess: (_d, v) => { toast.success(v.published ? "Review approved & shown" : "Review hidden"); invalidate(); },
+    onError: (e: any) => toast.error(e?.message || "Failed"),
+  });
+  const delMut = useMutation({
+    mutationFn: (id: string) => del({ data: { id } }),
+    onSuccess: () => { toast.success("Review deleted"); invalidate(); },
+    onError: (e: any) => toast.error(e?.message || "Failed"),
+  });
+  const replyMut = useMutation({
+    mutationFn: async () => {
+      if (!editing) return;
+      await reply({ data: { id: editing.id, reply: replyText.trim() || null, note: noteText.trim() || null } });
+    },
+    onSuccess: () => { toast.success("Response saved"); invalidate(); setEditing(null); },
+    onError: (e: any) => toast.error(e?.message || "Failed"),
+  });
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold">Review Moderation</h1>
+        <p className="text-sm text-muted-foreground">Approve, hide, delete or respond to customer reviews.</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-4">
+        {[
+          { label: "Total", value: stats.total },
+          { label: "Published", value: stats.pub },
+          { label: "Hidden", value: stats.hidden },
+          { label: "Avg rating", value: stats.avg ? stats.avg.toFixed(2) : "—" },
+        ].map((k) => (
+          <Card key={k.label}><CardContent className="p-4">
+            <p className="text-xs uppercase text-muted-foreground">{k.label}</p>
+            <p className="mt-1 text-xl font-bold">{k.value}</p>
+          </CardContent></Card>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-md border border-border p-0.5">
+          {(["all","published","hidden"] as const).map((s) => (
+            <button key={s} onClick={() => setStatus(s)}
+              className={`px-3 py-1 text-sm rounded capitalize ${status === s ? "bg-primary text-primary-foreground" : ""}`}>{s}</button>
+          ))}
+        </div>
+        <div className="relative ml-auto w-full max-w-xs">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search author, service, comment…" className="h-9 pl-8" />
+        </div>
+      </div>
+
+      {isLoading ? (
+        <p className="py-16 text-center text-sm text-muted-foreground">Loading reviews…</p>
+      ) : reviews.length === 0 ? (
+        <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No reviews match this filter.</CardContent></Card>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((r) => (
+            <Card key={r.id} className="card-pop">
+              <CardContent className="p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold">{r.author}</span>
+                      <Stars n={r.rating} />
+                      <Badge variant={r.published ? "default" : "secondary"}>{r.published ? "Published" : "Hidden"}</Badge>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {r.author_email && <span>{r.author_email} · </span>}
+                      {r.service_name} · {new Date(r.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Button size="sm" variant="outline" onClick={() => pubMut.mutate({ id: r.id, published: !r.published })}>
+                      {r.published ? <><EyeOff className="mr-1 h-3.5 w-3.5" />Hide</> : <><Eye className="mr-1 h-3.5 w-3.5" />Approve</>}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => openReply(r)}>
+                      <MessageSquare className="mr-1 h-3.5 w-3.5" />{r.admin_reply ? "Edit reply" : "Reply"}
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-destructive hover:text-destructive"
+                      onClick={() => { if (confirm("Delete this review permanently?")) delMut.mutate(r.id); }}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                {r.comment && <p className="mt-3 whitespace-pre-wrap rounded-md bg-secondary/40 p-3 text-sm">{r.comment}</p>}
+                {r.admin_reply && (
+                  <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                    <p className="text-xs font-semibold uppercase text-primary">Public reply</p>
+                    <p className="mt-1 whitespace-pre-wrap">{r.admin_reply}</p>
+                  </div>
+                )}
+                {r.admin_note && (
+                  <div className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs">
+                    <span className="font-semibold uppercase text-amber-700 dark:text-amber-300">Internal note: </span>{r.admin_note}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Reply to review</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="space-y-3">
+              <div className="rounded-md bg-secondary/40 p-3 text-sm">
+                <div className="flex items-center gap-2"><span className="font-semibold">{editing.author}</span><Stars n={editing.rating} /></div>
+                {editing.comment && <p className="mt-1 text-xs">{editing.comment}</p>}
+              </div>
+              <div>
+                <label className="text-xs font-medium">Public reply (shown on service page)</label>
+                <Textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} rows={4} maxLength={2000}
+                  placeholder="Thanks for your feedback…" />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Internal note (admins only)</label>
+                <Textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={2} maxLength={2000} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={() => replyMut.mutate()} disabled={replyMut.isPending}>{replyMut.isPending ? "Saving…" : "Save"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

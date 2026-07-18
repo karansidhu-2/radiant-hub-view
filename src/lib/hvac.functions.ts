@@ -461,7 +461,7 @@ export const listServiceReviews = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("reviews")
-      .select("id, rating, comment, created_at, user_id")
+      .select("id, rating, comment, created_at, user_id, admin_reply, admin_reply_at")
       .eq("service_slug", data.service_slug)
       .eq("published", true)
       .order("created_at", { ascending: false })
@@ -476,11 +476,87 @@ export const listServiceReviews = createServerFn({ method: "POST" })
     const list = (rows ?? []).map((r: any) => ({
       id: r.id, rating: r.rating, comment: r.comment, created_at: r.created_at,
       author: names.get(r.user_id) ?? "Customer",
+      admin_reply: r.admin_reply, admin_reply_at: r.admin_reply_at,
     }));
     const count = list.length;
     const avg = count ? list.reduce((s, r) => s + r.rating, 0) / count : 0;
     return { list, count, avg };
   });
+
+// ---------- Admin: reviews moderation ----------
+export const adminListReviews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { status?: "all" | "published" | "hidden"; q?: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let query = context.supabase
+      .from("reviews")
+      .select("id, rating, comment, published, admin_reply, admin_reply_at, admin_note, service_slug, service_name, booking_id, user_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (data.status === "published") query = query.eq("published", true);
+    else if (data.status === "hidden") query = query.eq("published", false);
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.user_id)));
+    let profiles = new Map<string, { name: string; email: string }>();
+    if (ids.length) {
+      const { data: profs } = await context.supabase
+        .from("profiles").select("id, full_name, email").in("id", ids);
+      profiles = new Map((profs ?? []).map((p: any) => [p.id, {
+        name: p.full_name || (p.email || "").split("@")[0] || "Customer",
+        email: p.email || "",
+      }]));
+    }
+    const q = (data.q || "").trim().toLowerCase();
+    let list = (rows ?? []).map((r: any) => ({
+      ...r,
+      author: profiles.get(r.user_id)?.name ?? "Customer",
+      author_email: profiles.get(r.user_id)?.email ?? "",
+    }));
+    if (q) list = list.filter((r) =>
+      (r.comment || "").toLowerCase().includes(q) ||
+      (r.service_name || "").toLowerCase().includes(q) ||
+      (r.author || "").toLowerCase().includes(q) ||
+      (r.author_email || "").toLowerCase().includes(q));
+    return list;
+  });
+
+export const adminSetReviewPublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; published: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("reviews").update({ published: data.published }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("reviews").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminReplyReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; reply: string | null; note?: string | null }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const reply = data.reply == null ? null : String(data.reply).slice(0, 2000);
+    const note = data.note == null ? null : String(data.note).slice(0, 2000);
+    const patch: any = { admin_reply: reply, admin_reply_at: reply ? new Date().toISOString() : null };
+    if (data.note !== undefined) patch.admin_note = note;
+    const { error } = await context.supabase.from("reviews").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 // ---------- Admin analytics ----------
 export const adminAnalytics = createServerFn({ method: "POST" })
