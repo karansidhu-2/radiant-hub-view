@@ -379,6 +379,11 @@ export const adminAddAllowlistEmail = createServerFn({ method: "POST" })
       await supabaseAdmin.from("user_roles")
         .upsert({ user_id: match.id, role: "admin" }, { onConflict: "user_id,role" });
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "allowlist.add", entity_type: "admin_allowlist", entity_id: data.email,
+      after: { email: data.email }, details: { granted: Boolean(match) },
+    });
     return { ok: true, granted: Boolean(match) };
   });
 
@@ -396,6 +401,11 @@ export const adminRemoveAllowlistEmail = createServerFn({ method: "POST" })
       await supabaseAdmin.from("user_roles").delete()
         .eq("user_id", match.id).eq("role", "admin");
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "allowlist.remove", entity_type: "admin_allowlist", entity_id: data.email,
+      before: { email: data.email }, details: { revoked: Boolean(match) },
+    });
     return { ok: true };
   });
 
@@ -412,6 +422,7 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: prev } = await context.supabase.from("bookings").select("status, reference").eq("id", data.id).maybeSingle();
     const { data: row, error } = await context.supabase
       .from("bookings")
       .update({ status: data.status as any })
@@ -426,6 +437,12 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
         console.error("booking notification failed", e),
       );
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.status", entity_type: "booking", entity_id: data.id,
+      before: { status: prev?.status }, after: { status: data.status },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
@@ -437,11 +454,18 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
     if (!(data.service_charge >= 0) || data.service_charge > 1_000_000) {
       throw new Error("Invalid amount");
     }
+    const { data: prev } = await context.supabase.from("bookings").select("service_charge, reference").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("bookings")
       .update({ service_charge: data.service_charge })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.charge", entity_type: "booking", entity_id: data.id,
+      before: { service_charge: prev?.service_charge }, after: { service_charge: data.service_charge },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
