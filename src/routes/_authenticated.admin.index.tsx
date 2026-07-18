@@ -54,18 +54,38 @@ function AdminDashboard() {
   const [days, setDays] = useState<number>(30);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const listCheckpoints = useServerFn(adminListCheckpoints);
+  const createCheckpoint = useServerFn(adminCreateCheckpoint);
+  const setActive = useServerFn(adminSetCheckpointActive);
+  const delCheckpoint = useServerFn(adminDeleteCheckpoint);
+  const [checkpoints, setCheckpoints] = useState<any[]>([]);
+  const [customDate, setCustomDate] = useState("");
+  const active = checkpoints.find((c) => c.active) ?? null;
+  const sinceOverride = active ? active.started_at : null;
+
+  const reloadCheckpoints = () => listCheckpoints().then(setCheckpoints).catch(() => {});
+  useEffect(() => { reloadCheckpoints(); /* eslint-disable-next-line */ }, []);
 
   useEffect(() => {
     setLoading(true);
-    analyticsFn({ data: { days } })
+    analyticsFn({ data: { days, sinceOverride } })
       .then((d) => setData(d))
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
-  }, [analyticsFn, days]);
+  }, [analyticsFn, days, sinceOverride]);
+
+  const startPeriod = async (period_type: "week" | "month" | "year" | "custom", started_at?: string) => {
+    try {
+      await createCheckpoint({ data: { period_type, started_at, label: period_type === "custom" ? `From ${started_at?.slice(0,10)}` : `New ${period_type}` } });
+      toast.success(`Revenue reset — tracking from new ${period_type}. History preserved.`);
+      await reloadCheckpoints();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
 
   if (loading || !data) {
     return <div className="py-16 text-center text-muted-foreground">Loading analytics…</div>;
   }
+
 
   const t = data.totals;
   const daily = data.daily.map((d: any) => ({
