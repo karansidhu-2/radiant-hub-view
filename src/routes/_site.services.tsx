@@ -59,7 +59,7 @@ function ServicesPage() {
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
               <Link key={s.slug} to="/services/$slug" params={{ slug: s.slug }} className="group">
-                <Card className="h-full transition-all hover:-translate-y-1 hover:shadow-elevated">
+                <Card className="h-full hover:border-primary/35">
                   <CardContent className="p-6">
                     <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg gradient-cool text-primary-foreground">
                       <DynamicIcon name={s.icon} className="h-5 w-5" />
