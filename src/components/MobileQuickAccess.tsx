@@ -25,19 +25,16 @@ export function MobileQuickAccess() {
 
   const tiles: Tile[] = user
     ? [
-        { key: "account", label: "My account", icon: UserIcon, to: "/account" },
         { key: "bookings", label: "My bookings", icon: CalendarCheck, to: "/account" },
         { key: "orders", label: "My orders", icon: ShoppingBag, to: "/account" },
-        { key: "reviews", label: "My reviews", icon: Star, to: "/reviews" },
-        { key: "admin", label: "Admin panel", icon: Shield, to: "/admin", accent: true },
         { key: "call", label: "Call us", icon: Phone, href: telHref(settings.support_phone) },
-        { key: "signout", label: "Sign out", icon: LogOut, onClick: () => signOut() },
       ]
     : [
         { key: "signin", label: "Sign in", icon: LogIn, to: "/auth", accent: true },
         { key: "shop", label: "Shop", icon: ShoppingBag, to: "/shop" },
         { key: "call", label: "Call us", icon: Phone, href: telHref(settings.support_phone) },
       ];
+
 
   return (
     <section aria-label="Quick access" className="md:hidden">
