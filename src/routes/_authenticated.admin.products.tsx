@@ -134,8 +134,8 @@ function AdminProducts() {
       </div>
 
       {editing && (
-        <Card className="mt-4"><CardContent className="p-5 grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-[160px,1fr]">
+        <Card className="mt-4"><CardContent className="grid gap-4 p-3 sm:p-5">
+          <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
             <div className="space-y-2">
               <Label>Primary image</Label>
               <div className="relative aspect-square w-40 overflow-hidden rounded-lg border border-border bg-muted">
