@@ -104,10 +104,9 @@ export const createBooking = createServerFn({ method: "POST" })
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
-    // enforce crew capacity per slot
-    const { data: settings } = await supabaseAdmin
-      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
-    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    // enforce per-slot capacity based on active qualified technicians (or settings fallback)
+    const cap = await computeCapacity(supabaseAdmin, data.service_slug ?? null);
+
     const { count } = await supabaseAdmin
       .from("bookings")
       .select("id", { count: "exact", head: true })
