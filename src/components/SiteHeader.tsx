@@ -50,7 +50,7 @@ export function SiteHeader() {
             <Phone className="h-4 w-4" />
             {settings.support_phone}
           </a>
-          <Link to="/cart" className="relative">
+          <Link to="/cart" className="relative hidden md:block">
             <Button variant="outline" size="icon" aria-label="Cart">
               <ShoppingCart className="h-4 w-4" />
             </Button>
@@ -62,6 +62,9 @@ export function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link to="/account" className="md:hidden" title="My account" aria-label="My account">
+                <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
+              </Link>
               <Link to="/account" className="hidden md:block" title="My account">
                 <Button variant="outline" size="icon"><UserIcon className="h-4 w-4" /></Button>
               </Link>
@@ -71,9 +74,14 @@ export function SiteHeader() {
               <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out"><LogOut className="h-4 w-4" /></Button>
             </>
           ) : (
-            <Link to="/auth" search={{ redirect: "/" }} className="hidden md:block">
-              <Button variant="outline" size="icon" title="Sign in"><LogIn className="h-4 w-4" /></Button>
-            </Link>
+            <>
+              <Link to="/auth" search={{ redirect: "/" }} className="md:hidden" aria-label="Sign in">
+                <Button variant="outline" size="icon" title="Sign in"><UserIcon className="h-4 w-4" /></Button>
+              </Link>
+              <Link to="/auth" search={{ redirect: "/" }} className="hidden md:block">
+                <Button variant="outline" size="icon" title="Sign in"><LogIn className="h-4 w-4" /></Button>
+              </Link>
+            </>
           )}
           <Link to="/book" search={{ service: undefined }} className="hidden md:block">
             <Button className="gradient-cool text-primary-foreground shadow-soft hover:opacity-95">
