@@ -285,7 +285,7 @@ function AdminReviews() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); } }}>
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); setBulkRefresh(false); } }}>
         <DialogContent>
           {bulkConfirm && (
             <>
@@ -306,9 +306,16 @@ function AdminReviews() {
                   <Checkbox checked={bulkAck} onCheckedChange={(v) => setBulkAck(v === true)} className="mt-0.5" />
                   <span>{BULK_META[bulkConfirm].ack}</span>
                 </label>
+                <label className="flex items-start gap-2 rounded-md border border-dashed border-border p-3 text-sm">
+                  <Checkbox checked={bulkRefresh} onCheckedChange={(v) => setBulkRefresh(v === true)} className="mt-0.5" />
+                  <span>
+                    Also refresh the page after applying
+                    <span className="block text-xs text-muted-foreground">Optional — the list is always re-fetched automatically. Enable this for a full page reload.</span>
+                  </span>
+                </label>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); }}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); setBulkRefresh(false); }}>Cancel</Button>
                 <Button
                   variant={BULK_META[bulkConfirm].destructive ? "destructive" : "default"}
                   disabled={!bulkAck || bulkMut.isPending}
@@ -320,6 +327,7 @@ function AdminReviews() {
           )}
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
