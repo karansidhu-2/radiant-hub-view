@@ -216,10 +216,10 @@ function AdminDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Reset</h2>
+                <h2 className="text-sm font-semibold uppercase text-muted-foreground">Period Reset</h2>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Start a new tracking period from $0. Previous records are preserved in history and remain in the database.
+                Starts a new tracking period from 0 for revenue, orders, bookings, completion rate, completed, cancelled, and every other KPI. A full closing report for the ending period downloads automatically. All raw records stay in the database.
               </p>
               {active ? (
                 <p className="mt-2 text-sm">
@@ -235,6 +235,9 @@ function AdminDashboard() {
               <Button size="sm" variant="outline" onClick={() => startPeriod("week")}>Start new week</Button>
               <Button size="sm" variant="outline" onClick={() => startPeriod("month")}>Start new month</Button>
               <Button size="sm" variant="outline" onClick={() => startPeriod("year")}>Start new year</Button>
+              <Button size="sm" variant="secondary" onClick={() => buildClosingReport(active ? (active.label ?? active.period_type) : `last_${days}d`)}>
+                <Download className="mr-1 h-3.5 w-3.5" />Download period report
+              </Button>
               {active && (
                 <Button size="sm" variant="ghost" onClick={async () => {
                   await setActive({ data: { id: null } });
