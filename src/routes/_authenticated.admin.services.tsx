@@ -80,12 +80,12 @@ function AdminServices() {
 
       <div className="mt-4 grid gap-2">
         {items.map((s) => (
-          <Card key={s.id}><CardContent className="flex items-center justify-between p-4">
-            <div>
-              <div className="flex items-center gap-2"><p className="font-semibold">{s.name}</p>{!s.published && <Badge variant="secondary">draft</Badge>}</div>
-              <p className="text-xs text-muted-foreground">{s.slug} • ${s.starting_at}</p>
+          <Card key={s.id}><CardContent className="flex items-center justify-between gap-3 p-3 sm:p-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5"><p className="min-w-0 truncate font-semibold">{s.name}</p>{!s.published && <Badge variant="secondary">draft</Badge>}</div>
+              <p className="truncate text-xs text-muted-foreground">{s.slug} • ${s.starting_at}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditing(s)}><Pencil className="h-4 w-4" /></Button>
               <Button variant="outline" size="sm" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>

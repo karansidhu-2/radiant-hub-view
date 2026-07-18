@@ -79,7 +79,7 @@ function AdminLayout() {
           </div>
         </div>
       </div>
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
+      <div className="mx-auto grid max-w-7xl gap-6 px-3 py-5 md:grid-cols-[220px_1fr] md:px-6 md:py-6">
         <aside className="md:sticky md:top-4 md:self-start">
           <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0">
             {nav.map((n) => {

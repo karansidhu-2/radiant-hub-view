@@ -86,18 +86,18 @@ function AdminsPage() {
           ) : (
             <ul className="divide-y divide-border">
               {rows.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-3 p-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      <span className="truncate font-medium">{r.email}</span>
-                      <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${r.registered ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <li key={r.id} className="flex items-center justify-between gap-3 p-3 sm:p-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
+                      <span className="min-w-0 max-w-full truncate font-medium">{r.email}</span>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${r.registered ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                         {r.registered ? "Active" : "Pending signup"}
                       </span>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">Added {new Date(r.created_at).toLocaleDateString()}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => onRemove(r.email)}>
+                  <Button variant="ghost" size="sm" className="shrink-0" onClick={() => onRemove(r.email)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </li>
