@@ -72,6 +72,27 @@
   --gradient-warm: linear-gradient(135deg, oklch(0.72 0.17 55), oklch(0.65 0.2 30));
   --shadow-soft: 0 6px 18px -14px oklch(0.45 0.15 250 / 0.22);
   --shadow-elevated: 0 10px 28px -20px oklch(0.45 0.15 250 / 0.24);
+
+  /* -----------------------------------------------------------
+   * Card hover interactivity — tune these to dial in the feel.
+   * lift        : vertical translate on hover (px)
+   * blur        : outer shadow blur radius (px)
+   * spread      : outer shadow negative spread / offset-y (px)
+   * strength    : outer shadow color opacity (0–1)
+   * glow-blur   : primary-tinted glow blur (px)
+   * glow-strength: primary glow opacity (0–1)
+   * ring        : inset-like 1px ring opacity around the card (0–1)
+   * border      : hover border color mix % against --border
+   * ----------------------------------------------------------- */
+  --card-hover-lift: 5px;
+  --card-hover-blur: 42px;
+  --card-hover-spread: 22px;
+  --card-hover-strength: 0.42;
+  --card-hover-glow-blur: 22px;
+  --card-hover-glow-strength: 0.38;
+  --card-hover-ring: 0.32;
+  --card-hover-border: 55%;
+  --card-hover-color: var(--primary);
 }
 
 .dark {
@@ -122,13 +143,18 @@
   }
   .card-pop { cursor: pointer; }
   .card-pop:hover {
-    transform: translateY(-5px);
+    transform: translateY(calc(var(--card-hover-lift) * -1));
     box-shadow:
-      0 22px 42px -22px oklch(0.45 0.15 250 / 0.42),
-      0 10px 20px -14px oklch(0.45 0.15 250 / 0.28),
-      0 0 0 1px color-mix(in oklab, var(--color-primary) 32%, transparent),
-      0 0 22px -6px color-mix(in oklab, var(--color-primary) 38%, transparent);
-    border-color: color-mix(in oklab, var(--color-primary) 55%, var(--color-border));
+      0 calc(var(--card-hover-spread) * 1px) calc(var(--card-hover-blur) * 1px)
+        calc(var(--card-hover-spread) * -1px)
+        color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-strength) * 100%), transparent),
+      0 calc(var(--card-hover-spread) * 0.45px) calc(var(--card-hover-blur) * 0.48px)
+        calc(var(--card-hover-spread) * -0.64px)
+        color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-strength) * 66%), transparent),
+      0 0 0 1px color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-ring) * 100%), transparent),
+      0 0 calc(var(--card-hover-glow-blur) * 1px) -6px
+        color-mix(in oklab, var(--card-hover-color) calc(var(--card-hover-glow-strength) * 100%), transparent);
+    border-color: color-mix(in oklab, var(--card-hover-color) var(--card-hover-border), var(--color-border));
   }
   /* Touch feedback for mobile (no hover) */
   @media (hover: none) {
