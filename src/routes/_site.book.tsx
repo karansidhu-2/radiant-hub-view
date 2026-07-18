@@ -102,8 +102,11 @@ function BookPage() {
     setForm((f) => ({ ...f, service_slug: s.slug, service_name: s.name }));
   };
 
+  const submittingRef = useRef(false);
   const runBooking = async (override?: { scheduled_date: string; scheduled_hour: number }) => {
+    if (submittingRef.current) return; // guard against double-clicks / repeat chip taps
     if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
+    submittingRef.current = true;
     const payload = { ...form, ...(override ?? {}), notes: form.notes || null };
     setBusy(true);
     setCapacityConflict(null);
@@ -128,8 +131,12 @@ function BookPage() {
       } else {
         toast.error(msg);
       }
-    } finally { setBusy(false); }
+    } finally {
+      submittingRef.current = false;
+      setBusy(false);
+    }
   };
+
 
   const submit = (e: React.FormEvent) => { e.preventDefault(); runBooking(); };
 
