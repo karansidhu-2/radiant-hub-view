@@ -162,7 +162,7 @@ function ProductDetail() {
           <div className="grid gap-4 sm:grid-cols-3">
             {data.related.map((r: any) => (
               <Link key={r.slug} to="/shop/$slug" params={{ slug: r.slug }}>
-                <Card className="h-full transition-all hover:shadow-soft">
+                <Card className="h-full hover:border-primary/35">
                   <CardContent className="p-5">
                     <p className="text-xs font-semibold uppercase text-muted-foreground">{r.brand}</p>
                     <h3 className="mt-1 font-semibold">{r.name}</h3>

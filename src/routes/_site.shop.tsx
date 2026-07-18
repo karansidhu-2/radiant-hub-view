@@ -111,7 +111,7 @@ function ShopPage() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((p) => (
-              <Card key={p.slug} className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-elevated">
+              <Card key={p.slug} className="group overflow-hidden hover:border-primary/35">
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
                   <div className="relative aspect-[4/3] gradient-cool overflow-hidden">
                     {(p as any).resolved_image ? (

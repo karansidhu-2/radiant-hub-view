@@ -49,7 +49,7 @@ export default function Home() {
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
           <div className="flex flex-col justify-center text-primary-foreground">
-            <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+            <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--ember)]" /> Same-day service across 28 states
             </span>
             <h1 className="text-4xl font-bold leading-[1.05] md:text-5xl lg:text-6xl">
@@ -68,7 +68,7 @@ export default function Home() {
                 </Button>
               </Link>
               <Link to="/shop">
-                <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white">
+                <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
                   Shop Systems
                 </Button>
               </Link>
@@ -83,7 +83,7 @@ export default function Home() {
             </div>
           </div>
           <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-white/10 blur-2xl" />
+            <div className="absolute -inset-1 -z-10 rounded-3xl bg-white/10" />
             <img
               src={heroImg}
               alt="HVAC Pro technician servicing an outdoor air conditioning condenser"
@@ -118,7 +118,7 @@ export default function Home() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {homeServices.map((s) => (
             <Link key={s.slug} to="/services/$slug" params={{ slug: s.slug }} className="group">
-              <Card className="h-full transition-all hover:-translate-y-1 hover:shadow-elevated">
+              <Card className="h-full hover:border-primary/35">
                 <CardContent className="p-6">
                   <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg gradient-cool text-primary-foreground">
                     <DynamicIcon name={s.icon} className="h-5 w-5" />
@@ -150,7 +150,7 @@ export default function Home() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((p) => (
               <Link key={p.slug} to="/shop/$slug" params={{ slug: p.slug }}>
-                <Card className="group h-full overflow-hidden transition-all hover:-translate-y-1 hover:shadow-elevated">
+                <Card className="group h-full overflow-hidden hover:border-primary/35">
                   <div className="relative aspect-[4/3] gradient-cool">
                     <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
                       <DynamicIcon
@@ -248,7 +248,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {["Texas", "Colorado", "Arizona", "Georgia", "N. Carolina", "Florida", "Virginia", "Tennessee", "Ohio", "Illinois"].map((state) => (
-                <div key={state} className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 backdrop-blur">
+                <div key={state} className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2">
                   <MapPin className="h-3.5 w-3.5 text-[color:var(--ember)]" /> {state}
                 </div>
               ))}
