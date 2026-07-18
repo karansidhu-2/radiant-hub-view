@@ -283,7 +283,15 @@ function AdminProducts() {
                     <Badge variant="outline" className="text-[10px]">{p.media.length} media</Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">${p.price} • Stock: {p.stock}</p>
+                <p className="text-xs text-muted-foreground">
+                  ${p.price} • Stock: {p.stock}
+                  {p.low_stock_threshold != null && p.stock <= p.low_stock_threshold && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                      Low stock (≤ {p.low_stock_threshold})
+                    </span>
+                  )}
+                </p>
+
               </div>
             </div>
             <div className="flex gap-2">
