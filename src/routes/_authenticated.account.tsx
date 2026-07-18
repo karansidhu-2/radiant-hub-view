@@ -109,6 +109,14 @@ function AccountPage() {
   const reviews = reviewsQ.data ?? [];
   const addresses = addressesQ.data ?? [];
 
+  // Live updates: refetch bookings/orders as their status changes.
+  useRealtimeInvalidate(
+    ["bookings", "orders"],
+    [["acct-bookings", uid], ["acct-orders", uid]],
+    { filter: uid ? `user_id=eq.${uid}` : undefined, enabled: !!uid },
+  );
+
+
   const orderSpend = orders
     .filter((o: any) => !["cancelled", "refunded"].includes(o.status))
     .reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
