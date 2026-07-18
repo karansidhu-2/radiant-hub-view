@@ -44,7 +44,9 @@ export default function Home() {
   const homeServices = services.slice(0, 6);
   return (
     <>
+      <MobileQuickAccess />
       {/* Hero */}
+
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
