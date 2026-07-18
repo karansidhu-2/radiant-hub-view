@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       admin_allowlist: {
         Row: {
           added_by: string | null
