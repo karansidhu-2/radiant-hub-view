@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog, Settings } from "lucide-react";
+import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
