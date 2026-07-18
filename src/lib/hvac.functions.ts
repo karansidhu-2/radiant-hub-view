@@ -273,8 +273,19 @@ export const adminUpsertService = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    let before: any = null;
+    if (data.slug) {
+      const { data: existing } = await context.supabase.from("services").select("*").eq("slug", data.slug).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("services").upsert(data, { onConflict: "slug" });
     if (error) throw new Error(error.message);
+    await logAdminAction(context, {
+      action: before ? "service.update" : "service.create",
+      entity_type: "service", entity_id: data.slug ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -283,8 +294,11 @@ export const adminDeleteService = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("services").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("services").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "service.delete", entity_type: "service", entity_id: data.id, before });
     return { ok: true };
   });
 
@@ -301,8 +315,19 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    let before: any = null;
+    if (data.slug) {
+      const { data: existing } = await context.supabase.from("products").select("*").eq("slug", data.slug).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("products").upsert(data, { onConflict: "slug" });
     if (error) throw new Error(error.message);
+    await logAdminAction(context, {
+      action: before ? "product.update" : "product.create",
+      entity_type: "product", entity_id: data.slug ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -311,8 +336,11 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("products").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "product.delete", entity_type: "product", entity_id: data.id, before });
     return { ok: true };
   });
 
@@ -351,6 +379,11 @@ export const adminAddAllowlistEmail = createServerFn({ method: "POST" })
       await supabaseAdmin.from("user_roles")
         .upsert({ user_id: match.id, role: "admin" }, { onConflict: "user_id,role" });
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "allowlist.add", entity_type: "admin_allowlist", entity_id: data.email,
+      after: { email: data.email }, details: { granted: Boolean(match) },
+    });
     return { ok: true, granted: Boolean(match) };
   });
 
@@ -368,6 +401,11 @@ export const adminRemoveAllowlistEmail = createServerFn({ method: "POST" })
       await supabaseAdmin.from("user_roles").delete()
         .eq("user_id", match.id).eq("role", "admin");
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "allowlist.remove", entity_type: "admin_allowlist", entity_id: data.email,
+      before: { email: data.email }, details: { revoked: Boolean(match) },
+    });
     return { ok: true };
   });
 
@@ -384,6 +422,7 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: prev } = await context.supabase.from("bookings").select("status, reference").eq("id", data.id).maybeSingle();
     const { data: row, error } = await context.supabase
       .from("bookings")
       .update({ status: data.status as any })
@@ -398,6 +437,12 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
         console.error("booking notification failed", e),
       );
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.status", entity_type: "booking", entity_id: data.id,
+      before: { status: prev?.status }, after: { status: data.status },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
@@ -409,11 +454,18 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
     if (!(data.service_charge >= 0) || data.service_charge > 1_000_000) {
       throw new Error("Invalid amount");
     }
+    const { data: prev } = await context.supabase.from("bookings").select("service_charge, reference").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("bookings")
       .update({ service_charge: data.service_charge })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.charge", entity_type: "booking", entity_id: data.id,
+      before: { service_charge: prev?.service_charge }, after: { service_charge: data.service_charge },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
@@ -423,11 +475,17 @@ export const adminSetBookingTechnician = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const tech = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { data: prev } = await context.supabase.from("bookings").select("technician").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("bookings")
       .update({ technician: tech })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.technician", entity_type: "booking", entity_id: data.id,
+      before: { technician: prev?.technician }, after: { technician: tech },
+    });
     return { ok: true };
   });
 
@@ -496,6 +554,7 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     }
     const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
     if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
+    const { data: prevRow } = await context.supabase.from("bookings").select("scheduled_date, scheduled_hour, technician, reference").eq("id", data.id).maybeSingle();
     const { data: row, error } = await context.supabase
       .from("bookings")
       .update(patch)
@@ -509,6 +568,12 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
         console.error("booking notification failed", e),
       );
     }
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "booking.reschedule", entity_type: "booking", entity_id: data.id,
+      before: { scheduled_date: prevRow?.scheduled_date, scheduled_hour: prevRow?.scheduled_hour, technician: prevRow?.technician },
+      after: patch, details: { reference: prevRow?.reference },
+    });
     return { ok: true };
   });
 
@@ -529,8 +594,15 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: prev } = await context.supabase.from("orders").select("status, reference").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("orders").update({ status: data.status as any }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: "order.status", entity_type: "order", entity_id: data.id,
+      before: { status: prev?.status }, after: { status: data.status },
+      details: { reference: prev?.reference },
+    });
     return { ok: true };
   });
 
@@ -547,8 +619,19 @@ export const adminUpsertArea = createServerFn({ method: "POST" })
   .inputValidator((d: any) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    let before: any = null;
+    if (data.zip) {
+      const { data: existing } = await context.supabase.from("service_areas").select("*").eq("zip", data.zip).maybeSingle();
+      before = existing;
+    }
     const { error } = await context.supabase.from("service_areas").upsert(data, { onConflict: "zip" });
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, {
+      action: before ? "area.update" : "area.create",
+      entity_type: "service_area", entity_id: data.zip ?? data.id ?? null,
+      before, after: data,
+    });
     return { ok: true };
   });
 
@@ -557,8 +640,11 @@ export const adminDeleteArea = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { data: before } = await context.supabase.from("service_areas").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("service_areas").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    const { logAdminAction } = await import("./audit.server");
+    await logAdminAction(context, { action: "area.delete", entity_type: "service_area", entity_id: data.id, before });
     return { ok: true };
   });
 
@@ -605,11 +691,19 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       patch.notification_templates = clean;
     }
 
+    const { data: prevSettings } = await context.supabase
+      .from("site_settings").select("*").eq("singleton", true).maybeSingle();
     const { error } = await context.supabase
       .from("site_settings")
       .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
+    const { logAdminAction, diffShallow } = await import("./audit.server");
+    const diff = diffShallow(prevSettings as any, patch);
+    await logAdminAction(context, {
+      action: "settings.update", entity_type: "site_settings", entity_id: "singleton",
+      before: diff.before, after: diff.after,
+    });
 
     // If crew capacity changed, log any resulting overflow slots to the inbox
     if (patch.crew_capacity !== undefined || patch.crew_capacity_enabled !== undefined) {
@@ -1121,4 +1215,43 @@ export const adminLowStockProducts = createServerFn({ method: "GET" })
       .select("id, slug, name, brand, stock, low_stock_threshold, available")
       .not("low_stock_threshold", "is", null);
     return (data ?? []).filter((p: any) => (p.stock ?? 0) <= (p.low_stock_threshold ?? 0));
+  });
+
+// ---------- Admin audit log ----------
+export const adminListActions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; action?: string; entity_type?: string; q?: string; limit?: number }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const days = Math.min(Math.max(data.days ?? 30, 1), 365);
+    const since = new Date(); since.setDate(since.getDate() - days);
+    let q = context.supabase
+      .from("admin_actions")
+      .select("id, admin_id, admin_email, action, entity_type, entity_id, before, after, details, created_at")
+      .gte("created_at", since.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(Math.min(Math.max(data.limit ?? 500, 1), 5000));
+    if (data.action && data.action !== "all") q = q.eq("action", data.action);
+    if (data.entity_type && data.entity_type !== "all") q = q.eq("entity_type", data.entity_type);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const term = (data.q || "").trim().toLowerCase();
+    let list = rows ?? [];
+    if (term) list = list.filter((r: any) =>
+      (r.admin_email || "").toLowerCase().includes(term) ||
+      (r.action || "").toLowerCase().includes(term) ||
+      (r.entity_type || "").toLowerCase().includes(term) ||
+      (r.entity_id || "").toLowerCase().includes(term));
+    return list;
+  });
+
+export const adminActionOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase
+      .from("admin_actions").select("action, entity_type").limit(2000);
+    const actions = new Set<string>(); const entities = new Set<string>();
+    for (const r of data ?? []) { if (r.action) actions.add(r.action); if (r.entity_type) entities.add(r.entity_type); }
+    return { actions: Array.from(actions).sort(), entities: Array.from(entities).sort() };
   });
