@@ -1,6 +1,17 @@
 // Server-only helpers to notify customers about booking changes via email + SMS.
 // Silently no-ops when the corresponding channel/provider is not configured.
 
+import {
+  DEFAULT_TEMPLATES,
+  bodyToHtml,
+  mergedTemplate,
+  renderTemplate,
+  wrapEmailHtml,
+  type NotificationKind,
+  type NotificationTemplates,
+  type TemplateVars,
+} from "@/lib/notification-templates";
+
 type BookingRow = {
   id: string;
   reference: string;
@@ -19,12 +30,7 @@ type BookingRow = {
   technician?: string | null;
 };
 
-export type BookingEventKind =
-  | "pending"
-  | "confirmed"
-  | "completed"
-  | "cancelled"
-  | "rescheduled";
+export type BookingEventKind = NotificationKind;
 
 type Settings = {
   company_name: string;
@@ -34,6 +40,8 @@ type Settings = {
   notify_on_reschedule: boolean;
   notify_on_status_change: boolean;
   twilio_from_phone: string;
+  notification_templates: NotificationTemplates;
+  origin: string;
 };
 
 async function loadSettings(): Promise<Settings> {
@@ -45,17 +53,19 @@ async function loadSettings(): Promise<Settings> {
     notify_on_reschedule: true,
     notify_on_status_change: true,
     twilio_from_phone: "",
+    notification_templates: {},
+    origin: process.env.PUBLIC_APP_URL || "",
   };
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("site_settings")
       .select(
-        "company_name, support_phone, notify_email_enabled, notify_sms_enabled, notify_on_reschedule, notify_on_status_change, twilio_from_phone",
+        "company_name, support_phone, notify_email_enabled, notify_sms_enabled, notify_on_reschedule, notify_on_status_change, twilio_from_phone, notification_templates",
       )
       .limit(1)
       .maybeSingle();
-    if (data) return { ...fallback, ...data } as Settings;
+    if (data) return { ...fallback, ...(data as any) } as Settings;
   } catch {}
   return fallback;
 }
@@ -64,66 +74,30 @@ function timeLabel(hour: number) {
   return `${((hour + 11) % 12) + 1}:00 ${hour < 12 ? "AM" : "PM"}`;
 }
 
-function copyFor(kind: BookingEventKind, b: BookingRow, siteName: string) {
-  const when = `${b.scheduled_date} at ${timeLabel(b.scheduled_hour)}`;
-  switch (kind) {
-    case "pending":
-      return {
-        subject: `Booking received — ${b.reference}`,
-        intro: `Thanks ${b.full_name}, we've received your request for ${b.service_name}. We'll confirm your appointment shortly.`,
-      };
-    case "confirmed":
-      return {
-        subject: `Booking confirmed — ${b.reference}`,
-        intro: `Good news — your ${b.service_name} appointment is confirmed for ${when}.`,
-      };
-    case "completed":
-      return {
-        subject: `Service completed — ${b.reference}`,
-        intro: `Your ${b.service_name} service has been completed. Thank you for choosing ${siteName}!`,
-      };
-    case "cancelled":
-      return {
-        subject: `Booking cancelled — ${b.reference}`,
-        intro: `Your ${b.service_name} appointment scheduled for ${when} has been cancelled. Please reach out if this was unexpected.`,
-      };
-    case "rescheduled":
-      return {
-        subject: `Appointment rescheduled — ${b.reference}`,
-        intro: `Your ${b.service_name} appointment has been rescheduled to ${when}.`,
-      };
-  }
+function buildVars(b: BookingRow, s: Settings): TemplateVars {
+  return {
+    customer_name: b.full_name,
+    service_name: b.service_name,
+    reference: b.reference,
+    date: b.scheduled_date,
+    time: timeLabel(b.scheduled_hour),
+    address: `${b.street}, ${b.city}, ${b.state} ${b.zip}`,
+    technician: b.technician || "To be assigned",
+    service_charge: b.service_charge != null ? `$${Number(b.service_charge).toFixed(2)}` : "—",
+    company_name: s.company_name,
+    support_phone: s.support_phone,
+    track_url: `${s.origin || ""}/confirmation/booking/${b.reference}`,
+  };
 }
 
 async function sendEmail(b: BookingRow, kind: BookingEventKind, s: Settings) {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) return { sent: false, reason: "no_api_key" as const };
-  const { subject, intro } = copyFor(kind, b, s.company_name);
-  const address = `${b.street}, ${b.city}, ${b.state} ${b.zip}`;
-  const trackUrl = `/confirmation/booking/${b.reference}`;
-  const chargeLine =
-    kind === "completed" && b.service_charge != null
-      ? `<tr><td style="padding:6px 0;color:#64748b">Service charge</td><td style="padding:6px 0;text-align:right;font-weight:600">$${Number(b.service_charge).toFixed(2)}</td></tr>`
-      : "";
-  const techLine = b.technician
-    ? `<tr><td style="color:#64748b">Technician</td><td style="text-align:right;font-weight:600">${b.technician}</td></tr>`
-    : "";
-  const html = `<!doctype html><html><body style="margin:0;background:#ffffff;font-family:Inter,Arial,sans-serif;color:#0f172a">
-  <div style="max-width:560px;margin:0 auto;padding:32px 24px">
-    <h1 style="font-size:22px;margin:0 0 8px">${subject}</h1>
-    <p style="color:#475569;margin:0 0 20px">Hi ${b.full_name}, ${intro}</p>
-    <table style="width:100%;border-collapse:collapse;background:#f8fafc;border-radius:8px;padding:16px" cellpadding="12">
-      <tr><td style="color:#64748b">Reference</td><td style="text-align:right;font-weight:600">${b.reference}</td></tr>
-      <tr><td style="color:#64748b">Service</td><td style="text-align:right;font-weight:600">${b.service_name}</td></tr>
-      <tr><td style="color:#64748b">When</td><td style="text-align:right;font-weight:600">${b.scheduled_date} • ${timeLabel(b.scheduled_hour)}</td></tr>
-      <tr><td style="color:#64748b">Address</td><td style="text-align:right">${address}</td></tr>
-      ${techLine}
-      ${chargeLine}
-    </table>
-    <p style="margin:24px 0 8px">Track status: <a href="${trackUrl}">${trackUrl}</a></p>
-    ${s.support_phone ? `<p style="color:#475569">Questions? Call us at ${s.support_phone}.</p>` : ""}
-    <p style="color:#94a3b8;font-size:12px;margin-top:32px">— ${s.company_name}</p>
-  </div></body></html>`;
+  const tpl = mergedTemplate(kind, s.notification_templates);
+  const vars = buildVars(b, s);
+  const subject = renderTemplate(tpl.email_subject, vars);
+  const bodyText = renderTemplate(tpl.email_body, vars);
+  const html = wrapEmailHtml(bodyToHtml(bodyText), s.company_name);
   try {
     const res = await fetch("https://api.lovable.dev/v1/email/send", {
       method: "POST",
@@ -158,8 +132,9 @@ async function sendSms(b: BookingRow, kind: BookingEventKind, s: Settings) {
   if (!s.twilio_from_phone) return { sent: false, reason: "no_from_phone" as const };
   const to = normalizePhone(b.customer_phone_notify || b.phone);
   if (!to) return { sent: false, reason: "no_recipient" as const };
-  const { subject, intro } = copyFor(kind, b, s.company_name);
-  const body = `${s.company_name}: ${subject}. ${intro} Track: /confirmation/booking/${b.reference}`;
+  const tpl = mergedTemplate(kind, s.notification_templates);
+  const vars = buildVars(b, s);
+  const body = renderTemplate(tpl.sms_body, vars);
   try {
     const res = await fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
       method: "POST",
@@ -192,10 +167,12 @@ export async function notifyBookingEvent(booking: BookingRow, kind: BookingEvent
   return results;
 }
 
-// Back-compat wrapper used by earlier code paths.
 export async function sendBookingStatusEmail(
   booking: BookingRow,
   status: "confirmed" | "completed",
 ) {
   return notifyBookingEvent(booking, status);
 }
+
+// Kept as an export to make tree-shaking obvious across imports.
+export { DEFAULT_TEMPLATES };
