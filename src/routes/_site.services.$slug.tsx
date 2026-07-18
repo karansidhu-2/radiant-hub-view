@@ -9,6 +9,8 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { StarRating } from "@/components/StarRating";
 import { listServiceReviews } from "@/lib/hvac.functions";
+import { JsonLd } from "@/components/JsonLd";
+
 
 export const Route = createFileRoute("/_site/services/$slug")({
   head: ({ params }) => ({
