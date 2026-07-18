@@ -1026,3 +1026,74 @@ export const adminAnalytics = createServerFn({ method: "POST" })
       topServices,
     };
   });
+
+// ---------- Capacity conflict inbox ----------
+export const adminListConflicts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { includeResolved?: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase.from("capacity_conflicts").select("*").order("created_at", { ascending: false }).limit(200);
+    if (!data.includeResolved) q = q.eq("resolved", false);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminUnresolvedConflictCount = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { count } = await context.supabase
+      .from("capacity_conflicts")
+      .select("id", { count: "exact", head: true })
+      .eq("resolved", false);
+    return { count: count ?? 0 };
+  });
+
+export const adminResolveConflict = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; resolved: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const patch = data.resolved
+      ? { resolved: true, resolved_at: new Date().toISOString(), resolved_by: context.userId }
+      : { resolved: false, resolved_at: null, resolved_by: null };
+    const { error } = await context.supabase.from("capacity_conflicts").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminResolveAllConflicts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("capacity_conflicts")
+      .update({ resolved: true, resolved_at: new Date().toISOString(), resolved_by: context.userId })
+      .eq("resolved", false);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteConflict = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("capacity_conflicts").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Low-stock products for reminders
+export const adminLowStockProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase
+      .from("products")
+      .select("id, slug, name, brand, stock, low_stock_threshold, available")
+      .not("low_stock_threshold", "is", null);
+    return (data ?? []).filter((p: any) => (p.stock ?? 0) <= (p.low_stock_threshold ?? 0));
+  });
