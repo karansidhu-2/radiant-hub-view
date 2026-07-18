@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { adminListProducts, adminUpsertProduct, adminDeleteProduct } from "@/lib/hvac.functions";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Upload, ImageOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { uploadProductImage, resolveProductImageUrl, resolveProductImageUrls } from "@/lib/product-image";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
 });
 
-const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, seer: null, capacity_btu: null, hspf: null, tag: null };
+const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, seer: null, capacity_btu: null, hspf: null, tag: null, image_url: null as string | null };
 
 function AdminProducts() {
   const [items, setItems] = useState<any[]>([]);
