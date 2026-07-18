@@ -2,12 +2,13 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Wrench, ShoppingBag, ShoppingCart, CalendarPlus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
-const items = [
+type NavItem = { to: "/" | "/services" | "/shop" | "/cart"; label: string; icon: typeof Home; exact?: boolean };
+const items: NavItem[] = [
   { to: "/", label: "Home", icon: Home, exact: true },
   { to: "/services", label: "Services", icon: Wrench },
   { to: "/shop", label: "Shop", icon: ShoppingBag },
   { to: "/cart", label: "Cart", icon: ShoppingCart },
-] as const;
+];
 
 export function MobileBottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
