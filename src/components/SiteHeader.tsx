@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, Wind, X } from "lucide-react";
+import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, User as UserIcon, Wind, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
