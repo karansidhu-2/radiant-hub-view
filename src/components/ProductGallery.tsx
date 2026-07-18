@@ -126,6 +126,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         role="region"
         aria-roledescription="carousel"
         aria-label={`${name} media gallery`}
+        aria-describedby={helpId}
         tabIndex={0}
         onKeyDown={onViewerKey}
         className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted shadow-elevated group outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -137,12 +138,24 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
 
         <button
           type="button"
+          aria-label="Keyboard shortcuts"
+          aria-expanded={showHelp}
+          aria-controls={helpId}
+          onClick={() => setShowHelp((s) => !s)}
+          className="absolute left-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <Keyboard className="h-4 w-4" aria-hidden />
+        </button>
+
+        <button
+          type="button"
           aria-label="Open full screen"
           onClick={() => setLightbox(true)}
           className="absolute right-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Maximize2 className="h-4 w-4" aria-hidden />
         </button>
+
 
         {total > 1 && (
           <>
