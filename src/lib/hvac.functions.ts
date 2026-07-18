@@ -115,7 +115,17 @@ export const createBooking = createServerFn({ method: "POST" })
         }
       }
       const alts = suggestions.slice(0, 6);
+      await supabaseAdmin.from("capacity_conflicts").insert({
+        scheduled_date: data.scheduled_date,
+        scheduled_hour: data.scheduled_hour,
+        capacity: cap,
+        count: (count ?? 0) + 1,
+        source: "booking",
+        note: `Customer booking blocked for ${data.service_name} — ${data.full_name}`,
+        created_by: context.userId,
+      }).then(() => {}, () => {});
       throw new Error(`That time slot is fully booked. Please pick another.||ALTS||${JSON.stringify(alts)}`);
+
     }
 
     const { data: row, error } = await context.supabase
