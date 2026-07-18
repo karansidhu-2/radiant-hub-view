@@ -80,13 +80,14 @@ function ServiceDetail() {
         provider: { "@type": "LocalBusiness", "@id": "https://radiant-hub-view.lovable.app/#business", name: "HVAC Pro" },
         areaServed: { "@type": "Country", name: "United States" },
         offers: { "@type": "Offer", price: svc.starting_at, priceCurrency: "USD", availability: "https://schema.org/InStock" },
-        ...(rv && rv.length > 0 ? {
+        ...(rv && rv.count > 0 ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: (rv.reduce((s: number, r: any) => s + (r.rating ?? 0), 0) / rv.length).toFixed(1),
-            reviewCount: rv.length,
+            ratingValue: Number(rv.avg ?? 0).toFixed(1),
+            reviewCount: rv.count,
           },
         } : {}),
+
       }} />
       <section className="border-b border-border bg-secondary/40">
 
