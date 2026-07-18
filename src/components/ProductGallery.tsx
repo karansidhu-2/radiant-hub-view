@@ -24,6 +24,9 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
   const [resolved, setResolved] = useState<Resolved[]>([]);
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const helpId = useId();
+
 
   useEffect(() => {
     let alive = true;
