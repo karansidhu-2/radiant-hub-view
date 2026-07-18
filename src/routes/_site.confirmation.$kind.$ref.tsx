@@ -100,7 +100,30 @@ function ConfirmationPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">Reference <span className="font-mono font-semibold">{data.reference}</span></p>
         <p className="mt-2 text-sm">We'll call {data.phone} within 1 business hour to confirm.</p>
+        <p className="mt-1 text-xs text-muted-foreground">A copy of this confirmation was sent to {data.email}.</p>
       </div>
+
+      {authed === false && !data.user_id && (
+        <Card className="mt-4 border-primary/40 bg-primary/5">
+          <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+            <div className="flex items-start gap-3">
+              <UserPlus className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">Create an account to track this {kind}</p>
+                <p className="text-xs text-muted-foreground">Sign up with <span className="font-medium">{data.email}</span> and we'll link this {kind} — and any future ones — to your account automatically.</p>
+              </div>
+            </div>
+            <Link
+              to="/auth"
+              search={{ redirect: `/confirmation/${kind}/${ref}` }}
+              className="shrink-0"
+            >
+              <Button size="sm" className="gradient-cool text-primary-foreground">Create account</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
 
       <Card className="mt-6"><CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">
