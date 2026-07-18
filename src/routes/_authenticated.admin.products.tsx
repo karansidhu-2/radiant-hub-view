@@ -265,8 +265,8 @@ function AdminProducts() {
 
       <div className="mt-4 grid gap-2">
         {items.map((p) => (
-          <Card key={p.id}><CardContent className="flex items-center justify-between gap-3 p-4">
-            <div className="flex items-center gap-3">
+          <Card key={p.id}><CardContent className="flex items-center justify-between gap-3 p-3 sm:p-4">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
                 {p.image_url && thumbs[p.image_url] ? (
                   <img src={thumbs[p.image_url]} alt="" className="h-full w-full object-cover" />
@@ -274,9 +274,9 @@ function AdminProducts() {
                   <div className="grid h-full w-full place-items-center text-muted-foreground"><ImageOff className="h-5 w-5" /></div>
                 )}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold">{p.brand} — {p.name}</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <p className="min-w-0 truncate font-semibold">{p.brand} — {p.name}</p>
                   {!p.published && <Badge variant="secondary">draft</Badge>}
                   {!p.available && <Badge variant="destructive">unavailable</Badge>}
                   {Array.isArray(p.media) && p.media.length > 0 && (
@@ -294,7 +294,7 @@ function AdminProducts() {
 
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditing({ ...p, media: Array.isArray(p.media) ? p.media : [] })}><Pencil className="h-4 w-4" /></Button>
               <Button variant="outline" size="sm" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
