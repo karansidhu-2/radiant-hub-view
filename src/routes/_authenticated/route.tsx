@@ -20,7 +20,7 @@ function AuthedLayout() {
     <>
       {showBack && (
         <div className="mx-auto w-full max-w-7xl px-4 pt-3 md:px-6">
-          <BackButton />
+          <BackButton fallback="/" />
         </div>
       )}
       <Outlet />
