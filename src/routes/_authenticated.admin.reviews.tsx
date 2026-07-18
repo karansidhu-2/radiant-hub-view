@@ -98,8 +98,18 @@ function AdminReviews() {
       bulk({ data: { ids: Array.from(selected), action } }) as Promise<{ count: number }>,
     onSuccess: (res, action) => {
       toast.success(`${action.replace("_", " ")}: ${res.count} review(s)`);
-      setSelected(new Set()); invalidate();
-      setBulkConfirm(null); setBulkAck(false);
+      // Reset selection & close modal automatically
+      setSelected(new Set());
+      setBulkConfirm(null);
+      setBulkAck(false);
+      const shouldRefresh = bulkRefresh;
+      setBulkRefresh(false);
+      // Always revalidate the list; optionally hard-refresh the page
+      invalidate();
+      if (shouldRefresh) {
+        // give the toast a moment before reloading
+        setTimeout(() => window.location.reload(), 400);
+      }
     },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
@@ -107,11 +117,15 @@ function AdminReviews() {
   type BulkAction = "approve" | "hide" | "delete" | "clear_reply";
   const [bulkConfirm, setBulkConfirm] = useState<BulkAction | null>(null);
   const [bulkAck, setBulkAck] = useState(false);
+  const [bulkRefresh, setBulkRefresh] = useState(false);
   const openBulk = (action: BulkAction) => {
     if (!selected.size) return;
     setBulkAck(false);
+    setBulkRefresh(false);
     setBulkConfirm(action);
   };
+
+
 
   const BULK_META: Record<BulkAction, { title: string; verb: string; body: string; destructive: boolean; ack: string }> = {
     approve:     { title: "Approve reviews",   verb: "Approve",      body: "These reviews will be published and visible to customers.",   destructive: false, ack: "I want to publish these reviews." },
