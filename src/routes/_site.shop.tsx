@@ -55,6 +55,7 @@ function ShopPage() {
   const [priceMax, setPriceMax] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const { addItem } = useCart();
+  const { data: autoRatings } = useAutoRatings();
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "public"],
