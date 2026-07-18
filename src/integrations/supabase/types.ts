@@ -233,6 +233,7 @@ export type Database = {
           id: string
           image_url: string | null
           installation_fee: number
+          media: Json
           name: string
           price: number
           published: boolean
@@ -254,6 +255,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           installation_fee?: number
+          media?: Json
           name: string
           price: number
           published?: boolean
@@ -275,6 +277,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           installation_fee?: number
+          media?: Json
           name?: string
           price?: number
           published?: boolean
