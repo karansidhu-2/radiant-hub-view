@@ -28,10 +28,17 @@ const UPDATE = process.argv.includes("--update");
 const THRESHOLD = 0.15;               // per-pixel color threshold (pixelmatch)
 const MAX_DIFF_RATIO = 0.02;          // fail if > 2% pixels differ
 
+// Breakpoint note: bottom nav is hidden at Tailwind `md` (>= 768px).
+// hasBottom flags the expected presence of the mobile bottom nav.
 const SIZES = [
-  { name: "mobile", w: 390, h: 844 },
-  { name: "tablet", w: 820, h: 1180 },
-  { name: "desktop", w: 1440, h: 900 },
+  { name: "mobile-375", w: 375, h: 812, hasBottom: true },   // iPhone SE / small mobile
+  { name: "mobile-390", w: 390, h: 844, hasBottom: true },   // iPhone 12/13/14
+  { name: "mobile-600", w: 600, h: 900, hasBottom: true },   // large phone / small tablet portrait
+  { name: "tablet-767", w: 767, h: 1024, hasBottom: true },  // just BELOW md breakpoint edge
+  { name: "tablet-768", w: 768, h: 1024, hasBottom: false }, // exactly AT md breakpoint edge
+  { name: "tablet-820", w: 820, h: 1180, hasBottom: false }, // iPad Air
+  { name: "desktop-1024", w: 1024, h: 768, hasBottom: false }, // lg breakpoint
+  { name: "desktop-1440", w: 1440, h: 900, hasBottom: false }, // standard desktop
 ];
 
 function loadPng(file) {
