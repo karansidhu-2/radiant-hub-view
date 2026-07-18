@@ -110,6 +110,9 @@ export function SiteHeader() {
                 <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
                   <Shield className="h-4 w-4" /> Admin panel
                 </Link>
+                <Link to="/reviews" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  <Shield className="h-4 w-4" /> My reviews
+                </Link>
                 <button
                   onClick={() => { setOpen(false); signOut(); }}
                   className="flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground hover:bg-accent"
