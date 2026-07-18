@@ -1080,12 +1080,24 @@ export const adminListReviewAudit = createServerFn({ method: "POST" })
 // ---------- Admin analytics ----------
 export const adminAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { days?: number }) => ({ days: Math.min(Math.max(d.days ?? 30, 7), 180) }))
+  .inputValidator((d: { days?: number; sinceOverride?: string | null }) => ({
+    days: Math.min(Math.max(d.days ?? 30, 7), 180),
+    sinceOverride: d.sinceOverride ?? null,
+  }))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const since = new Date();
-    since.setDate(since.getDate() - data.days);
-    const sinceIso = since.toISOString();
+    const rangeSince = new Date();
+    rangeSince.setDate(rangeSince.getDate() - data.days);
+    const effective =
+      data.sinceOverride && new Date(data.sinceOverride) > rangeSince
+        ? new Date(data.sinceOverride)
+        : rangeSince;
+    const sinceIso = effective.toISOString();
+    const daysSpan = Math.max(
+      1,
+      Math.ceil((Date.now() - effective.getTime()) / 86400000),
+    );
+
 
     const [ordersRes, bookingsRes, reviewsRes, servicesRes] = await Promise.all([
       context.supabase.from("orders")
