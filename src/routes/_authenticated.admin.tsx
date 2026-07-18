@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog, Settings } from "lucide-react";
+import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, ShoppingBag, MapPin, UserCog, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -23,6 +23,7 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const router = useRouter();
   const [state, setState] = useState<"loading" | "admin" | "denied">("loading");
   const [email, setEmail] = useState("");
   const check = useServerFn(isCurrentUserAdmin);
@@ -50,9 +51,19 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-secondary/20">
       <div className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
-          <div className="flex items-center gap-2 font-bold"><Shield className="h-5 w-5 text-primary" /> Admin Panel</div>
-          <div className="text-xs text-muted-foreground">{email}</div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 md:px-6">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => router.history.back()} className="gap-1">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </Button>
+            <div className="hidden items-center gap-2 font-bold sm:flex"><Shield className="h-5 w-5 text-primary" /> Admin Panel</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-1"><Home className="h-4 w-4" /> <span className="hidden sm:inline">Home</span></Button>
+            </Link>
+            <div className="hidden text-xs text-muted-foreground md:block">{email}</div>
+          </div>
         </div>
       </div>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
