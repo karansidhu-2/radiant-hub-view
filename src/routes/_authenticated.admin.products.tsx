@@ -171,8 +171,16 @@ function AdminProducts() {
               <div><Label>Category</Label><Input value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })} /></div>
               <div><Label>Price ($)</Label><Input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} /></div>
               <div><Label>Installation fee ($)</Label><Input type="number" value={editing.installation_fee} onChange={(e) => setEditing({ ...editing, installation_fee: Number(e.target.value) })} /></div>
-              <div><Label>Stock</Label><Input type="number" value={editing.stock} onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })} /></div>
+              <div><Label>Stock on hand</Label><Input type="number" min={0} value={editing.stock} onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })} /></div>
+              <div>
+                <Label>Low-stock reminder at</Label>
+                <Input type="number" min={0} placeholder="e.g. 3 (leave blank to disable)"
+                  value={editing.low_stock_threshold ?? ""}
+                  onChange={(e) => setEditing({ ...editing, low_stock_threshold: e.target.value === "" ? null : Number(e.target.value) })} />
+                <p className="mt-1 text-[11px] text-muted-foreground">Product appears in the Inbox low-stock reminder when stock reaches this number.</p>
+              </div>
               <div><Label>Tag</Label><Input value={editing.tag ?? ""} onChange={(e) => setEditing({ ...editing, tag: e.target.value || null })} /></div>
+
               <div className="flex items-center gap-2"><Switch checked={editing.published} onCheckedChange={(v) => setEditing({ ...editing, published: v })} /><Label>Published</Label></div>
               <div className="flex items-center gap-2"><Switch checked={editing.available} onCheckedChange={(v) => setEditing({ ...editing, available: v })} /><Label>Available</Label></div>
             </div>
