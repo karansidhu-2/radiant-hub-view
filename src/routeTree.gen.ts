@@ -21,6 +21,7 @@ import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteBookRouteImport } from './routes/_site.book'
 import { Route as SiteAuthRouteImport } from './routes/_site.auth'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated.reviews'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -95,6 +96,11 @@ const SiteAboutRoute = SiteAboutRouteImport.update({
   id: '/about',
   path: '/about',
   getParentRoute: () => SiteRoute,
+} as any)
+const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/reviews': typeof AuthenticatedReviewsRoute
   '/about': typeof SiteAboutRoute
   '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/reviews': typeof AuthenticatedReviewsRoute
   '/about': typeof SiteAboutRoute
   '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_site/about': typeof SiteAboutRoute
   '/_site/auth': typeof SiteAuthRoute
   '/_site/book': typeof SiteBookRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin'
+    | '/reviews'
     | '/about'
     | '/auth'
     | '/book'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/reviews'
     | '/about'
     | '/auth'
     | '/book'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
+    | '/_authenticated/reviews'
     | '/_site/about'
     | '/_site/auth'
     | '/_site/book'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/about'
       preLoaderRoute: typeof SiteAboutRouteImport
       parentRoute: typeof SiteRoute
+    }
+    '/_authenticated/reviews': {
+      id: '/_authenticated/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof AuthenticatedReviewsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -598,10 +617,12 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
