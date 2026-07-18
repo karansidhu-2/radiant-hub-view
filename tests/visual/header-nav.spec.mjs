@@ -133,14 +133,16 @@ try {
     await captureRegion(page, "header", headerOut);
 
     // Bottom nav (mobile only)
+    // Bottom nav visibility is driven by the size's hasBottom flag,
+    // so we assert both presence AND absence at each breakpoint edge.
     let bottomOut = null;
-    if (size.name === "mobile") {
+    if (size.hasBottom) {
       bottomOut = path.join(ACTUAL, `${size.name}_bottom.png`);
       await captureRegion(page, 'nav[aria-label="Primary mobile"]', bottomOut);
     } else {
       const exists = await page.locator('nav[aria-label="Primary mobile"]').count();
       const visible = exists ? await page.locator('nav[aria-label="Primary mobile"]').first().isVisible() : false;
-      if (visible) throw new Error(`[${size.name}] bottom nav must be hidden at tablet+desktop widths`);
+      if (visible) throw new Error(`[${size.name}] bottom nav must be hidden at ${size.w}px (>= md breakpoint)`);
     }
 
     const a11y = await verifyA11y(page, size);
