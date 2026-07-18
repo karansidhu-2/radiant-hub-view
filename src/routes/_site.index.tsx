@@ -107,7 +107,10 @@ export default function Home() {
         </div>
       </section>
 
+      <MobileQuickAccess />
+
       {/* Services */}
+
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
