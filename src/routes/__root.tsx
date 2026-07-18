@@ -122,6 +122,26 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    const onError = (event: ErrorEvent) => {
+      reportLovableError(event.error ?? event.message, {
+        source: "window_onerror",
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
+    };
+    const onRejection = (event: PromiseRejectionEvent) => {
+      reportLovableError(event.reason, { source: "unhandled_promise_rejection" });
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
@@ -131,4 +151,5 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
 
