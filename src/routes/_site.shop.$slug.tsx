@@ -34,6 +34,7 @@ function ProductDetail() {
   const { slug } = Route.useParams();
   const { addItem } = useCart();
   const [withInstall, setWithInstall] = useState(true);
+  const { data: autoRatings } = useAutoRatings();
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", slug],
