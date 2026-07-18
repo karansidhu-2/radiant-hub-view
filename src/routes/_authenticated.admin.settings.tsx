@@ -196,8 +196,59 @@ function SettingsPage() {
                 </p>
               </div>
             </div>
+            <div className="mt-5 border-t pt-4">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <AlertTriangle className={`h-4 w-4 ${overflow.length ? "text-destructive" : "text-muted-foreground"}`} />
+                    Capacity check
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Existing upcoming bookings are re-validated against the current capacity ({form.crew_capacity_enabled ? form.crew_capacity : 1}).
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="outline" disabled={checkingOverflow}
+                  onClick={() => refreshOverflow({ capacity: form.crew_capacity, enabled: form.crew_capacity_enabled })}>
+                  {checkingOverflow ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
+                  Re-check now
+                </Button>
+              </div>
+              {overflow.length === 0 ? (
+                <p className="mt-3 text-xs text-muted-foreground">No overflow — every upcoming slot fits within capacity.</p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  {overflow.map((o) => (
+                    <div key={`${o.date}-${o.hour}`} className="rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-destructive">
+                          {o.date} · {String(o.hour).padStart(2, "0")}:00 — {o.count} bookings for {o.capacity} crew{o.capacity === 1 ? "" : "s"}
+                        </div>
+                        <Link to="/admin/calendar" className="text-xs font-medium text-primary hover:underline">Open calendar →</Link>
+                      </div>
+                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        {o.bookings.map((b) => (
+                          <li key={b.id} className="flex items-center justify-between gap-2">
+                            <span className="truncate">
+                              <span className="font-mono">{b.reference}</span> · {b.full_name || "—"} · {b.service_name || "—"}
+                              {b.technician ? ` · 👷 ${b.technician}` : " · unassigned"}
+                            </span>
+                            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase">{b.status}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-xs">
+                        Reassign or reschedule the extra booking(s) from the calendar, or increase capacity above.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
+
+
+
 
 
         <Button type="submit" disabled={busy} className="gradient-cool text-primary-foreground">
