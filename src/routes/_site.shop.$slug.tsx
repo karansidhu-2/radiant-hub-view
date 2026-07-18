@@ -127,7 +127,7 @@ function ProductDetail() {
               {p.hspf && <span className="rounded-full bg-accent px-3 py-1 font-semibold text-accent-foreground">{p.hspf} HSPF2</span>}
             </div>
 
-            <Card className="mt-6">
+            <Card className="mt-6 md:sticky md:top-20">
               <CardContent className="p-5">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold">{formatMoney(price + (withInstall ? install : 0))}</span>
