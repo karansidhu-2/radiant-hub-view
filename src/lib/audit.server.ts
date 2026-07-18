@@ -25,9 +25,9 @@ export async function logAdminAction(
       action: entry.action,
       entity_type: entry.entity_type,
       entity_id: entry.entity_id ? String(entry.entity_id).slice(0, 120) : null,
-      before: entry.before ?? null,
-      after: entry.after ?? null,
-      details: entry.details ?? null,
+      before: (entry.before ?? null) as any,
+      after: (entry.after ?? null) as any,
+      details: (entry.details ?? null) as any,
     });
   } catch (e) {
     console.error("[audit] failed to log admin action", e);
