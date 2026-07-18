@@ -388,3 +388,176 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+
+// ---------- Reviews ----------
+const reviewSchema = z.object({
+  booking_id: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(2000).optional().nullable(),
+});
+
+export const createReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof reviewSchema>) => reviewSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: b, error: bErr } = await context.supabase
+      .from("bookings")
+      .select("id, user_id, status, service_slug, service_name")
+      .eq("id", data.booking_id)
+      .maybeSingle();
+    if (bErr || !b) throw new Error("Booking not found");
+    if (b.user_id !== context.userId) throw new Error("Not your booking");
+    if (b.status !== "completed") throw new Error("Booking not completed yet");
+    const { error } = await context.supabase.from("reviews").upsert({
+      user_id: context.userId,
+      booking_id: b.id,
+      service_slug: b.service_slug,
+      service_name: b.service_name,
+      rating: data.rating,
+      comment: data.comment ?? null,
+    }, { onConflict: "booking_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listMyReviewableBookings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: bookings } = await context.supabase
+      .from("bookings")
+      .select("id, service_slug, service_name, scheduled_date, status")
+      .eq("user_id", context.userId)
+      .eq("status", "completed")
+      .order("scheduled_date", { ascending: false });
+    const { data: reviews } = await context.supabase
+      .from("reviews")
+      .select("id, booking_id, rating, comment, created_at")
+      .eq("user_id", context.userId);
+    const byBooking = new Map((reviews ?? []).map((r: any) => [r.booking_id, r]));
+    return (bookings ?? []).map((b: any) => ({ ...b, review: byBooking.get(b.id) ?? null }));
+  });
+
+export const listServiceReviews = createServerFn({ method: "POST" })
+  .inputValidator((d: { service_slug: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("reviews")
+      .select("id, rating, comment, created_at, user_id")
+      .eq("service_slug", data.service_slug)
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.user_id)));
+    let names = new Map<string, string>();
+    if (ids.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("profiles").select("id, full_name, email").in("id", ids);
+      names = new Map((profs ?? []).map((p: any) => [p.id, p.full_name || (p.email || "").split("@")[0] || "Customer"]));
+    }
+    const list = (rows ?? []).map((r: any) => ({
+      id: r.id, rating: r.rating, comment: r.comment, created_at: r.created_at,
+      author: names.get(r.user_id) ?? "Customer",
+    }));
+    const count = list.length;
+    const avg = count ? list.reduce((s, r) => s + r.rating, 0) / count : 0;
+    return { list, count, avg };
+  });
+
+// ---------- Admin analytics ----------
+export const adminAnalytics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number }) => ({ days: Math.min(Math.max(d.days ?? 30, 7), 180) }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const since = new Date();
+    since.setDate(since.getDate() - data.days);
+    const sinceIso = since.toISOString();
+
+    const [ordersRes, bookingsRes, reviewsRes, servicesRes] = await Promise.all([
+      context.supabase.from("orders")
+        .select("id, total, status, created_at, user_id")
+        .gte("created_at", sinceIso),
+      context.supabase.from("bookings")
+        .select("id, status, service_slug, service_name, service_charge, scheduled_date, created_at, user_id")
+        .gte("created_at", sinceIso),
+      context.supabase.from("reviews")
+        .select("id, rating, service_slug, created_at").gte("created_at", sinceIso),
+      context.supabase.from("services").select("slug, name"),
+    ]);
+
+    const orders = ordersRes.data ?? [];
+    const bookings = bookingsRes.data ?? [];
+    const reviews = reviewsRes.data ?? [];
+    const services = servicesRes.data ?? [];
+
+    // Daily buckets
+    const days: { date: string; orderRevenue: number; serviceRevenue: number; orders: number; bookings: number }[] = [];
+    for (let i = data.days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push({ date: d.toISOString().slice(0, 10), orderRevenue: 0, serviceRevenue: 0, orders: 0, bookings: 0 });
+    }
+    const idx = new Map(days.map((d, i) => [d.date, i]));
+    for (const o of orders) {
+      const k = String(o.created_at).slice(0, 10);
+      const i = idx.get(k); if (i == null) continue;
+      days[i].orders++; days[i].orderRevenue += Number(o.total || 0);
+    }
+    for (const b of bookings) {
+      const k = String(b.created_at).slice(0, 10);
+      const i = idx.get(k); if (i == null) continue;
+      days[i].bookings++; days[i].serviceRevenue += Number(b.service_charge || 0);
+    }
+
+    const orderRevenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const serviceRevenue = bookings.reduce((s, b) => s + Number(b.service_charge || 0), 0);
+    const totalRevenue = orderRevenue + serviceRevenue;
+
+    // Booking funnel / conversion
+    const statusCounts: Record<string, number> = {};
+    for (const b of bookings) statusCounts[b.status] = (statusCounts[b.status] || 0) + 1;
+    const completed = statusCounts["completed"] || 0;
+    const cancelled = statusCounts["cancelled"] || 0;
+    const conversion = bookings.length ? (completed / bookings.length) * 100 : 0;
+
+    // Top services (by bookings & revenue)
+    const svcMap = new Map<string, { slug: string | null; name: string; bookings: number; revenue: number }>();
+    for (const b of bookings) {
+      const key = b.service_slug || b.service_name;
+      const cur = svcMap.get(key) || { slug: b.service_slug, name: b.service_name, bookings: 0, revenue: 0 };
+      cur.bookings++;
+      cur.revenue += Number(b.service_charge || 0);
+      svcMap.set(key, cur);
+    }
+    const topServices = Array.from(svcMap.values()).sort((a, b) => b.bookings - a.bookings).slice(0, 8);
+
+    // AOV
+    const aov = orders.length ? orderRevenue / orders.length : 0;
+    const avgTicket = completed ? serviceRevenue / completed : 0;
+
+    // Repeat customers
+    const customerBookings = new Map<string, number>();
+    for (const b of bookings) if (b.user_id) customerBookings.set(b.user_id, (customerBookings.get(b.user_id) || 0) + 1);
+    const uniqueCustomers = customerBookings.size;
+    const repeatCustomers = Array.from(customerBookings.values()).filter((n) => n > 1).length;
+
+    // Reviews
+    const reviewCount = reviews.length;
+    const avgRating = reviewCount ? reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount : 0;
+
+    return {
+      range: { days: data.days, since: sinceIso },
+      totals: {
+        totalRevenue, orderRevenue, serviceRevenue,
+        orderCount: orders.length, bookingCount: bookings.length,
+        completed, cancelled, conversion, aov, avgTicket,
+        uniqueCustomers, repeatCustomers,
+        reviewCount, avgRating,
+        serviceCatalog: services.length,
+      },
+      daily: days,
+      statusCounts,
+      topServices,
+    };
+  });
