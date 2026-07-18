@@ -63,6 +63,10 @@ function ServiceDetail() {
   }
 
   const svc = data.svc;
+  const { data: rv } = useQuery({
+    queryKey: ["service-reviews", slug],
+    queryFn: () => reviewsFn({ data: { service_slug: slug } }),
+  });
   return (
     <>
       <section className="border-b border-border bg-secondary/40">
