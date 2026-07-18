@@ -488,6 +488,48 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------- Capacity overflow (admin) ----------
+export const adminGetCapacityOverflow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { capacity?: number; enabled?: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let cap = 1;
+    let enabled = false;
+    if (data.enabled !== undefined || data.capacity !== undefined) {
+      enabled = !!data.enabled;
+      cap = enabled ? Math.max(1, Math.min(50, Math.floor(Number(data.capacity ?? 1)) || 1)) : 1;
+    } else {
+      const { data: s } = await context.supabase
+        .from("site_settings").select("crew_capacity_enabled, crew_capacity")
+        .eq("singleton", true).maybeSingle();
+      enabled = !!s?.crew_capacity_enabled;
+      cap = enabled ? Math.max(1, s?.crew_capacity ?? 1) : 1;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: rows } = await context.supabase
+      .from("bookings")
+      .select("id, reference, scheduled_date, scheduled_hour, service_name, technician, status, full_name")
+      .gte("scheduled_date", today)
+      .neq("status", "cancelled")
+      .order("scheduled_date", { ascending: true })
+      .order("scheduled_hour", { ascending: true });
+    const grouped: Record<string, typeof rows> = {};
+    for (const r of rows ?? []) {
+      const k = `${r.scheduled_date}#${r.scheduled_hour}`;
+      (grouped[k] ??= [] as any).push(r);
+    }
+    const overflow = Object.entries(grouped)
+      .filter(([, list]) => (list?.length ?? 0) > cap)
+      .map(([key, list]) => {
+        const [date, hour] = key.split("#");
+        return { date, hour: Number(hour), capacity: cap, count: list!.length, bookings: list! };
+      });
+    return { capacity: cap, enabled, overflow };
+  });
+
+
+
 
 
 // ---------- Reviews ----------
