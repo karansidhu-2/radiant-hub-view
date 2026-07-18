@@ -21,22 +21,17 @@ export const checkZip = createServerFn({ method: "POST" })
 
 // ---------- Booked slots for a date ----------
 export const getBookedSlots = createServerFn({ method: "POST" })
-  .inputValidator((d: { date: string }) => d)
+  .inputValidator((d: { date: string; service_slug?: string | null }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: rows }, { data: settings }] = await Promise.all([
+    const [{ data: rows }, capacity] = await Promise.all([
       supabaseAdmin
         .from("bookings")
         .select("scheduled_hour")
         .eq("scheduled_date", data.date)
         .neq("status", "cancelled"),
-      supabaseAdmin
-        .from("site_settings")
-        .select("crew_capacity_enabled, crew_capacity")
-        .eq("singleton", true)
-        .maybeSingle(),
+      computeCapacity(supabaseAdmin, data.service_slug ?? null),
     ]);
-    const capacity = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
     const counts: Record<number, number> = {};
     for (const r of rows ?? []) counts[r.scheduled_hour] = (counts[r.scheduled_hour] ?? 0) + 1;
     const hours = Object.entries(counts)
@@ -44,6 +39,7 @@ export const getBookedSlots = createServerFn({ method: "POST" })
       .map(([h]) => Number(h));
     return { hours, counts, capacity };
   });
+
 
 
 // ---------- Create booking ----------
