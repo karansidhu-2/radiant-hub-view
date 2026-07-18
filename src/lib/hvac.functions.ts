@@ -453,6 +453,7 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     notify_email_enabled?: boolean; notify_sms_enabled?: boolean;
     notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
     twilio_from_phone?: string; technicians?: string[];
+    crew_capacity_enabled?: boolean; crew_capacity?: number;
     notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string }>;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -460,6 +461,10 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     const patch: any = { ...data };
     if (Array.isArray(patch.technicians)) {
       patch.technicians = patch.technicians.map((t: string) => String(t).trim()).filter(Boolean).slice(0, 100);
+    }
+    if (patch.crew_capacity != null) {
+      const n = Math.floor(Number(patch.crew_capacity));
+      patch.crew_capacity = Math.min(50, Math.max(1, Number.isFinite(n) ? n : 1));
     }
     if (patch.notification_templates && typeof patch.notification_templates === "object") {
       const allowed = ["pending", "confirmed", "completed", "cancelled", "rescheduled"];
