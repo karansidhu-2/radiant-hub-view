@@ -427,12 +427,27 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     notify_email_enabled?: boolean; notify_sms_enabled?: boolean;
     notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
     twilio_from_phone?: string; technicians?: string[];
+    notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string }>;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const patch: any = { ...data };
     if (Array.isArray(patch.technicians)) {
       patch.technicians = patch.technicians.map((t: string) => String(t).trim()).filter(Boolean).slice(0, 100);
+    }
+    if (patch.notification_templates && typeof patch.notification_templates === "object") {
+      const allowed = ["pending", "confirmed", "completed", "cancelled", "rescheduled"];
+      const clean: any = {};
+      for (const k of allowed) {
+        const v = patch.notification_templates[k];
+        if (!v) continue;
+        clean[k] = {
+          email_subject: String(v.email_subject ?? "").slice(0, 300),
+          email_body: String(v.email_body ?? "").slice(0, 5000),
+          sms_body: String(v.sms_body ?? "").slice(0, 480),
+        };
+      }
+      patch.notification_templates = clean;
     }
     const { error } = await context.supabase
       .from("site_settings")

@@ -482,6 +482,7 @@ export type Database = {
           created_at: string
           emergency_phone: string
           id: string
+          notification_templates: Json
           notify_email_enabled: boolean
           notify_on_reschedule: boolean
           notify_on_status_change: boolean
@@ -501,6 +502,7 @@ export type Database = {
           created_at?: string
           emergency_phone?: string
           id?: string
+          notification_templates?: Json
           notify_email_enabled?: boolean
           notify_on_reschedule?: boolean
           notify_on_status_change?: boolean
@@ -520,6 +522,7 @@ export type Database = {
           created_at?: string
           emergency_phone?: string
           id?: string
+          notification_templates?: Json
           notify_email_enabled?: boolean
           notify_on_reschedule?: boolean
           notify_on_status_change?: boolean
