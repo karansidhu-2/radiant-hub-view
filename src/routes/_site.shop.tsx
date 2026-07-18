@@ -44,7 +44,7 @@ type ProductRow = {
   tag: string | null; available: boolean; image_url: string | null;
 };
 
-type SortKey = "featured" | "price-asc" | "price-desc" | "name";
+type SortKey = "featured" | "price-asc" | "price-desc" | "name" | "top-rated";
 
 function ShopPage() {
   const [filter, setFilter] = useState<ProductCategory | "all">("all");
