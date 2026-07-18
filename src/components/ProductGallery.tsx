@@ -2,6 +2,8 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
+import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";
+
 
 
 type Props = {
@@ -298,8 +300,6 @@ function Lightbox({
   useEffect(() => {
     const el = swipeAreaRef.current;
     if (!el) return;
-    const H_LOCK = 8;   // px before we decide axis
-    const V_LOCK = 10;
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
       touchStart.current = { x: t.clientX, y: t.clientY, t: performance.now() };
@@ -313,10 +313,7 @@ function Lightbox({
       const dx = t.clientX - touchStart.current.x;
       const dy = t.clientY - touchStart.current.y;
       touchDelta.current = { x: dx, y: dy };
-      if (!swipeLocked.current) {
-        if (Math.abs(dx) > H_LOCK && Math.abs(dx) > Math.abs(dy)) swipeLocked.current = "h";
-        else if (Math.abs(dy) > V_LOCK) swipeLocked.current = "v";
-      }
+      if (!swipeLocked.current) swipeLocked.current = resolveAxisLock(dx, dy);
       if (swipeLocked.current === "h") {
         e.preventDefault(); // block page scroll during horizontal drag
         setDragX(dx);
@@ -325,17 +322,18 @@ function Lightbox({
     const onEnd = () => {
       const start = touchStart.current;
       const { x: dx } = touchDelta.current;
-      touchStart.current = null;
       const locked = swipeLocked.current;
+      touchStart.current = null;
       swipeLocked.current = null;
       setDragX(0);
-      if (!start || locked !== "h") return;
-      const width = el.clientWidth || 1;
-      const elapsed = Math.max(1, performance.now() - start.t);
-      const velocity = Math.abs(dx) / elapsed; // px/ms
-      const distanceHit = Math.abs(dx) > Math.max(60, width * 0.18);
-      const velocityHit = velocity > 0.5 && Math.abs(dx) > 30;
-      if (distanceHit || velocityHit) go(dx < 0 ? 1 : -1);
+      if (!start) return;
+      const decision = decideSwipe({
+        dx,
+        elapsedMs: performance.now() - start.t,
+        width: el.clientWidth || 1,
+        lockedAxis: locked,
+      });
+      if (decision !== 0) go(decision);
     };
     el.addEventListener("touchstart", onStart, { passive: true });
     el.addEventListener("touchmove", onMove, { passive: false });
@@ -348,6 +346,7 @@ function Lightbox({
       el.removeEventListener("touchcancel", onEnd);
     };
   }, [go]);
+
 
 
   const current = items[index];

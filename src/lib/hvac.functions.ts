@@ -554,7 +554,7 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     notify_on_reschedule?: boolean; notify_on_status_change?: boolean;
     twilio_from_phone?: string; technicians?: string[];
     crew_capacity_enabled?: boolean; crew_capacity?: number;
-    notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string }>;
+    notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string; composer?: unknown }>;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -572,14 +572,21 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       for (const k of allowed) {
         const v = patch.notification_templates[k];
         if (!v) continue;
-        clean[k] = {
+        const entry: any = {
           email_subject: String(v.email_subject ?? "").slice(0, 300),
           email_body: String(v.email_body ?? "").slice(0, 5000),
           sms_body: String(v.sms_body ?? "").slice(0, 480),
         };
+        // Persist composer state verbatim (bounded by JSON stringify size).
+        if (v.composer && typeof v.composer === "object") {
+          const s = JSON.stringify(v.composer);
+          if (s.length <= 8000) entry.composer = v.composer;
+        }
+        clean[k] = entry;
       }
       patch.notification_templates = clean;
     }
+
     const { error } = await context.supabase
       .from("site_settings")
       .update(patch)

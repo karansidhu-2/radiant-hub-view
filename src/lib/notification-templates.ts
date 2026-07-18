@@ -30,7 +30,38 @@ export type TemplateEntry = {
   sms_body: string;
 };
 
-export type NotificationTemplates = Partial<Record<NotificationKind, Partial<TemplateEntry>>>;
+/**
+ * Easy-mode composer state. The admin edits friendly fields (greeting,
+ * message, checkboxes) and we compile these into the actual template strings
+ * on save. Persisted per-kind so the composer round-trips.
+ */
+export type ComposerState = {
+  greeting: string;              // e.g. "Hi {name}," — {name} auto-fills customer_name
+  message: string;               // plain text, no code
+  include: {
+    reference?: boolean;
+    dateTime?: boolean;
+    address?: boolean;
+    technician?: boolean;
+    serviceCharge?: boolean;
+    trackLink?: boolean;
+    supportPhone?: boolean;
+  };
+  signature: string;             // e.g. "— {company}"
+  subjectMode: "auto" | "custom";
+  subject: string;               // used when subjectMode === "custom"
+  sms: {
+    message: string;
+    includeReference?: boolean;
+    includeDateTime?: boolean;
+    includeTrackLink?: boolean;
+  };
+};
+
+export type NotificationTemplates = Partial<
+  Record<NotificationKind, Partial<TemplateEntry> & { composer?: ComposerState }>
+>;
+
 
 export const DEFAULT_TEMPLATES: Record<NotificationKind, TemplateEntry> = {
   pending: {
@@ -130,3 +161,111 @@ export const SAMPLE_VARS: TemplateVars = {
   support_phone: "(800) 555-0199",
   track_url: "https://example.com/confirmation/booking/HVAC-8F3D2A",
 };
+
+// ---- Easy-mode composer helpers ---------------------------------------------
+
+const DEFAULT_SUBJECTS: Record<NotificationKind, string> = {
+  pending: "Booking received — {{reference}}",
+  confirmed: "Booking confirmed — {{reference}}",
+  completed: "Service completed — {{reference}}",
+  cancelled: "Booking cancelled — {{reference}}",
+  rescheduled: "Appointment rescheduled — {{reference}}",
+};
+
+const DEFAULT_MESSAGES: Record<NotificationKind, string> = {
+  pending:
+    "Thanks for booking your {service} with us. We've received your request and will confirm the appointment shortly.",
+  confirmed:
+    "Good news — your {service} appointment is confirmed. We'll see you soon.",
+  completed:
+    "Your {service} service is complete. Thank you for choosing us — we'd love your feedback!",
+  cancelled:
+    "Your {service} appointment has been cancelled. If this was unexpected, please give us a call.",
+  rescheduled:
+    "Your {service} appointment has been rescheduled to the new time below.",
+};
+
+const DEFAULT_SMS: Record<NotificationKind, string> = {
+  pending: "Booking received for your {service}. We'll confirm soon.",
+  confirmed: "Your {service} is confirmed.",
+  completed: "Your {service} is complete. Thank you!",
+  cancelled: "Your {service} appointment was cancelled.",
+  rescheduled: "Your {service} appointment was rescheduled.",
+};
+
+export function defaultComposer(kind: NotificationKind): ComposerState {
+  const detailDefaults = {
+    reference: true,
+    dateTime: kind !== "completed",
+    address: kind === "confirmed" || kind === "rescheduled",
+    technician: kind === "confirmed" || kind === "rescheduled",
+    serviceCharge: kind === "completed",
+    trackLink: kind !== "cancelled",
+    supportPhone: kind === "cancelled",
+  };
+  return {
+    greeting: "Hi {name},",
+    message: DEFAULT_MESSAGES[kind],
+    include: detailDefaults,
+    signature: "— {company}",
+    subjectMode: "auto",
+    subject: DEFAULT_SUBJECTS[kind],
+    sms: {
+      message: DEFAULT_SMS[kind],
+      includeReference: true,
+      includeDateTime: kind !== "completed",
+      includeTrackLink: kind === "confirmed" || kind === "rescheduled",
+    },
+  };
+}
+
+// Replace friendly {name}/{service}/{company} tokens in composer text with the
+// underlying {{customer_name}} / {{service_name}} / {{company_name}} vars.
+function friendlyToVars(text: string): string {
+  return text
+    .replace(/\{name\}/gi, "{{customer_name}}")
+    .replace(/\{service\}/gi, "{{service_name}}")
+    .replace(/\{company\}/gi, "{{company_name}}")
+    .replace(/\{reference\}/gi, "{{reference}}")
+    .replace(/\{date\}/gi, "{{date}}")
+    .replace(/\{time\}/gi, "{{time}}")
+    .replace(/\{address\}/gi, "{{address}}")
+    .replace(/\{technician\}/gi, "{{technician}}")
+    .replace(/\{phone\}/gi, "{{support_phone}}");
+}
+
+export function compileComposer(
+  kind: NotificationKind,
+  c: ComposerState,
+): TemplateEntry {
+  const details: string[] = [];
+  if (c.include.reference) details.push("Reference: {{reference}}");
+  if (c.include.dateTime) details.push("When: {{date}} at {{time}}");
+  if (c.include.address) details.push("Address: {{address}}");
+  if (c.include.technician) details.push("Technician: {{technician}}");
+  if (c.include.serviceCharge) details.push("Service charge: {{service_charge}}");
+  if (c.include.supportPhone) details.push("Questions? Call {{support_phone}}.");
+
+  const parts: string[] = [];
+  if (c.greeting.trim()) parts.push(friendlyToVars(c.greeting.trim()));
+  if (c.message.trim()) parts.push(friendlyToVars(c.message.trim()));
+  if (details.length) parts.push(details.join("\n"));
+  if (c.include.trackLink) parts.push("Track your booking: {{track_url}}");
+  if (c.signature.trim()) parts.push(friendlyToVars(c.signature.trim()));
+
+  const subject = c.subjectMode === "custom" && c.subject.trim()
+    ? friendlyToVars(c.subject.trim())
+    : DEFAULT_SUBJECTS[kind];
+
+  const smsBits: string[] = [friendlyToVars(c.sms.message.trim() || DEFAULT_SMS[kind])];
+  if (c.sms.includeDateTime) smsBits.push("on {{date}} at {{time}}");
+  if (c.sms.includeReference) smsBits.push("Ref {{reference}}");
+  if (c.sms.includeTrackLink) smsBits.push("Track: {{track_url}}");
+
+  return {
+    email_subject: subject,
+    email_body: parts.join("\n\n"),
+    sms_body: smsBits.join(" ").replace(/\s+/g, " ").trim(),
+  };
+}
+
