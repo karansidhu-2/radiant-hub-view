@@ -15,6 +15,8 @@ import {
   Calendar, DollarSign, MapPin, MessageSquare, Package, Plus, Star, Trash2, User, Wallet, Wrench, Reply,
 } from "lucide-react";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -128,10 +130,15 @@ function AccountPage() {
     (b: any) => !["completed", "cancelled"].includes(b.status) && b.scheduled_date && new Date(b.scheduled_date) >= new Date(new Date().toDateString()),
   ).length;
 
+  const ptr = usePullToRefresh(async () => {
+    await Promise.all([bookingsQ.refetch(), ordersQ.refetch(), reviewsQ.refetch(), addressesQ.refetch(), profileQ.refetch()]);
+  });
+
   if (!user) return <div className="p-6 text-sm">Please sign in.</div>;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6">
+      <PullToRefreshIndicator {...ptr} />
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">My account</h1>

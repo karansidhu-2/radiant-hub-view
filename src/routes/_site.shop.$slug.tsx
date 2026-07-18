@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Check, ShieldCheck, Truck, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, ShieldCheck, Truck, Loader2, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -89,8 +89,33 @@ function ProductDetail() {
             )}
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
-            <h1 className="mt-1 text-3xl font-bold md:text-4xl">{p.name}</h1>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                <h1 className="mt-1 text-3xl font-bold md:text-4xl">{p.name}</h1>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label="Share this product"
+                className="shrink-0"
+                onClick={async () => {
+                  const url = typeof window !== "undefined" ? window.location.href : "";
+                  const shareData = { title: `${p.brand} ${p.name}`, text: p.description?.slice(0, 140), url };
+                  try {
+                    if (typeof navigator !== "undefined" && (navigator as any).share) {
+                      await (navigator as any).share(shareData);
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      toast.success("Link copied to clipboard");
+                    }
+                  } catch { /* user cancelled */ }
+                }}
+              >
+                <Share2 className="mr-1 h-4 w-4" /> Share
+              </Button>
+            </div>
             <p className="mt-3 text-muted-foreground">{p.description}</p>
             {autoRatings?.[p.slug] && (
               <div className="mt-4"><AutoRatingBadge rating={autoRatings[p.slug]} /></div>
@@ -102,7 +127,7 @@ function ProductDetail() {
               {p.hspf && <span className="rounded-full bg-accent px-3 py-1 font-semibold text-accent-foreground">{p.hspf} HSPF2</span>}
             </div>
 
-            <Card className="mt-6">
+            <Card className="mt-6 md:sticky md:top-20">
               <CardContent className="p-5">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold">{formatMoney(price + (withInstall ? install : 0))}</span>
