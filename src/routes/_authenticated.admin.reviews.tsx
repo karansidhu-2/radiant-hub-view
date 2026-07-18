@@ -169,19 +169,19 @@ function AdminReviews() {
             </label>
             <div className="ml-auto flex flex-wrap gap-1.5">
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("approve")}>
+                onClick={() => openBulk("approve")}>
                 <Eye className="mr-1 h-3.5 w-3.5" />Approve
               </Button>
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("hide")}>
+                onClick={() => openBulk("hide")}>
                 <EyeOff className="mr-1 h-3.5 w-3.5" />Hide
               </Button>
               <Button size="sm" variant="outline" disabled={!selected.size || bulkMut.isPending}
-                onClick={() => runBulk("clear_reply")}>
+                onClick={() => openBulk("clear_reply")}>
                 <MessageSquareOff className="mr-1 h-3.5 w-3.5" />Clear replies
               </Button>
               <Button size="sm" variant="outline" className="text-destructive hover:text-destructive"
-                disabled={!selected.size || bulkMut.isPending} onClick={() => runBulk("delete")}>
+                disabled={!selected.size || bulkMut.isPending} onClick={() => openBulk("delete")}>
                 <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
               </Button>
             </div>
