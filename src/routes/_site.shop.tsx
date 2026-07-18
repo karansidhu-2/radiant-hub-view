@@ -71,6 +71,8 @@ function ShopPage() {
       const urls = paths.length ? await (await import("@/lib/product-image")).resolveProductImageUrls(paths) : {};
       return rows.map((r) => ({ ...r, resolved_image: r.image_url ? urls[r.image_url] ?? null : null }));
     },
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
   });
 
   const brands = useMemo(
