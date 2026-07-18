@@ -18,7 +18,7 @@ function SiteLayout() {
           <BackButton />
         </div>
       )}
-      <main key={path} className="flex-1 animate-page-in">
+      <main className="flex-1">
         <Outlet />
       </main>
       <SiteFooter />
