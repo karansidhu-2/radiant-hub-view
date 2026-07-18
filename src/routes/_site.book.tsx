@@ -71,6 +71,8 @@ function BookPage() {
   const [zipMsg, setZipMsg] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [bookedHours, setBookedHours] = useState<number[]>([]);
+  const [capacityConflict, setCapacityConflict] = useState<string | null>(null);
+
 
   const checkZipFn = useServerFn(checkZip);
   const bookedFn = useServerFn(getBookedSlots);
