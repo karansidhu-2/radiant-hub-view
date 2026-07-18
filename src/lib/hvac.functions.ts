@@ -71,6 +71,18 @@ export const createBooking = createServerFn({ method: "POST" })
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
+    // enforce crew capacity per slot
+    const { data: settings } = await context.supabase
+      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
+    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    const { count } = await context.supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("scheduled_date", data.scheduled_date)
+      .eq("scheduled_hour", data.scheduled_hour)
+      .neq("status", "cancelled");
+    if ((count ?? 0) >= cap) throw new Error("That time slot is fully booked. Please pick another.");
+
     const { data: row, error } = await context.supabase
       .from("bookings")
       .insert({ ...data, user_id: context.userId, notes: data.notes ?? null })
