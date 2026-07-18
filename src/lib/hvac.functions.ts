@@ -691,11 +691,19 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       patch.notification_templates = clean;
     }
 
+    const { data: prevSettings } = await context.supabase
+      .from("site_settings").select("*").eq("singleton", true).maybeSingle();
     const { error } = await context.supabase
       .from("site_settings")
       .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
+    const { logAdminAction, diffShallow } = await import("./audit.server");
+    const diff = diffShallow(prevSettings as any, patch);
+    await logAdminAction(context, {
+      action: "settings.update", entity_type: "site_settings", entity_id: "singleton",
+      before: diff.before, after: diff.after,
+    });
 
     // If crew capacity changed, log any resulting overflow slots to the inbox
     if (patch.crew_capacity !== undefined || patch.crew_capacity_enabled !== undefined) {
