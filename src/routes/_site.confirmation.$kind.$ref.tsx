@@ -134,7 +134,7 @@ function ConfirmationPage() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={load}>Refresh status</Button>
           {kind === "booking" && data.status === "completed" && (
-            <a href="/reviews"><Button size="sm">Leave a review</Button></a>
+            <Link to="/reviews"><Button size="sm">Leave a review</Button></Link>
           )}
         </div>
       </CardContent></Card>
