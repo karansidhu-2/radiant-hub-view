@@ -17,8 +17,6 @@ import {
   CheckCircle2, XCircle, Repeat, Wrench, Download, RotateCcw, Trash2, Play,
 } from "lucide-react";
 
-  CheckCircle2, XCircle, Repeat, Wrench, Download,
-} from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
