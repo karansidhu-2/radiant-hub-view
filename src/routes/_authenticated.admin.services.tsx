@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/services")({
   component: AdminServices,
 });
 
-const empty = { slug: "", name: "", category: "cooling", short: "", description: "", starting_at: 0, icon: "Wrench", published: true, bullets: [] as string[] };
+const empty = { slug: "", name: "", category: "cooling", short: "", description: "", starting_at: 0, icon: "Wrench", published: true, bullets: [] as string[], required_skill: "" };
 
 function AdminServices() {
   const [items, setItems] = useState<any[]>([]);
