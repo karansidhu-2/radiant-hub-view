@@ -72,6 +72,7 @@ function BookPage() {
   const [busy, setBusy] = useState(false);
   const [bookedHours, setBookedHours] = useState<number[]>([]);
   const [capacityConflict, setCapacityConflict] = useState<string | null>(null);
+  const [alternatives, setAlternatives] = useState<{ date: string; hour: number }[]>([]);
 
 
   const checkZipFn = useServerFn(checkZip);
@@ -106,6 +107,7 @@ function BookPage() {
     if (zipState !== "ok") { toast.error("Please verify your ZIP is in our service area"); return; }
     setBusy(true);
     setCapacityConflict(null);
+    setAlternatives([]);
     try {
       const res = await bookFn({ data: { ...form, notes: form.notes || null } });
       toast.success("Booking confirmed!");
@@ -113,8 +115,15 @@ function BookPage() {
     } catch (err: any) {
       const msg = err?.message || "Failed to book";
       if (/fully booked|capacity/i.test(msg)) {
-        setCapacityConflict("That time slot just filled up (crew capacity reached). Please pick another available time below — we've refreshed the list.");
-        // refresh booked slots so the picker reflects the new state
+        setCapacityConflict("That time slot just filled up (crew capacity reached). Pick one of the suggested alternatives below, or choose another time.");
+        // parse alternatives if present
+        const marker = msg.indexOf("||ALTS||");
+        if (marker >= 0) {
+          try {
+            const alts = JSON.parse(msg.slice(marker + "||ALTS||".length));
+            if (Array.isArray(alts)) setAlternatives(alts);
+          } catch { /* ignore */ }
+        }
         bookedFn({ data: { date: form.scheduled_date } }).then((r) => setBookedHours(r.hours)).catch(() => {});
         toast.error("Slot is at crew capacity — pick another time");
       } else {
@@ -183,9 +192,40 @@ function BookPage() {
               onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
           </div>
           {capacityConflict && (
-            <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-              <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{capacityConflict}</span>
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="flex items-start gap-2">
+                <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{capacityConflict}</span>
+              </div>
+              {alternatives.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-destructive/80">Suggested open slots</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {alternatives.map((a, i) => {
+                      const sameDay = a.date === form.scheduled_date;
+                      const dt = new Date(`${a.date}T00:00:00`);
+                      const label = sameDay
+                        ? fmtHour(a.hour)
+                        : `${dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${fmtHour(a.hour)}`;
+                      return (
+                        <button
+                          key={`${a.date}-${a.hour}-${i}`}
+                          type="button"
+                          onClick={() => {
+                            setForm((f) => ({ ...f, scheduled_date: a.date, scheduled_hour: a.hour }));
+                            setCapacityConflict(null);
+                            setAlternatives([]);
+                            toast.success(`Selected ${label}`);
+                          }}
+                          className="rounded-full border border-destructive/40 bg-background px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
