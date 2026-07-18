@@ -1216,3 +1216,42 @@ export const adminLowStockProducts = createServerFn({ method: "GET" })
       .not("low_stock_threshold", "is", null);
     return (data ?? []).filter((p: any) => (p.stock ?? 0) <= (p.low_stock_threshold ?? 0));
   });
+
+// ---------- Admin audit log ----------
+export const adminListActions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days?: number; action?: string; entity_type?: string; q?: string; limit?: number }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const days = Math.min(Math.max(data.days ?? 30, 1), 365);
+    const since = new Date(); since.setDate(since.getDate() - days);
+    let q = context.supabase
+      .from("admin_actions")
+      .select("id, admin_id, admin_email, action, entity_type, entity_id, before, after, details, created_at")
+      .gte("created_at", since.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(Math.min(Math.max(data.limit ?? 500, 1), 5000));
+    if (data.action && data.action !== "all") q = q.eq("action", data.action);
+    if (data.entity_type && data.entity_type !== "all") q = q.eq("entity_type", data.entity_type);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const term = (data.q || "").trim().toLowerCase();
+    let list = rows ?? [];
+    if (term) list = list.filter((r: any) =>
+      (r.admin_email || "").toLowerCase().includes(term) ||
+      (r.action || "").toLowerCase().includes(term) ||
+      (r.entity_type || "").toLowerCase().includes(term) ||
+      (r.entity_id || "").toLowerCase().includes(term));
+    return list;
+  });
+
+export const adminActionOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase
+      .from("admin_actions").select("action, entity_type").limit(2000);
+    const actions = new Set<string>(); const entities = new Set<string>();
+    for (const r of data ?? []) { if (r.action) actions.add(r.action); if (r.entity_type) entities.add(r.entity_type); }
+    return { actions: Array.from(actions).sort(), entities: Array.from(entities).sort() };
+  });
