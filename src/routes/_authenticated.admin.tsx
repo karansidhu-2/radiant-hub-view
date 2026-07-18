@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox, ScrollText, Users, KeyRound } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
+import { NewBookingNotifier } from "@/components/admin/NewBookingNotifier";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
