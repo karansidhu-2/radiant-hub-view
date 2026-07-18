@@ -113,7 +113,7 @@ async function verifyA11y(page, size) {
 }
 
 const results = [];
-const browser = await chromium.launch();
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/chromium-1194/chrome-linux/chrome" });
 try {
   for (const size of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: size.w, height: size.h }, reducedMotion: "reduce" });
