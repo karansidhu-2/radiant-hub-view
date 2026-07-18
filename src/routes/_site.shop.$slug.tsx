@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProductGallery } from "@/components/ProductGallery";
 import type { MediaItem } from "@/lib/product-image";
+import { useAutoRatings } from "@/hooks/useAutoRatings";
+import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 
 export const Route = createFileRoute("/_site/shop/$slug")({
   head: ({ params }) => ({
