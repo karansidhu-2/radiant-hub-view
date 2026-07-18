@@ -585,8 +585,38 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
+
+    // If crew capacity changed, log any resulting overflow slots to the inbox
+    if (patch.crew_capacity !== undefined || patch.crew_capacity_enabled !== undefined) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const enabled = patch.crew_capacity_enabled ?? true;
+        const cap = enabled ? Math.max(1, patch.crew_capacity ?? 1) : 1;
+        const today = new Date().toISOString().slice(0, 10);
+        const { data: rows } = await supabaseAdmin
+          .from("bookings")
+          .select("id, scheduled_date, scheduled_hour")
+          .gte("scheduled_date", today)
+          .neq("status", "cancelled");
+        const grouped: Record<string, number> = {};
+        for (const r of rows ?? []) grouped[`${r.scheduled_date}#${r.scheduled_hour}`] = (grouped[`${r.scheduled_date}#${r.scheduled_hour}`] ?? 0) + 1;
+        for (const [k, c] of Object.entries(grouped)) {
+          if (c > cap) {
+            const [d, h] = k.split("#");
+            await supabaseAdmin.from("capacity_conflicts").insert({
+              scheduled_date: d, scheduled_hour: Number(h),
+              capacity: cap, count: c,
+              source: "capacity_change",
+              note: `Capacity lowered to ${cap} — ${c} bookings on this slot`,
+              created_by: context.userId,
+            });
+          }
+        }
+      } catch (e) { console.error("capacity conflict log failed", e); }
+    }
     return { ok: true };
   });
+
 
 // ---------- Capacity overflow (admin) ----------
 export const adminGetCapacityOverflow = createServerFn({ method: "POST" })
