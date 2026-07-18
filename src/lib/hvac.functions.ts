@@ -295,7 +295,32 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("bookings").update({ status: data.status as any }).eq("id", data.id);
+    const { data: row, error } = await context.supabase
+      .from("bookings")
+      .update({ status: data.status as any })
+      .eq("id", data.id)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    if (row && (data.status === "confirmed" || data.status === "completed")) {
+      const { sendBookingStatusEmail } = await import("./booking-email.server");
+      await sendBookingStatusEmail(row, data.status).catch((e) => console.error("booking email failed", e));
+    }
+    return { ok: true };
+  });
+
+export const adminSetBookingCharge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; service_charge: number }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (!(data.service_charge >= 0) || data.service_charge > 1_000_000) {
+      throw new Error("Invalid amount");
+    }
+    const { error } = await context.supabase
+      .from("bookings")
+      .update({ service_charge: data.service_charge })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
