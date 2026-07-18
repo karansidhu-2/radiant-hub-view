@@ -110,7 +110,7 @@ function AdminBookings() {
                   </p>
                 </div>
                 <Select value={b.status} onValueChange={(v) => setStatus(b.id, v)}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -122,7 +122,7 @@ function AdminBookings() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2 border-t pt-3">
+              <div className="flex flex-wrap items-center gap-2 border-t pt-3">
                 <label className="text-xs text-muted-foreground whitespace-nowrap">
                   Service charge ($)
                 </label>
@@ -131,7 +131,7 @@ function AdminBookings() {
                   min="0"
                   step="0.01"
                   placeholder="e.g. 249.00"
-                  className="max-w-[160px]"
+                  className="w-full sm:max-w-[160px]"
                   value={charges[b.id] ?? ""}
                   onChange={(e) =>
                     setCharges((c) => ({ ...c, [b.id]: e.target.value }))
