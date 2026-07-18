@@ -412,6 +412,49 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.scheduled_hour) || data.scheduled_hour < 8 || data.scheduled_hour > 18) {
       throw new Error("Hour must be between 8 and 18");
     }
+    // enforce crew capacity (excluding the booking itself)
+    const { data: settings } = await context.supabase
+      .from("site_settings").select("crew_capacity_enabled, crew_capacity").eq("singleton", true).maybeSingle();
+    const cap = settings?.crew_capacity_enabled ? Math.max(1, settings.crew_capacity ?? 1) : 1;
+    const { count } = await context.supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("scheduled_date", data.scheduled_date)
+      .eq("scheduled_hour", data.scheduled_hour)
+      .neq("status", "cancelled")
+      .neq("id", data.id);
+    if ((count ?? 0) >= cap) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const [y, m, d] = data.scheduled_date.split("-").map(Number);
+      const base = new Date(Date.UTC(y, m - 1, d));
+      const dates = [0, 1, 2].map((i) => {
+        const dt = new Date(base); dt.setUTCDate(base.getUTCDate() + i);
+        return dt.toISOString().slice(0, 10);
+      });
+      const { data: rows } = await supabaseAdmin
+        .from("bookings")
+        .select("scheduled_date, scheduled_hour, id")
+        .in("scheduled_date", dates)
+        .neq("status", "cancelled");
+      const counts: Record<string, Record<number, number>> = {};
+      for (const r of rows ?? []) {
+        if (r.id === data.id) continue;
+        counts[r.scheduled_date] ??= {};
+        counts[r.scheduled_date][r.scheduled_hour] = (counts[r.scheduled_date][r.scheduled_hour] ?? 0) + 1;
+      }
+      const suggestions: { date: string; hour: number }[] = [];
+      const sameDayOpen = BUSINESS_HOURS
+        .filter((h) => h !== data.scheduled_hour && (counts[data.scheduled_date]?.[h] ?? 0) < cap)
+        .sort((a, b) => Math.abs(a - data.scheduled_hour) - Math.abs(b - data.scheduled_hour));
+      for (const h of sameDayOpen) suggestions.push({ date: data.scheduled_date, hour: h });
+      for (const dt of dates.slice(1)) {
+        for (const h of BUSINESS_HOURS) {
+          if ((counts[dt]?.[h] ?? 0) < cap) suggestions.push({ date: dt, hour: h });
+        }
+      }
+      const alts = suggestions.slice(0, 6);
+      throw new Error(`That time slot is fully booked (crew capacity reached). Pick another.||ALTS||${JSON.stringify(alts)}`);
+    }
     const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
     if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
     const { data: row, error } = await context.supabase
@@ -429,6 +472,7 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
 
 
 

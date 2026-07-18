@@ -114,15 +114,31 @@ function CalendarPage() {
 
   const shift = (n: number) => { const d = new Date(anchor); d.setDate(d.getDate() + (view === "week" ? 7 * n : n)); setAnchor(d); };
 
-  const openEdit = (b: Booking) => { setSelected(b); setEditDate(b.scheduled_date); setEditHour(b.scheduled_hour); setEditTech(b.technician ?? ""); };
+  const openEdit = (b: Booking) => { setSelected(b); setEditDate(b.scheduled_date); setEditHour(b.scheduled_hour); setEditTech(b.technician ?? ""); setAlts([]); setConflict(null); };
+
+  const [alts, setAlts] = useState<{ date: string; hour: number }[]>([]);
+  const [conflict, setConflict] = useState<string | null>(null);
 
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!selected) return;
       await reschedule({ data: { id: selected.id, scheduled_date: editDate, scheduled_hour: editHour, technician: editTech.trim() || null } });
     },
-    onSuccess: () => { toast.success("Booking rescheduled — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); setSelected(null); },
-    onError: (e: any) => toast.error(e?.message || "Failed to reschedule"),
+    onSuccess: () => { toast.success("Booking rescheduled — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); setSelected(null); setAlts([]); setConflict(null); },
+    onError: (e: any) => {
+      const msg = String(e?.message || "Failed to reschedule");
+      const marker = msg.indexOf("||ALTS||");
+      if (marker >= 0) {
+        setConflict(msg.slice(0, marker));
+        try {
+          const list = JSON.parse(msg.slice(marker + "||ALTS||".length));
+          if (Array.isArray(list)) setAlts(list);
+        } catch { /* noop */ }
+        toast.error("Slot at capacity — pick a suggested alternative");
+      } else {
+        toast.error(msg);
+      }
+    },
   });
 
   const statusMut = useMutation({
@@ -130,6 +146,22 @@ function CalendarPage() {
     onSuccess: () => { toast.success("Status updated — customer notified"); qc.invalidateQueries({ queryKey: ["admin-bookings-all"] }); },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
+
+  // Deep-link support: /admin/calendar?date=YYYY-MM-DD&hour=13 focuses that slot
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const p = new URLSearchParams(window.location.search);
+    const d = p.get("date");
+    const h = p.get("hour");
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const [y, mo, da] = d.split("-").map(Number);
+      const dt = new Date(y, mo - 1, da); dt.setHours(0, 0, 0, 0);
+      setAnchor(dt);
+      setView("day");
+      if (h) toast.message(`Focused ${d} @ ${h}:00`);
+    }
+  }, []);
+
 
   const todayKey = fmtDate(new Date());
   const rangeLabel = view === "week"
@@ -300,7 +332,27 @@ function CalendarPage() {
                 )}
                 <p className="mt-1 text-[11px] text-muted-foreground">Add technicians in Settings for a dropdown, or type a name here.</p>
               </div>
+              {conflict && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs">
+                  <div className="font-semibold text-destructive">{conflict}</div>
+                  {alts.length > 0 ? (
+                    <>
+                      <div className="mt-2 text-muted-foreground">Suggested open slots — click to auto-select:</div>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {alts.map((a, i) => (
+                          <button key={i} type="button"
+                            onClick={() => { setEditDate(a.date); setEditHour(a.hour); setConflict(null); setAlts([]); toast.success(`Selected ${a.date} @ ${fmtHour(a.hour)}`); }}
+                            className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/20">
+                            {a.date} · {fmtHour(a.hour)}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : <div className="mt-2 text-muted-foreground">No open alternatives in the next 3 days — try another date.</div>}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">Saving will notify the customer via configured channels.</p>
+
             </div>
           )}
           <DialogFooter>

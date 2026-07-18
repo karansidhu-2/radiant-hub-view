@@ -79,7 +79,14 @@ function SettingsPage() {
       // Re-validate existing bookings against the new capacity
       const res = await refreshOverflow({ capacity: form.crew_capacity, enabled: form.crew_capacity_enabled });
       if (res && res.overflow.length > 0) {
-        toast.warning(`${res.overflow.length} time slot(s) now exceed crew capacity — review below`);
+        const first = res.overflow[0];
+        toast.warning(`${res.overflow.length} time slot(s) now exceed crew capacity`, {
+          description: "Bulk save triggered conflicts. Review or reschedule from the calendar.",
+          action: {
+            label: "Open calendar",
+            onClick: () => { window.location.href = `/admin/calendar?date=${first.date}&hour=${first.hour}`; },
+          },
+        });
       }
     } catch (err: any) { toast.error(err?.message || "Failed to save"); }
     finally { setBusy(false); }
