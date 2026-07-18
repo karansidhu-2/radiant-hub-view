@@ -213,16 +213,19 @@ function BookPage() {
                         <button
                           key={`${a.date}-${a.hour}-${i}`}
                           type="button"
+                          disabled={busy}
                           onClick={() => {
                             setForm((f) => ({ ...f, scheduled_date: a.date, scheduled_hour: a.hour }));
                             setCapacityConflict(null);
                             setAlternatives([]);
-                            toast.success(`Selected ${label}`);
+                            toast.success(`Selected ${label} — rebooking…`);
+                            runBooking({ scheduled_date: a.date, scheduled_hour: a.hour });
                           }}
-                          className="rounded-full border border-destructive/40 bg-background px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                          className="rounded-full border border-destructive/40 bg-background px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
                         >
                           {label}
                         </button>
+
                       );
                     })}
                   </div>
