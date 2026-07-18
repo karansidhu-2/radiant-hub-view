@@ -99,16 +99,27 @@ function AdminReviews() {
     onSuccess: (res, action) => {
       toast.success(`${action.replace("_", " ")}: ${res.count} review(s)`);
       setSelected(new Set()); invalidate();
+      setBulkConfirm(null); setBulkAck(false);
     },
     onError: (e: any) => toast.error(e?.message || "Failed"),
   });
 
-  const runBulk = (action: "approve" | "hide" | "delete" | "clear_reply") => {
+  type BulkAction = "approve" | "hide" | "delete" | "clear_reply";
+  const [bulkConfirm, setBulkConfirm] = useState<BulkAction | null>(null);
+  const [bulkAck, setBulkAck] = useState(false);
+  const openBulk = (action: BulkAction) => {
     if (!selected.size) return;
-    if ((action === "delete" || action === "clear_reply") &&
-      !confirm(`${action === "delete" ? "Delete" : "Clear replies from"} ${selected.size} review(s)?`)) return;
-    bulkMut.mutate(action);
+    setBulkAck(false);
+    setBulkConfirm(action);
   };
+
+  const BULK_META: Record<BulkAction, { title: string; verb: string; body: string; destructive: boolean; ack: string }> = {
+    approve:     { title: "Approve reviews",   verb: "Approve",      body: "These reviews will be published and visible to customers.",   destructive: false, ack: "I want to publish these reviews." },
+    hide:        { title: "Hide reviews",      verb: "Hide",         body: "These reviews will be hidden from public service pages.",     destructive: false, ack: "I want to hide these reviews." },
+    clear_reply: { title: "Clear replies",     verb: "Clear replies", body: "Public admin replies on these reviews will be removed. Ratings and comments stay.", destructive: false, ack: "I want to clear the public replies." },
+    delete:      { title: "Delete reviews",    verb: "Delete",       body: "These reviews will be permanently deleted. This cannot be undone.", destructive: true, ack: "I understand this permanently deletes the selected reviews." },
+  };
+
 
   return (
     <div className="space-y-4">
