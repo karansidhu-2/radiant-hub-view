@@ -665,6 +665,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_product_auto_ratings: {
+        Args: never
+        Returns: {
+          auto_confidence: number
+          auto_rating: number
+          avg_related_rating: number
+          order_count: number
+          related_review_count: number
+          slug: string
+          units_sold: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
