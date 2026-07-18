@@ -115,7 +115,17 @@ export const createBooking = createServerFn({ method: "POST" })
         }
       }
       const alts = suggestions.slice(0, 6);
+      await supabaseAdmin.from("capacity_conflicts").insert({
+        scheduled_date: data.scheduled_date,
+        scheduled_hour: data.scheduled_hour,
+        capacity: cap,
+        count: (count ?? 0) + 1,
+        source: "booking",
+        note: `Customer booking blocked for ${data.service_name} — ${data.full_name}`,
+        created_by: context.userId,
+      }).then(() => {}, () => {});
       throw new Error(`That time slot is fully booked. Please pick another.||ALTS||${JSON.stringify(alts)}`);
+
     }
 
     const { data: row, error } = await context.supabase
@@ -453,7 +463,18 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
         }
       }
       const alts = suggestions.slice(0, 6);
+      await supabaseAdmin.from("capacity_conflicts").insert({
+        scheduled_date: data.scheduled_date,
+        scheduled_hour: data.scheduled_hour,
+        capacity: cap,
+        count: (count ?? 0) + 1,
+        source: "reschedule",
+        note: `Reschedule blocked for booking ${data.id.slice(0, 8)}`,
+        booking_id: data.id,
+        created_by: context.userId,
+      }).then(() => {}, () => {});
       throw new Error(`That time slot is fully booked (crew capacity reached). Pick another.||ALTS||${JSON.stringify(alts)}`);
+
     }
     const patch: any = { scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour };
     if (data.technician !== undefined) patch.technician = data.technician == null ? null : String(data.technician).slice(0, 120);
@@ -564,8 +585,38 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       .update(patch)
       .eq("singleton", true);
     if (error) throw new Error(error.message);
+
+    // If crew capacity changed, log any resulting overflow slots to the inbox
+    if (patch.crew_capacity !== undefined || patch.crew_capacity_enabled !== undefined) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const enabled = patch.crew_capacity_enabled ?? true;
+        const cap = enabled ? Math.max(1, patch.crew_capacity ?? 1) : 1;
+        const today = new Date().toISOString().slice(0, 10);
+        const { data: rows } = await supabaseAdmin
+          .from("bookings")
+          .select("id, scheduled_date, scheduled_hour")
+          .gte("scheduled_date", today)
+          .neq("status", "cancelled");
+        const grouped: Record<string, number> = {};
+        for (const r of rows ?? []) grouped[`${r.scheduled_date}#${r.scheduled_hour}`] = (grouped[`${r.scheduled_date}#${r.scheduled_hour}`] ?? 0) + 1;
+        for (const [k, c] of Object.entries(grouped)) {
+          if (c > cap) {
+            const [d, h] = k.split("#");
+            await supabaseAdmin.from("capacity_conflicts").insert({
+              scheduled_date: d, scheduled_hour: Number(h),
+              capacity: cap, count: c,
+              source: "capacity_change",
+              note: `Capacity lowered to ${cap} — ${c} bookings on this slot`,
+              created_by: context.userId,
+            });
+          }
+        }
+      } catch (e) { console.error("capacity conflict log failed", e); }
+    }
     return { ok: true };
   });
+
 
 // ---------- Capacity overflow (admin) ----------
 export const adminGetCapacityOverflow = createServerFn({ method: "POST" })
@@ -974,4 +1025,75 @@ export const adminAnalytics = createServerFn({ method: "POST" })
       statusCounts,
       topServices,
     };
+  });
+
+// ---------- Capacity conflict inbox ----------
+export const adminListConflicts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { includeResolved?: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase.from("capacity_conflicts").select("*").order("created_at", { ascending: false }).limit(200);
+    if (!data.includeResolved) q = q.eq("resolved", false);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminUnresolvedConflictCount = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { count } = await context.supabase
+      .from("capacity_conflicts")
+      .select("id", { count: "exact", head: true })
+      .eq("resolved", false);
+    return { count: count ?? 0 };
+  });
+
+export const adminResolveConflict = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; resolved: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const patch = data.resolved
+      ? { resolved: true, resolved_at: new Date().toISOString(), resolved_by: context.userId }
+      : { resolved: false, resolved_at: null, resolved_by: null };
+    const { error } = await context.supabase.from("capacity_conflicts").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminResolveAllConflicts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("capacity_conflicts")
+      .update({ resolved: true, resolved_at: new Date().toISOString(), resolved_by: context.userId })
+      .eq("resolved", false);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteConflict = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("capacity_conflicts").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Low-stock products for reminders
+export const adminLowStockProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase
+      .from("products")
+      .select("id, slug, name, brand, stock, low_stock_threshold, available")
+      .not("low_stock_threshold", "is", null);
+    return (data ?? []).filter((p: any) => (p.stock ?? 0) <= (p.low_stock_threshold ?? 0));
   });

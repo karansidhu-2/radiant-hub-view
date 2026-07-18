@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
 });
 
-const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, seer: null, capacity_btu: null, hspf: null, tag: null, image_url: null as string | null, media: [] as MediaItem[] };
+const empty = { slug: "", name: "", brand: "", category: "ac", price: 0, installation_fee: 0, description: "", features: [] as string[], published: true, available: true, stock: 0, low_stock_threshold: null as number | null, seer: null, capacity_btu: null, hspf: null, tag: null, image_url: null as string | null, media: [] as MediaItem[] };
 
 function AdminProducts() {
   const [items, setItems] = useState<any[]>([]);
@@ -171,8 +171,16 @@ function AdminProducts() {
               <div><Label>Category</Label><Input value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })} /></div>
               <div><Label>Price ($)</Label><Input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} /></div>
               <div><Label>Installation fee ($)</Label><Input type="number" value={editing.installation_fee} onChange={(e) => setEditing({ ...editing, installation_fee: Number(e.target.value) })} /></div>
-              <div><Label>Stock</Label><Input type="number" value={editing.stock} onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })} /></div>
+              <div><Label>Stock on hand</Label><Input type="number" min={0} value={editing.stock} onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })} /></div>
+              <div>
+                <Label>Low-stock reminder at</Label>
+                <Input type="number" min={0} placeholder="e.g. 3 (leave blank to disable)"
+                  value={editing.low_stock_threshold ?? ""}
+                  onChange={(e) => setEditing({ ...editing, low_stock_threshold: e.target.value === "" ? null : Number(e.target.value) })} />
+                <p className="mt-1 text-[11px] text-muted-foreground">Product appears in the Inbox low-stock reminder when stock reaches this number.</p>
+              </div>
               <div><Label>Tag</Label><Input value={editing.tag ?? ""} onChange={(e) => setEditing({ ...editing, tag: e.target.value || null })} /></div>
+
               <div className="flex items-center gap-2"><Switch checked={editing.published} onCheckedChange={(v) => setEditing({ ...editing, published: v })} /><Label>Published</Label></div>
               <div className="flex items-center gap-2"><Switch checked={editing.available} onCheckedChange={(v) => setEditing({ ...editing, available: v })} /><Label>Available</Label></div>
             </div>
@@ -275,7 +283,15 @@ function AdminProducts() {
                     <Badge variant="outline" className="text-[10px]">{p.media.length} media</Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">${p.price} • Stock: {p.stock}</p>
+                <p className="text-xs text-muted-foreground">
+                  ${p.price} • Stock: {p.stock}
+                  {p.low_stock_threshold != null && p.stock <= p.low_stock_threshold && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                      Low stock (≤ {p.low_stock_threshold})
+                    </span>
+                  )}
+                </p>
+
               </div>
             </div>
             <div className="flex gap-2">

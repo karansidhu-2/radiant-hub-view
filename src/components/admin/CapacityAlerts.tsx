@@ -68,9 +68,13 @@ export function CapacityAlerts() {
               {items.length > 8 && (
                 <span className="text-[11px] text-muted-foreground">+{items.length - 8} more</span>
               )}
+              <Link to="/admin/inbox" className="ml-1 text-[11px] font-semibold text-primary hover:underline">
+                Open inbox →
+              </Link>
             </div>
           </div>
         </div>
+
         <button onClick={() => setDismissed(true)} className="text-muted-foreground hover:text-foreground" aria-label="Dismiss">
           <X className="h-4 w-4" />
         </button>

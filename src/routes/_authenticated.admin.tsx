@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell } from "lucide-react";
+import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
 
 
@@ -21,6 +21,8 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/inbox", label: "Inbox", icon: Inbox },
+
   { to: "/admin/zips", label: "Service Areas", icon: MapPin },
   { to: "/admin/admins", label: "Admins", icon: UserCog },
   { to: "/admin/settings", label: "Site Settings", icon: Settings },
