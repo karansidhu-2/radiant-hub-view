@@ -90,21 +90,38 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-border md:hidden">
+        <div className="animate-rise-in border-t border-border md:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
             {nav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/70"
               >
                 {n.label}
               </Link>
             ))}
-            <a href={telHref(settings.support_phone)} className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
-              📞 {settings.support_phone}
+            <a href={telHref(settings.support_phone)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+              <Phone className="h-4 w-4" /> {settings.support_phone}
             </a>
+            {user ? (
+              <>
+                <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  <Shield className="h-4 w-4" /> Admin panel
+                </Link>
+                <button
+                  onClick={() => { setOpen(false); signOut(); }}
+                  className="flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground hover:bg-accent"
+                >
+                  <LogOut className="h-4 w-4" /> Sign out
+                </button>
+              </>
+            ) : (
+              <Link to="/auth" search={{ redirect: "/" }} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                <LogIn className="h-4 w-4" /> Sign in
+              </Link>
+            )}
             <Link to="/book" search={{ service: undefined }} onClick={() => setOpen(false)}>
               <Button className="mt-2 w-full gradient-cool text-primary-foreground">Book Service</Button>
             </Link>
