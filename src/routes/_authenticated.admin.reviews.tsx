@@ -270,6 +270,42 @@ function AdminReviews() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => { if (!o) { setBulkConfirm(null); setBulkAck(false); } }}>
+        <DialogContent>
+          {bulkConfirm && (
+            <>
+              <DialogHeader>
+                <DialogTitle className={BULK_META[bulkConfirm].destructive ? "text-destructive" : ""}>
+                  {BULK_META[bulkConfirm].title}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className={`rounded-md border p-3 ${BULK_META[bulkConfirm].destructive ? "border-destructive/40 bg-destructive/5" : "border-border bg-secondary/40"}`}>
+                  <p className="text-sm">
+                    You are about to <span className="font-semibold">{BULK_META[bulkConfirm].verb.toLowerCase()}</span>{" "}
+                    <span className="font-semibold">{selected.size}</span> review{selected.size === 1 ? "" : "s"}.
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{BULK_META[bulkConfirm].body}</p>
+                </div>
+                <label className="flex items-start gap-2 rounded-md border border-border p-3 text-sm">
+                  <Checkbox checked={bulkAck} onCheckedChange={(v) => setBulkAck(v === true)} className="mt-0.5" />
+                  <span>{BULK_META[bulkConfirm].ack}</span>
+                </label>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setBulkConfirm(null); setBulkAck(false); }}>Cancel</Button>
+                <Button
+                  variant={BULK_META[bulkConfirm].destructive ? "destructive" : "default"}
+                  disabled={!bulkAck || bulkMut.isPending}
+                  onClick={() => bulkMut.mutate(bulkConfirm)}>
+                  {bulkMut.isPending ? "Applying…" : `${BULK_META[bulkConfirm].verb} ${selected.size}`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
