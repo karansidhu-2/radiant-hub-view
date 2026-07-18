@@ -16,6 +16,8 @@ export function CapacityAlerts() {
     let mounted = true;
     let seen = "";
     const load = async () => {
+      // Skip polling when the tab is hidden — saves ~95% of admin idle traffic.
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
       try {
         const res = await getOverflow({ data: {} });
         if (!mounted) return;
@@ -42,8 +44,11 @@ export function CapacityAlerts() {
       }
     };
     load();
-    const t = setInterval(load, 60_000);
-    return () => { mounted = false; clearInterval(t); };
+    // Poll every 3 minutes (down from 60s); refresh immediately when tab regains focus.
+    const t = setInterval(load, 3 * 60_000);
+    const onVis = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { mounted = false; clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
   }, [getOverflow]);
 
   if (dismissed || items.length === 0) return null;

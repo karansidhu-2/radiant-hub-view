@@ -38,6 +38,8 @@ function ServicesPage() {
         bullets: Array.isArray(r.bullets) ? r.bullets as string[] : [],
       })) as Row[];
     },
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
   });
 
   return (

@@ -32,7 +32,8 @@ export function useSiteSettings() {
         .maybeSingle();
       return (data as SiteSettings | null) ?? FALLBACK;
     },
-    staleTime: 60_000,
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
   });
   return data ?? FALLBACK;
 }
