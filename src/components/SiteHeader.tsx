@@ -72,7 +72,7 @@ export function SiteHeader() {
               <Button variant="outline" size="icon" title="Sign in"><LogIn className="h-4 w-4" /></Button>
             </Link>
           )}
-          <Link to="/book" className="hidden md:block">
+          <Link to="/book" search={{ service: undefined }} className="hidden md:block">
             <Button className="gradient-cool text-primary-foreground shadow-soft hover:opacity-95">
               Book Service
             </Button>
@@ -105,7 +105,7 @@ export function SiteHeader() {
             <a href={telHref(settings.support_phone)} className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
               📞 {settings.support_phone}
             </a>
-            <Link to="/book" onClick={() => setOpen(false)}>
+            <Link to="/book" search={{ service: undefined }} onClick={() => setOpen(false)}>
               <Button className="mt-2 w-full gradient-cool text-primary-foreground">Book Service</Button>
             </Link>
           </div>

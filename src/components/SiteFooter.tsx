@@ -20,11 +20,11 @@ export function SiteFooter() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Services</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/services/ac-repair" className="hover:text-foreground">AC Repair</Link></li>
-            <li><Link to="/services/furnace-repair" className="hover:text-foreground">Furnace Repair</Link></li>
-            <li><Link to="/services/new-system-install" className="hover:text-foreground">New Installation</Link></li>
-            <li><Link to="/services/maintenance-plan" className="hover:text-foreground">Maintenance Plans</Link></li>
-            <li><Link to="/services/emergency-service" className="hover:text-foreground">24/7 Emergency</Link></li>
+            <li><Link to="/services/$slug" params={{ slug: "ac-repair" }} className="hover:text-foreground">AC Repair</Link></li>
+            <li><Link to="/services/$slug" params={{ slug: "furnace-repair" }} className="hover:text-foreground">Furnace Repair</Link></li>
+            <li><Link to="/services/$slug" params={{ slug: "new-system-install" }} className="hover:text-foreground">New Installation</Link></li>
+            <li><Link to="/services/$slug" params={{ slug: "maintenance-plan" }} className="hover:text-foreground">Maintenance Plans</Link></li>
+            <li><Link to="/services/$slug" params={{ slug: "emergency-service" }} className="hover:text-foreground">24/7 Emergency</Link></li>
           </ul>
         </div>
         <div>
@@ -32,7 +32,7 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/about" className="hover:text-foreground">About Us</Link></li>
             <li><Link to="/shop" className="hover:text-foreground">Shop Systems</Link></li>
-            <li><Link to="/book" className="hover:text-foreground">Book Service</Link></li>
+            <li><Link to="/book" search={{ service: undefined }} className="hover:text-foreground">Book Service</Link></li>
             <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
           </ul>
         </div>
