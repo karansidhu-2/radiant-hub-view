@@ -1284,3 +1284,56 @@ export const adminActionOptions = createServerFn({ method: "GET" })
     for (const r of data ?? []) { if (r.action) actions.add(r.action); if (r.entity_type) entities.add(r.entity_type); }
     return { actions: Array.from(actions).sort(), entities: Array.from(entities).sort() };
   });
+
+// ---------- Admin: technicians (skill-based routing) ----------
+export const adminListTechnicians = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase.from("technicians").select("*").order("name");
+    return data ?? [];
+  });
+
+export const adminUpsertTechnician = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id?: string | null; name: string; email?: string | null; phone?: string | null; skills?: string[]; active?: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const patch: any = {
+      name: String(data.name).trim().slice(0, 120),
+      email: data.email?.trim() || null,
+      phone: data.phone?.trim() || null,
+      skills: Array.isArray(data.skills) ? data.skills.map((s) => String(s).trim()).filter(Boolean).slice(0, 20) : [],
+      active: data.active ?? true,
+    };
+    let before: any = null;
+    if (data.id) {
+      const { data: prev } = await context.supabase.from("technicians").select("*").eq("id", data.id).maybeSingle();
+      before = prev;
+      const { error } = await context.supabase.from("technicians").update(patch).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase.from("technicians").insert(patch);
+      if (error) throw new Error(error.message);
+    }
+    await logAdminAction(context, {
+      action: before ? "technician.update" : "technician.create",
+      entity_type: "technician", entity_id: data.id ?? null,
+      before, after: patch,
+    });
+    return { ok: true };
+  });
+
+export const adminDeleteTechnician = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { logAdminAction } = await import("./audit.server");
+    const { data: before } = await context.supabase.from("technicians").select("*").eq("id", data.id).maybeSingle();
+    const { error } = await context.supabase.from("technicians").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await logAdminAction(context, { action: "technician.delete", entity_type: "technician", entity_id: data.id, before });
+    return { ok: true };
+  });
