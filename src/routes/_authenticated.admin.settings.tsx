@@ -1,19 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { adminUpdateSiteSettings } from "@/lib/hvac.functions";
+import { adminUpdateSiteSettings, adminGetCapacityOverflow } from "@/lib/hvac.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: SettingsPage,
 });
+
+type OverflowSlot = {
+  date: string; hour: number; capacity: number; count: number;
+  bookings: Array<{ id: string; reference: string; service_name: string | null; technician: string | null; full_name: string | null; status: string }>;
+};
+
 
 type S = {
   company_name: string; tagline: string; support_phone: string;
