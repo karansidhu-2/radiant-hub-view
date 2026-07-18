@@ -10,6 +10,8 @@ import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Search, X, SlidersHorizontal } from "lucide-react";
+import { useAutoRatings } from "@/hooks/useAutoRatings";
+import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
