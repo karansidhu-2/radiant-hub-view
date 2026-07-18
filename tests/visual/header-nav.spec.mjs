@@ -118,8 +118,8 @@ try {
   for (const size of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: size.w, height: size.h }, reducedMotion: "reduce" });
     const page = await ctx.newPage();
-    await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(600);
+    await page.goto(BASE_URL + "/", { waitUntil: "networkidle" });
+    await page.waitForTimeout(1200);
 
     // Header
     const headerOut = path.join(ACTUAL, `${size.name}_header.png`);
