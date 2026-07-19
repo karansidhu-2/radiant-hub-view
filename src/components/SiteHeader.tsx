@@ -15,7 +15,7 @@ const nav = [
 
 export function SiteHeader() {
   const { count, hydrated } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const settings = useSiteSettings();
   const [open, setOpen] = useState(false);
 
@@ -66,9 +66,11 @@ export function SiteHeader() {
               <Link to="/account" className="hidden md:block" title="My account">
                 <Button variant="outline" size="icon" aria-label="My account"><UserIcon className="h-4 w-4" /></Button>
               </Link>
-              <Link to="/admin" className="hidden md:block" title="Admin">
-                <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" className="hidden md:block" title="Admin">
+                  <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
+                </Link>
+              )}
               <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
             </>
           ) : (
@@ -118,9 +120,11 @@ export function SiteHeader() {
                 <Link to="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
                   <UserIcon className="h-4 w-4" /> My account
                 </Link>
-                <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
-                  <Shield className="h-4 w-4" /> Admin panel
-                </Link>
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                    <Shield className="h-4 w-4" /> Admin panel
+                  </Link>
+                )}
                 <Link to="/reviews" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
                   <Shield className="h-4 w-4" /> My reviews
                 </Link>
