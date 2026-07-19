@@ -83,6 +83,7 @@ export type Database = {
           full_name: string
           id: string
           notes: string | null
+          order_id: string | null
           phone: string
           reference: string
           scheduled_date: string
@@ -106,6 +107,7 @@ export type Database = {
           full_name: string
           id?: string
           notes?: string | null
+          order_id?: string | null
           phone: string
           reference?: string
           scheduled_date: string
@@ -129,6 +131,7 @@ export type Database = {
           full_name?: string
           id?: string
           notes?: string | null
+          order_id?: string | null
           phone?: string
           reference?: string
           scheduled_date?: string
@@ -144,7 +147,15 @@ export type Database = {
           user_id?: string | null
           zip?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       capacity_conflicts: {
         Row: {
@@ -403,6 +414,21 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          hit_at: string
+          key: string
+        }
+        Insert: {
+          hit_at?: string
+          key: string
+        }
+        Update: {
+          hit_at?: string
+          key?: string
         }
         Relationships: []
       }
@@ -773,6 +799,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_and_hit_rate_limit: {
+        Args: { _key: string; _max: number; _window_seconds: number }
+        Returns: boolean
+      }
       get_product_auto_ratings: {
         Args: never
         Returns: {

@@ -6,6 +6,8 @@ import { z } from "zod";
 export const checkZip = createServerFn({ method: "POST" })
   .inputValidator((d: { zip: string }) => d)
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("checkZip", { max: 30, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const zip = (data.zip || "").trim();
     if (!/^\d{5}$/.test(zip)) return { available: false, reason: "invalid" as const };
@@ -95,6 +97,8 @@ async function computeCapacity(admin: any, serviceSlug?: string | null) {
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createBooking", { max: 5, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { optionalUserId } = await import("./optional-auth.server");
     const userId = await optionalUserId();
@@ -182,13 +186,15 @@ const orderSchema = z.object({
   zip: z.string().regex(/^\d{5}$/),
   scheduled_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
   scheduled_hour: z.number().int().min(8).max(18).nullable(),
-  notes: z.string().nullable().optional(),
-  items: z.array(orderItemSchema).min(1),
+  notes: z.string().max(1000).nullable().optional(),
+  items: z.array(orderItemSchema).min(1).max(50),
 });
 
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof orderSchema>) => orderSchema.parse(d))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createOrder", { max: 5, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { optionalUserId } = await import("./optional-auth.server");
     const userId = await optionalUserId();
@@ -224,6 +230,7 @@ export const createOrder = createServerFn({ method: "POST" })
     if (data.scheduled_date && data.scheduled_hour) {
       await supabaseAdmin.from("bookings").insert({
         user_id: userId,
+        order_id: order.id,
         full_name: data.full_name, email: data.email, phone: data.phone,
         street: data.street, city: data.city, state: data.state, zip: data.zip,
         service_slug: "new-system-install", service_name: `Installation for order ${order.reference}`,
@@ -821,6 +828,8 @@ export const createReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof reviewSchema>) => reviewSchema.parse(d))
   .handler(async ({ data, context }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createReview", { max: 10, windowSeconds: 3600, extra: context.userId });
     const { data: b, error: bErr } = await context.supabase
       .from("bookings")
       .select("id, user_id, status, service_slug, service_name")
