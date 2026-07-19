@@ -828,6 +828,8 @@ export const createReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof reviewSchema>) => reviewSchema.parse(d))
   .handler(async ({ data, context }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createReview", { max: 10, windowSeconds: 3600, extra: context.userId });
     const { data: b, error: bErr } = await context.supabase
       .from("bookings")
       .select("id, user_id, status, service_slug, service_name")
