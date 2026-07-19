@@ -15,7 +15,7 @@ const nav = [
 
 export function SiteHeader() {
   const { count, hydrated } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const settings = useSiteSettings();
   const [open, setOpen] = useState(false);
 
