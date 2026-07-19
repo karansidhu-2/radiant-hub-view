@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { products, type Product } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { products as seedProducts, type Product } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CartItem {
   slug: string;
@@ -42,10 +44,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
   }, [items, hydrated]);
 
+  // Fetch live product catalog so admin-created (non-seeded) products
+  // still resolve for cart totals, badge count, and checkout.
+  const { data: dbProducts = [] } = useQuery({
+    queryKey: ["cart", "product-lookup"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("slug,name,brand,category,price,installation_fee,description,features,tag,seer,capacity_btu,hspf")
+        .eq("published", true);
+      if (error) throw error;
+      return (data ?? []).map((p): Product => ({
+        slug: p.slug,
+        name: p.name,
+        brand: p.brand,
+        category: p.category as Product["category"],
+        price: Number(p.price),
+        installationFee: Number(p.installation_fee),
+        seer: p.seer ?? undefined,
+        capacityBTU: p.capacity_btu ?? undefined,
+        hspf: p.hspf ?? undefined,
+        description: p.description ?? "",
+        features: Array.isArray(p.features) ? (p.features as string[]) : [],
+        tag: p.tag ?? undefined,
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const value = useMemo<CartContextValue>(() => {
+    // DB first, seed as fallback so cart still works before the query resolves.
+    const bySlug = new Map<string, Product>();
+    for (const p of seedProducts) bySlug.set(p.slug, p);
+    for (const p of dbProducts) bySlug.set(p.slug, p);
+
     const detailed = items
       .map((item) => {
-        const product = products.find((p) => p.slug === item.slug);
+        const product = bySlug.get(item.slug);
         return product ? { item, product } : null;
       })
       .filter((v): v is { item: CartItem; product: Product } => v !== null);
@@ -87,7 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems((prev) => prev.map((i) => (i.slug === slug ? { ...i, includeInstallation: !i.includeInstallation } : i))),
       clear: () => setItems([]),
     };
-  }, [items, hydrated]);
+  }, [items, hydrated, dbProducts]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
