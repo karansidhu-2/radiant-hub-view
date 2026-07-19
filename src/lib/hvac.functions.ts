@@ -230,6 +230,7 @@ export const createOrder = createServerFn({ method: "POST" })
     if (data.scheduled_date && data.scheduled_hour) {
       await supabaseAdmin.from("bookings").insert({
         user_id: userId,
+        order_id: order.id,
         full_name: data.full_name, email: data.email, phone: data.phone,
         street: data.street, city: data.city, state: data.state, zip: data.zip,
         service_slug: "new-system-install", service_name: `Installation for order ${order.reference}`,
