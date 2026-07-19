@@ -6,6 +6,8 @@ import { z } from "zod";
 export const checkZip = createServerFn({ method: "POST" })
   .inputValidator((d: { zip: string }) => d)
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("checkZip", { max: 30, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const zip = (data.zip || "").trim();
     if (!/^\d{5}$/.test(zip)) return { available: false, reason: "invalid" as const };
