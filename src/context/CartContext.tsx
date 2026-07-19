@@ -122,7 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems((prev) => prev.map((i) => (i.slug === slug ? { ...i, includeInstallation: !i.includeInstallation } : i))),
       clear: () => setItems([]),
     };
-  }, [items, hydrated]);
+  }, [items, hydrated, dbProducts]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
