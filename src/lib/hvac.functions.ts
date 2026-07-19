@@ -186,13 +186,15 @@ const orderSchema = z.object({
   zip: z.string().regex(/^\d{5}$/),
   scheduled_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
   scheduled_hour: z.number().int().min(8).max(18).nullable(),
-  notes: z.string().nullable().optional(),
-  items: z.array(orderItemSchema).min(1),
+  notes: z.string().max(1000).nullable().optional(),
+  items: z.array(orderItemSchema).min(1).max(50),
 });
 
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof orderSchema>) => orderSchema.parse(d))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createOrder", { max: 5, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { optionalUserId } = await import("./optional-auth.server");
     const userId = await optionalUserId();
