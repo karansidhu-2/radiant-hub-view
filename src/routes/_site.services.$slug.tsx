@@ -52,6 +52,11 @@ function ServiceDetail() {
     },
   });
 
+  const { data: rv } = useQuery({
+    queryKey: ["service-reviews", slug],
+    queryFn: () => reviewsFn({ data: { service_slug: slug } }),
+  });
+
   if (isLoading) {
     return <div className="grid place-items-center py-24 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
@@ -65,10 +70,7 @@ function ServiceDetail() {
   }
 
   const svc = data.svc;
-  const { data: rv } = useQuery({
-    queryKey: ["service-reviews", slug],
-    queryFn: () => reviewsFn({ data: { service_slug: slug } }),
-  });
+
   return (
     <>
       <JsonLd id={`service-${svc.slug}`} data={{
