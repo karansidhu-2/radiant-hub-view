@@ -66,9 +66,11 @@ export function SiteHeader() {
               <Link to="/account" className="hidden md:block" title="My account">
                 <Button variant="outline" size="icon" aria-label="My account"><UserIcon className="h-4 w-4" /></Button>
               </Link>
-              <Link to="/admin" className="hidden md:block" title="Admin">
-                <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" className="hidden md:block" title="Admin">
+                  <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
+                </Link>
+              )}
               <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
             </>
           ) : (
