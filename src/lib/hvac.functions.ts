@@ -97,6 +97,8 @@ async function computeCapacity(admin: any, serviceSlug?: string | null) {
 export const createBooking = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof bookingSchema>) => bookingSchema.parse(d))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("createBooking", { max: 5, windowSeconds: 60 });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { optionalUserId } = await import("./optional-auth.server");
     const userId = await optionalUserId();
