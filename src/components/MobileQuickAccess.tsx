@@ -20,7 +20,7 @@ type Tile = {
  * it never wraps into a crowded grid on small screens.
  */
 export function MobileQuickAccess() {
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const settings = useSiteSettings();
 
   const tiles: Tile[] = user
@@ -29,7 +29,7 @@ export function MobileQuickAccess() {
         { key: "bookings", label: "My bookings", icon: CalendarCheck, to: "/account" },
         { key: "orders", label: "My orders", icon: ShoppingBag, to: "/account" },
         { key: "reviews", label: "My reviews", icon: Star, to: "/reviews" },
-        { key: "admin", label: "Admin panel", icon: Shield, to: "/admin" },
+        ...(isAdmin ? [{ key: "admin", label: "Admin panel", icon: Shield, to: "/admin" } as Tile] : []),
         { key: "call", label: "Call us", icon: Phone, href: telHref(settings.support_phone) },
         { key: "signout", label: "Sign out", icon: LogOut, onClick: () => signOut() },
       ]
