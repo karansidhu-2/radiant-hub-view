@@ -13,11 +13,24 @@ import { ProductGallery } from "@/components/ProductGallery";
 import type { MediaItem } from "@/lib/product-image";
 import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
+import { JsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/_site/shop/$slug")({
-  head: ({ params }) => ({
-    meta: [{ title: `${params.slug.replace(/-/g, " ")} — HVAC Pro` }],
-  }),
+  head: ({ params }) => {
+    const name = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const url = `https://radiant-hub-view.lovable.app/shop/${params.slug}`;
+    return {
+      meta: [
+        { title: `${name} — HVAC Pro` },
+        { name: "description", content: `Buy ${name} from HVAC Pro with professional installation, warranty, and financing options.` },
+        { property: "og:title", content: `${name} — HVAC Pro` },
+        { property: "og:description", content: `Shop ${name} with installation included.` },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   errorComponent: ({ error }) => <div role="alert" className="p-10 text-center">{error.message}</div>,
   component: ProductDetail,
 });
@@ -75,6 +88,31 @@ function ProductDetail() {
 
   return (
     <>
+      <JsonLd id={`product-${p.slug}`} data={{
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: p.name,
+        description: p.description,
+        brand: { "@type": "Brand", name: p.brand },
+        category: p.category,
+        image: p.image_url ? [p.image_url] : undefined,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "USD",
+          price: Number(p.price),
+          availability: p.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          url: `https://radiant-hub-view.lovable.app/shop/${p.slug}`,
+        },
+      }} />
+      <JsonLd id={`breadcrumb-product-${p.slug}`} data={{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://radiant-hub-view.lovable.app/" },
+          { "@type": "ListItem", position: 2, name: "Shop", item: "https://radiant-hub-view.lovable.app/shop" },
+          { "@type": "ListItem", position: 3, name: p.name, item: `https://radiant-hub-view.lovable.app/shop/${p.slug}` },
+        ],
+      }} />
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
         <Link to="/shop" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to shop

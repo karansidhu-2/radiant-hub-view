@@ -1,7 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_site/about")({
-  head: () => ({ meta: [{ title: "About — HVAC Pro" }, { name: "description", content: "Family-owned HVAC company serving homes and businesses across the US." }] }),
+  head: () => ({
+    meta: [
+      { title: "About HVAC Pro — Licensed HVAC Company Serving the US" },
+      { name: "description", content: "Family-owned, NATE-certified HVAC company serving homes and businesses across 28 US states with repair, installation, and 24/7 emergency service." },
+      { property: "og:title", content: "About HVAC Pro" },
+      { property: "og:description", content: "Licensed, insured, family-owned HVAC contractor." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/about" },
+    ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/about" }],
+  }),
   component: () => (
     <section className="mx-auto max-w-3xl px-4 py-16 md:px-6">
       <h1 className="text-3xl font-bold md:text-4xl">About HVAC Pro</h1>

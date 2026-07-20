@@ -14,7 +14,7 @@ import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — HVAC Pro" }] }),
+  head: () => ({ meta: [{ title: "Checkout — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: CheckoutPage,
 });
 

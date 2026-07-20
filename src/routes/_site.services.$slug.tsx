@@ -13,12 +13,21 @@ import { JsonLd } from "@/components/JsonLd";
 
 
 export const Route = createFileRoute("/_site/services/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug.replace(/-/g, " ")} — HVAC Pro` },
-      { property: "og:title", content: `HVAC Service — HVAC Pro` },
-    ],
-  }),
+  head: ({ params }) => {
+    const name = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const url = `https://radiant-hub-view.lovable.app/services/${params.slug}`;
+    return {
+      meta: [
+        { title: `${name} — HVAC Pro` },
+        { name: "description", content: `Professional ${name.toLowerCase()} from licensed HVAC technicians. Upfront pricing, same-day availability, and guaranteed workmanship.` },
+        { property: "og:title", content: `${name} — HVAC Pro` },
+        { property: "og:description", content: `Book ${name.toLowerCase()} with HVAC Pro — licensed, insured, guaranteed.` },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   errorComponent: ({ error }) => <div role="alert" className="p-10 text-center">{error.message}</div>,
   component: ServiceDetail,
 });
