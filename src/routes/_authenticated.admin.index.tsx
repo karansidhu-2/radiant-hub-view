@@ -13,6 +13,7 @@ import {
   prefetchDashboardChartsChunk,
 } from "@/lib/admin-analytics-query";
 import { PerfProfiler } from "@/lib/perf-profiler";
+import { AdminDashboardSkeleton } from "@/components/skeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,7 +143,7 @@ function AdminDashboard() {
   };
 
   if (loading || !data) {
-    return <div className="py-16 text-center text-muted-foreground">Loading analytics…</div>;
+    return <AdminDashboardSkeleton />;
   }
 
 

@@ -169,9 +169,7 @@ function ServicesPage() {
 
 
         {isLoading ? (
-          <div className="grid place-items-center py-16 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
+          <ServiceGridSkeleton count={6} />
         ) : filtered.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center text-sm text-muted-foreground">
             No services in this category yet. Try another filter.
