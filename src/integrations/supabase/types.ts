@@ -815,6 +815,18 @@ export type Database = {
           units_sold: number
         }[]
       }
+      get_site_settings_public: {
+        Args: never
+        Returns: {
+          address: string
+          business_hours: string
+          company_name: string
+          emergency_phone: string
+          support_email: string
+          support_phone: string
+          tagline: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -11,14 +11,11 @@ export default defineTool({
     const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data } = await supabase
-      .from("site_settings")
-      .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone")
-      .eq("singleton", true)
-      .maybeSingle();
+    const { data } = await (supabase as any).rpc("get_site_settings_public");
+    const row = Array.isArray(data) ? data[0] : data;
     return {
-      content: [{ type: "text", text: JSON.stringify(data ?? {}) }],
-      structuredContent: data ?? {},
+      content: [{ type: "text", text: JSON.stringify(row ?? {}) }],
+      structuredContent: row ?? {},
     };
   },
 });

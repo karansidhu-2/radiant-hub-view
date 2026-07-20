@@ -25,12 +25,9 @@ export function useSiteSettings() {
   const { data } = useQuery({
     queryKey: ["site_settings"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("site_settings")
-        .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone")
-        .eq("singleton", true)
-        .maybeSingle();
-      return (data as SiteSettings | null) ?? FALLBACK;
+      const { data } = await (supabase as any).rpc("get_site_settings_public");
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row as SiteSettings | null) ?? FALLBACK;
     },
     staleTime: 10 * 60_000,
     gcTime: 30 * 60_000,
