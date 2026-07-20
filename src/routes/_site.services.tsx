@@ -9,6 +9,8 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
 import { ServiceGridSkeleton } from "@/components/skeletons";
+import { JsonLd } from "@/components/JsonLd";
+
 
 export const Route = createFileRoute("/_site/services")({
   head: () => ({
@@ -107,6 +109,26 @@ function ServicesPage() {
 
   return (
     <>
+      {services.length > 0 && (
+        <JsonLd id="services-itemlist" data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "HVAC Pro Services",
+          itemListElement: services.slice(0, 25).map((s, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "Service",
+              name: s.name,
+              description: s.short,
+              url: `https://radiant-hub-view.lovable.app/services/${s.slug}`,
+              provider: { "@type": "LocalBusiness", "@id": "https://radiant-hub-view.lovable.app/#business", name: "HVAC Pro" },
+              offers: { "@type": "Offer", price: s.starting_at, priceCurrency: "USD" },
+            },
+          })),
+        }} />
+      )}
+
       <section className="border-b border-border bg-secondary/40">
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-20">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary md:text-sm">Services</p>
