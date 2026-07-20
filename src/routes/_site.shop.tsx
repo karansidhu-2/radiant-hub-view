@@ -138,10 +138,10 @@ function ShopPage() {
   return (
     <>
       <section className="border-b border-border bg-secondary/40">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Shop</p>
-          <h1 className="mt-1 text-3xl font-bold md:text-5xl">HVAC systems & equipment</h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary md:text-sm">Shop</p>
+          <h1 className="mt-1 text-2xl font-bold md:text-5xl">HVAC systems & equipment</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:mt-3 md:text-base">
             Every purchase can include professional installation, permits, and a 10-year warranty. Add to cart, book a time, and we handle the rest.
           </p>
         </div>
@@ -263,7 +263,7 @@ function ShopPage() {
             <Button onClick={clearAll} variant="outline" size="sm" className="mt-4">Clear all filters</Button>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((p) => (
               <Card key={p.slug} className="card-pop group overflow-hidden hover:border-primary/35">
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
@@ -287,27 +287,27 @@ function ShopPage() {
                     )}
                   </div>
                 </Link>
-                <CardContent className="p-5">
+                <CardContent className="p-3 sm:p-5">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
+                    <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{p.brand}</p>
                     <AutoRatingBadge rating={autoRatings?.[p.slug]} compact />
                   </div>
                   <Link to="/shop/$slug" params={{ slug: p.slug }}>
-                    <h3 className="mt-1 text-base font-semibold leading-tight hover:text-primary">{p.name}</h3>
+                    <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-tight hover:text-primary sm:text-base">{p.name}</h3>
                   </Link>
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  <div className="mt-2 hidden flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground sm:flex">
                     {p.seer && <span>{p.seer} SEER2</span>}
                     {p.capacity_btu && <span>{(p.capacity_btu / 12000).toFixed(1)} ton</span>}
                     {p.hspf && <span>{p.hspf} HSPF2</span>}
                   </div>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-xl font-bold">{formatMoney(Number(p.price))}</span>
-                    <span className="text-xs text-muted-foreground">+ {formatMoney(Number(p.installation_fee))} install</span>
+                  <div className="mt-2 flex items-baseline gap-1 sm:mt-3">
+                    <span className="text-base font-bold sm:text-xl">{formatMoney(Number(p.price))}</span>
+                    <span className="hidden text-xs text-muted-foreground sm:inline">+ {formatMoney(Number(p.installation_fee))} install</span>
                   </div>
                   <Button
                     onClick={() => handleAdd(p.slug, p.name)}
                     disabled={!p.available}
-                    className="mt-4 w-full gradient-cool text-primary-foreground hover:opacity-95"
+                    className="mt-3 h-10 w-full gradient-cool text-primary-foreground hover:opacity-95 sm:mt-4"
                   >
                     {p.available ? "Add to cart" : "Unavailable"}
                   </Button>

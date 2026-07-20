@@ -57,28 +57,28 @@ function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
           <div className="flex flex-col justify-center text-primary-foreground">
             <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--ember)]" /> Same-day service across 28 states
             </span>
-            <h1 className="text-4xl font-bold leading-[1.05] md:text-5xl lg:text-6xl">
+            <h1 className="text-[2rem] font-bold leading-[1.1] md:text-5xl lg:text-6xl">
               Comfort you can count on.
               <span className="mt-2 block bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                 All year, every year.
               </span>
             </h1>
-            <p className="mt-5 max-w-lg text-base text-white/85 md:text-lg">
+            <p className="mt-4 max-w-lg text-[15px] text-white/85 md:mt-5 md:text-lg">
               Licensed heating, cooling, and air quality experts. Book same-day repair, order a new system with professional installation, or get a free replacement quote in minutes.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/book" search={{ service: undefined }}>
-                <Button size="lg" className="bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90">
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
+              <Link to="/book" search={{ service: undefined }} className="w-full sm:w-auto">
+                <Button size="lg" className="h-12 w-full bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90 sm:w-auto">
                   Book Service <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/shop">
-                <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+              <Link to="/shop" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="h-12 w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto">
                   Shop Systems
                 </Button>
               </Link>
@@ -123,7 +123,7 @@ function Home() {
       {/* Services */}
 
 
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">Our services</p>
@@ -153,7 +153,7 @@ function Home() {
       </section>
 
       {/* Featured products */}
-      <section className="bg-secondary/40 py-20">
+      <section className="bg-secondary/40 py-12 md:py-20">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -163,7 +163,7 @@ function Home() {
             </div>
             <Link to="/shop" className="text-sm font-semibold text-primary hover:underline">Browse all products →</Link>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((p) => (
               <Link key={p.slug} to="/shop/$slug" params={{ slug: p.slug }}>
                 <Card className="card-pop group h-full overflow-hidden hover:border-primary/35">
@@ -180,12 +180,12 @@ function Home() {
                       </span>
                     )}
                   </div>
-                  <CardContent className="p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
-                    <h3 className="mt-1 text-base font-semibold leading-tight">{p.name}</h3>
-                    <div className="mt-3 flex items-baseline gap-1">
-                      <span className="text-lg font-bold">{formatMoney(p.price)}</span>
-                      <span className="text-xs text-muted-foreground">+ install</span>
+                  <CardContent className="p-3 sm:p-5">
+                    <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{p.brand}</p>
+                    <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-tight sm:text-base">{p.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-1 sm:mt-3">
+                      <span className="text-base font-bold sm:text-lg">{formatMoney(p.price)}</span>
+                      <span className="hidden text-xs text-muted-foreground sm:inline">+ install</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -196,7 +196,7 @@ function Home() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <div className="mb-12 text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">How it works</p>
           <h2 className="mt-1 text-3xl font-bold md:text-4xl">Comfort in three simple steps</h2>
@@ -217,7 +217,7 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-secondary/40 py-20">
+      <section className="bg-secondary/40 py-12 md:py-20">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-10 text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">What customers say</p>
@@ -242,9 +242,9 @@ function Home() {
       </section>
 
       {/* Service area */}
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <Card className="overflow-hidden border-0 gradient-hero text-primary-foreground shadow-elevated">
-          <CardContent className="grid gap-8 p-10 md:grid-cols-[1.2fr_1fr] md:p-14">
+          <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_1fr] md:gap-8 md:p-14">
             <div>
               <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                 <MapPin className="h-3.5 w-3.5" /> 28 states · 140+ metro areas

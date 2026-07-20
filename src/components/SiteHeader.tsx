@@ -20,13 +20,13 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-          <span className="grid h-9 w-9 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft">
-            <Wind className="h-5 w-5" strokeWidth={2.4} />
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 md:bg-background/95 md:backdrop-blur-none">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 md:h-16 md:px-6">
+        <Link to="/" className="flex min-w-0 items-center gap-2 text-base font-bold tracking-tight md:text-lg">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
+            <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
-          <span>{settings.company_name}</span>
+          <span className="truncate">{settings.company_name}</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
@@ -100,48 +100,48 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="animate-rise-in border-t border-border md:hidden">
+        <div className="animate-rise-in border-t border-border bg-background/95 backdrop-blur-md md:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
             {nav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/70"
+                className="flex min-h-11 items-center rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent active:bg-accent/70"
               >
                 {n.label}
               </Link>
             ))}
-            <a href={telHref(settings.support_phone)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+            <a href={telHref(settings.support_phone)} className="flex min-h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent">
               <Phone className="h-4 w-4" /> {settings.support_phone}
             </a>
             {user ? (
               <>
-                <Link to="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                <Link to="/account" onClick={() => setOpen(false)} className="flex min-h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent">
                   <UserIcon className="h-4 w-4" /> My account
                 </Link>
                 {isAdmin && (
-                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  <Link to="/admin" onClick={() => setOpen(false)} className="flex min-h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent">
                     <Shield className="h-4 w-4" /> Admin panel
                   </Link>
                 )}
-                <Link to="/reviews" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                <Link to="/reviews" onClick={() => setOpen(false)} className="flex min-h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent">
                   <Shield className="h-4 w-4" /> My reviews
                 </Link>
                 <button
                   onClick={() => { setOpen(false); signOut(); }}
-                  className="flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-foreground hover:bg-accent"
+                  className="flex min-h-11 items-center gap-2 rounded-md px-3 text-left text-[15px] font-medium text-foreground hover:bg-accent"
                 >
                   <LogOut className="h-4 w-4" /> Sign out
                 </button>
               </>
             ) : (
-              <Link to="/auth" search={{ redirect: "/" }} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+              <Link to="/auth" search={{ redirect: "/" }} onClick={() => setOpen(false)} className="flex min-h-11 items-center gap-2 rounded-md px-3 text-[15px] font-medium text-foreground hover:bg-accent">
                 <LogIn className="h-4 w-4" /> Sign in
               </Link>
             )}
             <Link to="/book" search={{ service: undefined }} onClick={() => setOpen(false)}>
-              <Button className="mt-2 w-full gradient-cool text-primary-foreground">Book Service</Button>
+              <Button className="mt-2 h-11 w-full gradient-cool text-primary-foreground">Book Service</Button>
             </Link>
           </div>
         </div>

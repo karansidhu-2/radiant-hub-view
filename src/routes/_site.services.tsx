@@ -107,10 +107,10 @@ function ServicesPage() {
   return (
     <>
       <section className="border-b border-border bg-secondary/40">
-        <div className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Services</p>
-          <h1 className="mt-1 text-3xl font-bold md:text-5xl">Everything your home comfort system needs</h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary md:text-sm">Services</p>
+          <h1 className="mt-1 text-2xl font-bold md:text-5xl">Everything your home comfort system needs</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:mt-3 md:text-base">
             Book any service online in under 2 minutes. Same-day availability in most metro areas. All work performed by our own W-2 certified technicians — never subcontracted.
           </p>
         </div>
