@@ -90,8 +90,8 @@ async function run() {
   // 1) Seed cart via localStorage BEFORE hydration.
   await page.goto(`${BASE_URL}/shop`, { waitUntil: "domcontentloaded" });
   await page.evaluate(({ slug, qty, install }) => {
-    const cart = [{ productSlug: slug, quantity: qty, includeInstallation: install }];
-    localStorage.setItem("hvac.cart.v1", JSON.stringify(cart));
+    const cart = [{ slug, quantity: qty, includeInstallation: install }];
+    localStorage.setItem("hvacpro:cart:v1", JSON.stringify(cart));
   }, { slug: PRODUCT_SLUG, qty: QUANTITY, install: INCLUDE_INSTALL });
 
   // 2) Load checkout with the seeded cart.
