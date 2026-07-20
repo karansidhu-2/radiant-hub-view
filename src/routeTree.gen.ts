@@ -9,50 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as SiteRouteImport } from './routes/_site'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as SiteIndexRouteImport } from './routes/_site.index'
-import { Route as SiteShopRouteImport } from './routes/_site.shop'
-import { Route as SiteServicesRouteImport } from './routes/_site.services'
-import { Route as SiteOfflineRouteImport } from './routes/_site.offline'
-import { Route as SiteContactRouteImport } from './routes/_site.contact'
-import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
-import { Route as SiteCartRouteImport } from './routes/_site.cart'
-import { Route as SiteBookRouteImport } from './routes/_site.book'
-import { Route as SiteAuthRouteImport } from './routes/_site.auth'
-import { Route as SiteAboutRouteImport } from './routes/_site.about'
-import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated.reviews'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
-import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated.account'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as SiteRouteImport } from './routes/_site'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
-import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
-import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$slug'
-import { Route as AuthenticatedAdminZipsRouteImport } from './routes/_authenticated.admin.zips'
-import { Route as AuthenticatedAdminTechniciansRouteImport } from './routes/_authenticated.admin.technicians'
-import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated.admin.settings'
-import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
-import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated.admin.security'
-import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
-import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
-import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
-import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated.admin.notifications'
-import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated.admin.inbox'
-import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated.admin.calendar'
-import { Route as AuthenticatedAdminBookingsRouteImport } from './routes/_authenticated.admin.bookings'
-import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated.admin.audit'
-import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated.admin.admins'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated.account'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated.reviews'
+import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as SiteAuthRouteImport } from './routes/_site.auth'
+import { Route as SiteBookRouteImport } from './routes/_site.book'
+import { Route as SiteCartRouteImport } from './routes/_site.cart'
+import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
+import { Route as SiteContactRouteImport } from './routes/_site.contact'
+import { Route as SiteOfflineRouteImport } from './routes/_site.offline'
+import { Route as SiteServicesRouteImport } from './routes/_site.services'
+import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
+import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated.admin.admins'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated.admin.audit'
+import { Route as AuthenticatedAdminBookingsRouteImport } from './routes/_authenticated.admin.bookings'
+import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated.admin.calendar'
+import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated.admin.inbox'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated.admin.notifications'
+import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
+import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
+import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
+import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated.admin.security'
+import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated.admin.settings'
+import { Route as AuthenticatedAdminTechniciansRouteImport } from './routes/_authenticated.admin.technicians'
+import { Route as AuthenticatedAdminZipsRouteImport } from './routes/_authenticated.admin.zips'
+import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$slug'
+import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
 import { Route as AuthenticatedAdminReviewsAuditRouteImport } from './routes/_authenticated.admin.reviews.audit'
+import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteRoute = SiteRouteImport.update({
+  id: '/_site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -60,67 +63,26 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SiteRoute = SiteRouteImport.update({
-  id: '/_site',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SiteIndexRoute = SiteIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteShopRoute = SiteShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteServicesRoute = SiteServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteOfflineRoute = SiteOfflineRouteImport.update({
-  id: '/offline',
-  path: '/offline',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteContactRoute = SiteContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteCheckoutRoute = SiteCheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteCartRoute = SiteCartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteBookRoute = SiteBookRouteImport.update({
-  id: '/book',
-  path: '/book',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteAuthRoute = SiteAuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteAboutRoute = SiteAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => SiteRoute,
-} as any)
-const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
-  id: '/reviews',
-  path: '/reviews',
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -128,111 +90,75 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
+const SiteIndexRoute = SiteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteAuthRoute = SiteAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteBookRoute = SiteBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCartRoute = SiteCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteCheckoutRoute = SiteCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteOfflineRoute = SiteOfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteServicesRoute = SiteServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteShopRoute = SiteShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => SiteRoute,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const SiteShopSlugRoute = SiteShopSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => SiteShopRoute,
-} as any)
-const SiteServicesSlugRoute = SiteServicesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => SiteServicesRoute,
-} as any)
-const AuthenticatedAdminZipsRoute = AuthenticatedAdminZipsRouteImport.update({
-  id: '/zips',
-  path: '/zips',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminTechniciansRoute =
-  AuthenticatedAdminTechniciansRouteImport.update({
-    id: '/technicians',
-    path: '/technicians',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSettingsRoute =
-  AuthenticatedAdminSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminServicesRoute =
-  AuthenticatedAdminServicesRouteImport.update({
-    id: '/services',
-    path: '/services',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminSecurityRoute =
-  AuthenticatedAdminSecurityRouteImport.update({
-    id: '/security',
-    path: '/security',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminReviewsRoute =
-  AuthenticatedAdminReviewsRouteImport.update({
-    id: '/reviews',
-    path: '/reviews',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminProductsRoute =
-  AuthenticatedAdminProductsRouteImport.update({
-    id: '/products',
-    path: '/products',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminOrdersRoute =
-  AuthenticatedAdminOrdersRouteImport.update({
-    id: '/orders',
-    path: '/orders',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminNotificationsRoute =
-  AuthenticatedAdminNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminCalendarRoute =
-  AuthenticatedAdminCalendarRouteImport.update({
-    id: '/calendar',
-    path: '/calendar',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminBookingsRoute =
-  AuthenticatedAdminBookingsRouteImport.update({
-    id: '/bookings',
-    path: '/bookings',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminAdminsRoute =
@@ -241,21 +167,90 @@ const AuthenticatedAdminAdminsRoute =
     path: '/admins',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
-const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
-  id: '/confirmation/$kind/$ref',
-  path: '/confirmation/$kind/$ref',
-  getParentRoute: () => SiteRoute,
+const AuthenticatedAdminBookingsRoute =
+  AuthenticatedAdminBookingsRouteImport.update({
+    id: '/bookings',
+    path: '/bookings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCalendarRoute =
+  AuthenticatedAdminCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminOrdersRoute =
+  AuthenticatedAdminOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProductsRoute =
+  AuthenticatedAdminProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminReviewsRoute =
+  AuthenticatedAdminReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSecurityRoute =
+  AuthenticatedAdminSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminServicesRoute =
+  AuthenticatedAdminServicesRouteImport.update({
+    id: '/services',
+    path: '/services',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminTechniciansRoute =
+  AuthenticatedAdminTechniciansRouteImport.update({
+    id: '/technicians',
+    path: '/technicians',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminZipsRoute = AuthenticatedAdminZipsRouteImport.update({
+  id: '/zips',
+  path: '/zips',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const SiteServicesSlugRoute = SiteServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => SiteServicesRoute,
+} as any)
+const SiteShopSlugRoute = SiteShopSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => SiteShopRoute,
 } as any)
 const AuthenticatedAdminReviewsAuditRoute =
   AuthenticatedAdminReviewsAuditRouteImport.update({
@@ -263,6 +258,11 @@ const AuthenticatedAdminReviewsAuditRoute =
     path: '/audit',
     getParentRoute: () => AuthenticatedAdminReviewsRoute,
   } as any)
+const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
+  id: '/confirmation/$kind/$ref',
+  path: '/confirmation/$kind/$ref',
+  getParentRoute: () => SiteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -523,18 +523,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_site': {
@@ -544,109 +537,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_site/': {
-      id: '/_site/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof SiteIndexRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/shop': {
-      id: '/_site/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof SiteShopRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/services': {
-      id: '/_site/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof SiteServicesRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/offline': {
-      id: '/_site/offline'
-      path: '/offline'
-      fullPath: '/offline'
-      preLoaderRoute: typeof SiteOfflineRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/contact': {
-      id: '/_site/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof SiteContactRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/checkout': {
-      id: '/_site/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof SiteCheckoutRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/cart': {
-      id: '/_site/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof SiteCartRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/book': {
-      id: '/_site/book'
-      path: '/book'
-      fullPath: '/book'
-      preLoaderRoute: typeof SiteBookRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/auth': {
-      id: '/_site/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof SiteAuthRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/about': {
-      id: '/_site/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof SiteAboutRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_authenticated/reviews': {
-      id: '/_authenticated/reviews'
-      path: '/reviews'
-      fullPath: '/reviews'
-      preLoaderRoute: typeof AuthenticatedReviewsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/account': {
-      id: '/_authenticated/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AuthenticatedAccountRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -656,116 +558,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reviews': {
+      id: '/_authenticated/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof AuthenticatedReviewsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_site/': {
+      id: '/_site/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/auth': {
+      id: '/_site/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof SiteAuthRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/book': {
+      id: '/_site/book'
+      path: '/book'
+      fullPath: '/book'
+      preLoaderRoute: typeof SiteBookRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/cart': {
+      id: '/_site/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof SiteCartRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/checkout': {
+      id: '/_site/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof SiteCheckoutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/offline': {
+      id: '/_site/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof SiteOfflineRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/services': {
+      id: '/_site/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof SiteServicesRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/shop': {
+      id: '/_site/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof SiteShopRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_site/shop/$slug': {
-      id: '/_site/shop/$slug'
-      path: '/$slug'
-      fullPath: '/shop/$slug'
-      preLoaderRoute: typeof SiteShopSlugRouteImport
-      parentRoute: typeof SiteShopRoute
-    }
-    '/_site/services/$slug': {
-      id: '/_site/services/$slug'
-      path: '/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof SiteServicesSlugRouteImport
-      parentRoute: typeof SiteServicesRoute
-    }
-    '/_authenticated/admin/zips': {
-      id: '/_authenticated/admin/zips'
-      path: '/zips'
-      fullPath: '/admin/zips'
-      preLoaderRoute: typeof AuthenticatedAdminZipsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/technicians': {
-      id: '/_authenticated/admin/technicians'
-      path: '/technicians'
-      fullPath: '/admin/technicians'
-      preLoaderRoute: typeof AuthenticatedAdminTechniciansRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/settings': {
-      id: '/_authenticated/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/services': {
-      id: '/_authenticated/admin/services'
-      path: '/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AuthenticatedAdminServicesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/security': {
-      id: '/_authenticated/admin/security'
-      path: '/security'
-      fullPath: '/admin/security'
-      preLoaderRoute: typeof AuthenticatedAdminSecurityRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/reviews': {
-      id: '/_authenticated/admin/reviews'
-      path: '/reviews'
-      fullPath: '/admin/reviews'
-      preLoaderRoute: typeof AuthenticatedAdminReviewsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/products': {
-      id: '/_authenticated/admin/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/orders': {
-      id: '/_authenticated/admin/orders'
-      path: '/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/notifications': {
-      id: '/_authenticated/admin/notifications'
-      path: '/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/inbox': {
-      id: '/_authenticated/admin/inbox'
-      path: '/inbox'
-      fullPath: '/admin/inbox'
-      preLoaderRoute: typeof AuthenticatedAdminInboxRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/calendar': {
-      id: '/_authenticated/admin/calendar'
-      path: '/calendar'
-      fullPath: '/admin/calendar'
-      preLoaderRoute: typeof AuthenticatedAdminCalendarRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/bookings': {
-      id: '/_authenticated/admin/bookings'
-      path: '/bookings'
-      fullPath: '/admin/bookings'
-      preLoaderRoute: typeof AuthenticatedAdminBookingsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/audit': {
-      id: '/_authenticated/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/admins': {
@@ -775,26 +684,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/.lovable/oauth/consent': {
-      id: '/.lovable/oauth/consent'
-      path: '/.lovable/oauth/consent'
-      fullPath: '/.lovable/oauth/consent'
-      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/admin/bookings': {
+      id: '/_authenticated/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AuthenticatedAdminBookingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_site/confirmation/$kind/$ref': {
-      id: '/_site/confirmation/$kind/$ref'
-      path: '/confirmation/$kind/$ref'
-      fullPath: '/confirmation/$kind/$ref'
-      preLoaderRoute: typeof SiteConfirmationKindRefRouteImport
-      parentRoute: typeof SiteRoute
+    '/_authenticated/admin/calendar': {
+      id: '/_authenticated/admin/calendar'
+      path: '/calendar'
+      fullPath: '/admin/calendar'
+      preLoaderRoute: typeof AuthenticatedAdminCalendarRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/inbox': {
+      id: '/_authenticated/admin/inbox'
+      path: '/inbox'
+      fullPath: '/admin/inbox'
+      preLoaderRoute: typeof AuthenticatedAdminInboxRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/orders': {
+      id: '/_authenticated/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/products': {
+      id: '/_authenticated/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/reviews': {
+      id: '/_authenticated/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AuthenticatedAdminReviewsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/security': {
+      id: '/_authenticated/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AuthenticatedAdminSecurityRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/services': {
+      id: '/_authenticated/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AuthenticatedAdminServicesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/technicians': {
+      id: '/_authenticated/admin/technicians'
+      path: '/technicians'
+      fullPath: '/admin/technicians'
+      preLoaderRoute: typeof AuthenticatedAdminTechniciansRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/zips': {
+      id: '/_authenticated/admin/zips'
+      path: '/zips'
+      fullPath: '/admin/zips'
+      preLoaderRoute: typeof AuthenticatedAdminZipsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_site/services/$slug': {
+      id: '/_site/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof SiteServicesSlugRouteImport
+      parentRoute: typeof SiteServicesRoute
+    }
+    '/_site/shop/$slug': {
+      id: '/_site/shop/$slug'
+      path: '/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof SiteShopSlugRouteImport
+      parentRoute: typeof SiteShopRoute
     }
     '/_authenticated/admin/reviews/audit': {
       id: '/_authenticated/admin/reviews/audit'
@@ -802,6 +795,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/reviews/audit'
       preLoaderRoute: typeof AuthenticatedAdminReviewsAuditRouteImport
       parentRoute: typeof AuthenticatedAdminReviewsRoute
+    }
+    '/_site/confirmation/$kind/$ref': {
+      id: '/_site/confirmation/$kind/$ref'
+      path: '/confirmation/$kind/$ref'
+      fullPath: '/confirmation/$kind/$ref'
+      preLoaderRoute: typeof SiteConfirmationKindRefRouteImport
+      parentRoute: typeof SiteRoute
     }
   }
 }
