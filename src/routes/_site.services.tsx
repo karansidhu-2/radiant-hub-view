@@ -176,37 +176,55 @@ function ServicesPage() {
             No services in this category yet. Try another filter.
           </div>
         ) : (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            id="services-grid"
+            role="tabpanel"
+            aria-label={`${CATEGORY_TABS.find((t) => t.key === tab)?.label ?? "All"} services`}
+            className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+          >
             {filtered.map((s) => {
               const rating = ratings[s.slug];
               const isEmergency = s.category === "emergency";
               const isPopular = s.slug === popularSlug;
               return (
-                <Card key={s.slug} className="card-pop relative flex h-full flex-col overflow-hidden hover:border-primary/35">
+                <Card key={s.slug} className="card-pop relative flex h-full flex-col overflow-hidden hover:border-primary/35 focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/40">
                   {/* Corner ribbon: live availability for emergency, popular otherwise */}
                   {isEmergency ? (
-                    <span className="absolute right-0 top-0 flex items-center gap-1.5 rounded-bl-lg bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                    <span
+                      className="absolute right-0 top-0 flex items-center gap-1.5 rounded-bl-lg bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-primary"
+                      role="status"
+                      aria-label={`${s.name} — available now`}
+                    >
+                      <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 motion-safe:animate-ping motion-reduce:opacity-100" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
                       </span>
                       Available now
                     </span>
                   ) : isPopular ? (
-                    <span className="absolute right-3 top-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                    <span
+                      className="absolute right-3 top-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400"
+                      aria-label={`${s.name} — popular pick`}
+                    >
                       Popular
                     </span>
                   ) : null}
 
                   <CardContent className="flex h-full flex-col p-6">
                     <div className="mb-4 flex items-start gap-3">
-                      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground">
+                      <div
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground"
+                        aria-hidden="true"
+                      >
                         <DynamicIcon name={s.icon} className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
                         {rating && rating.count > 0 ? (
-                          <div className="mb-0.5 flex items-center gap-1.5">
-                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                          <div
+                            className="mb-0.5 flex items-center gap-1.5"
+                            aria-label={`Rated ${rating.avg.toFixed(1)} out of 5 from ${rating.count} review${rating.count === 1 ? "" : "s"}`}
+                          >
+                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
                             <span className="text-xs font-bold text-foreground">{rating.avg.toFixed(1)}</span>
                             <span className="text-[11px] text-muted-foreground">
                               ({rating.count} review{rating.count === 1 ? "" : "s"})
@@ -214,12 +232,16 @@ function ServicesPage() {
                           </div>
                         ) : (
                           <div className="mb-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                            <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                             Certified techs
                           </div>
                         )}
                         <h3 className="truncate text-lg font-semibold">
-                          <Link to="/services/$slug" params={{ slug: s.slug }} className="hover:underline">
+                          <Link
+                            to="/services/$slug"
+                            params={{ slug: s.slug }}
+                            className="rounded-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                          >
                             {s.name}
                           </Link>
                         </h3>
@@ -231,7 +253,7 @@ function ServicesPage() {
                     <ul className="mt-4 space-y-1.5 text-sm">
                       {s.bullets.slice(0, 3).map((b) => (
                         <li key={b} className="flex items-start gap-2 text-muted-foreground">
-                          <span className="mt-1.5 inline-block h-1 w-1 rounded-full bg-primary" />
+                          <span className="mt-1.5 inline-block h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
                           {b}
                         </li>
                       ))}
@@ -239,18 +261,18 @@ function ServicesPage() {
 
                     <div className="mt-auto pt-5">
                       <div className="mb-3 flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Starting at</span>
-                        <span className="text-lg font-extrabold text-foreground">
+                        <span className="text-muted-foreground" id={`starting-${s.slug}`}>Starting at</span>
+                        <span className="text-lg font-extrabold text-foreground" aria-labelledby={`starting-${s.slug}`}>
                           {formatMoney(Number(s.starting_at))}
                         </span>
                       </div>
                       <Button
                         type="button"
-                        className="w-full gradient-cool text-primary-foreground"
+                        className="w-full gradient-cool text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         onClick={() => navigate({ to: "/book", search: { service: s.slug } })}
-                        aria-label={`Book ${s.name}`}
+                        aria-label={`Book ${s.name} — starting at ${formatMoney(Number(s.starting_at))}`}
                       >
-                        Book this service <ArrowRight className="ml-1 h-4 w-4" />
+                        Book this service <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </CardContent>
@@ -258,6 +280,7 @@ function ServicesPage() {
               );
             })}
           </div>
+
         )}
 
         {/* Free-estimate / callback strip — sits under the grid on every device */}
