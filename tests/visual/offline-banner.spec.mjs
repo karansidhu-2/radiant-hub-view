@@ -51,8 +51,8 @@ async function run() {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
 
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(400);
+  await page.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
 
   // 1. Online on load → no banner.
   assert.equal(await bannerVisible(page), false, "banner must NOT show on initial online load");
