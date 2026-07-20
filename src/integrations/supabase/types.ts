@@ -796,42 +796,7 @@ export type Database = {
       }
     }
     Views: {
-      site_settings_public: {
-        Row: {
-          address: string | null
-          business_hours: string | null
-          company_name: string | null
-          emergency_phone: string | null
-          id: string | null
-          singleton: boolean | null
-          support_email: string | null
-          support_phone: string | null
-          tagline: string | null
-        }
-        Insert: {
-          address?: string | null
-          business_hours?: string | null
-          company_name?: string | null
-          emergency_phone?: string | null
-          id?: string | null
-          singleton?: boolean | null
-          support_email?: string | null
-          support_phone?: string | null
-          tagline?: string | null
-        }
-        Update: {
-          address?: string | null
-          business_hours?: string | null
-          company_name?: string | null
-          emergency_phone?: string | null
-          id?: string | null
-          singleton?: boolean | null
-          support_email?: string | null
-          support_phone?: string | null
-          tagline?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_and_hit_rate_limit: {
@@ -848,6 +813,18 @@ export type Database = {
           related_review_count: number
           slug: string
           units_sold: number
+        }[]
+      }
+      get_site_settings_public: {
+        Args: never
+        Returns: {
+          address: string
+          business_hours: string
+          company_name: string
+          emergency_phone: string
+          support_email: string
+          support_phone: string
+          tagline: string
         }[]
       }
       has_role: {
