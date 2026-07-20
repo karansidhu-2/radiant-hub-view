@@ -190,85 +190,122 @@ export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof orderSchema>) => orderSchema.parse(d))
   .handler(async ({ data }) => {
     const { rateLimit } = await import("./rate-limit.server");
-    await rateLimit("createOrder", { max: 5, windowSeconds: 60 });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { logRpcAudit } = await import("./rpc-audit.server");
     const { optionalUserId } = await import("./optional-auth.server");
     const userId = await optionalUserId();
+    await rateLimit("createOrder", { max: 5, windowSeconds: 60, actorUserId: userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: area } = await supabaseAdmin
-      .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
-    if (!area) throw new Error("ZIP not in service area");
-
-    // Authoritative product lookup — never trust client-supplied prices.
-    const slugs = Array.from(new Set(data.items.map((i) => i.product_slug)));
-    const { data: products, error: prodErr } = await supabaseAdmin
-      .from("products")
-      .select("slug, name, brand, price, installation_fee, stock, available, published")
-      .in("slug", slugs);
-    if (prodErr) throw new Error(prodErr.message);
-    const byslug = new Map((products ?? []).map((p) => [p.slug, p]));
-
-    type Priced = {
-      product_slug: string; product_name: string; brand: string | null;
-      quantity: number; unit_price: number; installation_fee: number; include_installation: boolean;
-    };
-    const priced: Priced[] = [];
-    for (const it of data.items) {
-      const p = byslug.get(it.product_slug);
-      if (!p) throw new Error(`Product not found: ${it.product_slug}`);
-      if (!p.published || p.available === false) throw new Error(`Product unavailable: ${p.name}`);
-      if (typeof p.stock === "number" && p.stock < it.quantity) {
-        throw new Error(`Insufficient stock for ${p.name} (have ${p.stock}, requested ${it.quantity})`);
+    try {
+      const { data: area } = await supabaseAdmin
+        .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
+      if (!area) {
+        await logRpcAudit({
+          event: "createOrder.denied", outcome: "denied", reason: "zip_not_covered",
+          entity_type: "order", actor_user_id: userId,
+          metadata: { item_count: data.items.length },
+        });
+        throw new Error("ZIP not in service area");
       }
-      priced.push({
-        product_slug: p.slug,
-        product_name: p.name,
-        brand: p.brand ?? null,
-        quantity: it.quantity,
-        unit_price: Number(p.price),
-        installation_fee: Number(p.installation_fee ?? 0),
-        include_installation: it.include_installation,
+
+      // Authoritative product lookup — never trust client-supplied prices.
+      const slugs = Array.from(new Set(data.items.map((i) => i.product_slug)));
+      const { data: products, error: prodErr } = await supabaseAdmin
+        .from("products")
+        .select("slug, name, brand, price, installation_fee, stock, available, published")
+        .in("slug", slugs);
+      if (prodErr) throw new Error(prodErr.message);
+      const byslug = new Map((products ?? []).map((p) => [p.slug, p]));
+
+      type Priced = {
+        product_slug: string; product_name: string; brand: string | null;
+        quantity: number; unit_price: number; installation_fee: number; include_installation: boolean;
+      };
+      const priced: Priced[] = [];
+      for (const it of data.items) {
+        const p = byslug.get(it.product_slug);
+        if (!p) throw new Error(`Product not found: ${it.product_slug}`);
+        if (!p.published || p.available === false) throw new Error(`Product unavailable: ${p.name}`);
+        if (typeof p.stock === "number" && p.stock < it.quantity) {
+          throw new Error(`Insufficient stock for ${p.name} (have ${p.stock}, requested ${it.quantity})`);
+        }
+        priced.push({
+          product_slug: p.slug,
+          product_name: p.name,
+          brand: p.brand ?? null,
+          quantity: it.quantity,
+          unit_price: Number(p.price),
+          installation_fee: Number(p.installation_fee ?? 0),
+          include_installation: it.include_installation,
+        });
+      }
+
+      const subtotal = priced.reduce((s, it) => s + it.unit_price * it.quantity, 0);
+      const installationTotal = priced.reduce(
+        (s, it) => s + (it.include_installation ? it.installation_fee * it.quantity : 0), 0);
+      const total = subtotal + installationTotal;
+
+      const { data: order, error } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          user_id: userId,
+          full_name: data.full_name, email: data.email, phone: data.phone,
+          street: data.street, city: data.city, state: data.state, zip: data.zip,
+          scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour,
+          notes: data.notes ?? null,
+          subtotal, installation_total: installationTotal, total,
+        })
+        .select("id, reference")
+        .single();
+      if (error || !order) throw new Error(error?.message || "Failed to create order");
+
+      const { error: itemErr } = await supabaseAdmin.from("order_items").insert(
+        priced.map((it) => ({ ...it, order_id: order.id }))
+      );
+      if (itemErr) throw new Error(itemErr.message);
+
+      if (data.scheduled_date && data.scheduled_hour) {
+        await supabaseAdmin.from("bookings").insert({
+          user_id: userId,
+          order_id: order.id,
+          full_name: data.full_name, email: data.email, phone: data.phone,
+          street: data.street, city: data.city, state: data.state, zip: data.zip,
+          service_slug: "new-system-install", service_name: `Installation for order ${order.reference}`,
+          scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour,
+          notes: `Order ${order.reference}`,
+        });
+      }
+
+      await logRpcAudit({
+        event: "createOrder.success",
+        outcome: "success",
+        entity_type: "order",
+        entity_id: order.id,
+        actor_user_id: userId,
+        metadata: {
+          reference: order.reference,
+          item_count: priced.length,
+          quantities: priced.map((it) => ({ slug: it.product_slug, qty: it.quantity, install: it.include_installation })),
+          computed_total: total,
+          has_installation_booking: Boolean(data.scheduled_date && data.scheduled_hour),
+        },
       });
+
+      return order;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Skip re-logging already-logged denials.
+      if (!msg.startsWith("ZIP not in service area") && !msg.startsWith("Too many requests")) {
+        await logRpcAudit({
+          event: "createOrder.error", outcome: "error", reason: msg.slice(0, 200),
+          entity_type: "order", actor_user_id: userId,
+          metadata: { item_count: data.items.length },
+        });
+      }
+      throw err;
     }
-
-    const subtotal = priced.reduce((s, it) => s + it.unit_price * it.quantity, 0);
-    const installationTotal = priced.reduce(
-      (s, it) => s + (it.include_installation ? it.installation_fee * it.quantity : 0), 0);
-    const total = subtotal + installationTotal;
-
-    const { data: order, error } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        user_id: userId,
-        full_name: data.full_name, email: data.email, phone: data.phone,
-        street: data.street, city: data.city, state: data.state, zip: data.zip,
-        scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour,
-        notes: data.notes ?? null,
-        subtotal, installation_total: installationTotal, total,
-      })
-      .select("id, reference")
-      .single();
-    if (error || !order) throw new Error(error?.message || "Failed to create order");
-
-    const { error: itemErr } = await supabaseAdmin.from("order_items").insert(
-      priced.map((it) => ({ ...it, order_id: order.id }))
-    );
-    if (itemErr) throw new Error(itemErr.message);
-
-
-    if (data.scheduled_date && data.scheduled_hour) {
-      await supabaseAdmin.from("bookings").insert({
-        user_id: userId,
-        order_id: order.id,
-        full_name: data.full_name, email: data.email, phone: data.phone,
-        street: data.street, city: data.city, state: data.state, zip: data.zip,
-        service_slug: "new-system-install", service_name: `Installation for order ${order.reference}`,
-        scheduled_date: data.scheduled_date, scheduled_hour: data.scheduled_hour,
-        notes: `Order ${order.reference}`,
-      });
-    }
-    return order;
   });
+
 
 // ---------- Get booking / order for confirmation (public: reference acts as capability token) ----------
 export const getBookingByRef = createServerFn({ method: "POST" })
