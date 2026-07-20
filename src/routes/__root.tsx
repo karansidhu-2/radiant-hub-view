@@ -149,4 +149,10 @@ function RootComponent() {
   );
 }
 
+function PerfControlsGate() {
+  const { isAdmin } = useAuth();
+  return <PerfProfilerControls isAdmin={!!isAdmin} />;
+}
+
+
 
