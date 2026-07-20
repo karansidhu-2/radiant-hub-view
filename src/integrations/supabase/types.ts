@@ -554,6 +554,48 @@ export type Database = {
           },
         ]
       }
+      rpc_audit_log: {
+        Row: {
+          actor_role: string
+          actor_user_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event: string
+          id: string
+          ip_hash: string | null
+          metadata: Json
+          outcome: string
+          reason: string | null
+        }
+        Insert: {
+          actor_role?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event: string
+          id?: string
+          ip_hash?: string | null
+          metadata?: Json
+          outcome?: string
+          reason?: string | null
+        }
+        Update: {
+          actor_role?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event?: string
+          id?: string
+          ip_hash?: string | null
+          metadata?: Json
+          outcome?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       saved_addresses: {
         Row: {
           city: string
