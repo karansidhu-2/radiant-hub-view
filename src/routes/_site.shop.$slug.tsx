@@ -86,6 +86,7 @@ function ProductDetail() {
   const install = Number(p.installation_fee);
   const emptyIcon = p.category === "furnace" ? "Flame" : p.category === "thermostat" ? "Thermometer" : p.category === "filter" ? "Filter" : "Snowflake";
 
+  const auto = autoRatings?.[p.slug];
   return (
     <>
       <JsonLd id={`product-${p.slug}`} data={{
@@ -93,6 +94,8 @@ function ProductDetail() {
         "@type": "Product",
         name: p.name,
         description: p.description,
+        sku: p.slug,
+        mpn: p.slug,
         brand: { "@type": "Brand", name: p.brand },
         category: p.category,
         image: p.image_url ? [p.image_url] : undefined,
@@ -102,7 +105,17 @@ function ProductDetail() {
           price: Number(p.price),
           availability: p.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           url: `https://radiant-hub-view.lovable.app/shop/${p.slug}`,
+          itemCondition: "https://schema.org/NewCondition",
         },
+        ...(auto && auto.count > 0 ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(auto.rating ?? auto.avg ?? 0).toFixed(1),
+            reviewCount: auto.count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        } : {}),
       }} />
       <JsonLd id={`breadcrumb-product-${p.slug}`} data={{
         "@context": "https://schema.org",
@@ -113,6 +126,7 @@ function ProductDetail() {
           { "@type": "ListItem", position: 3, name: p.name, item: `https://radiant-hub-view.lovable.app/shop/${p.slug}` },
         ],
       }} />
+
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
         <Link to="/shop" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to shop
