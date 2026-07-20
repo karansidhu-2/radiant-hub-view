@@ -342,9 +342,11 @@ function AdminDashboard() {
             {data.topServices.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <Suspense fallback={<ChartFallback />}>
-                <TopServicesChart data={data.topServices} />
-              </Suspense>
+              <PerfProfiler id="admin-chart-top-services">
+                <Suspense fallback={<ChartFallback />}>
+                  <TopServicesChart data={data.topServices} />
+                </Suspense>
+              </PerfProfiler>
             )}
           </CardContent>
         </Card>
@@ -358,12 +360,15 @@ function AdminDashboard() {
             {statusData.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <Suspense fallback={<ChartFallback />}>
-                <BookingStatusChart data={statusData} />
-              </Suspense>
+              <PerfProfiler id="admin-chart-booking-status">
+                <Suspense fallback={<ChartFallback />}>
+                  <BookingStatusChart data={statusData} />
+                </Suspense>
+              </PerfProfiler>
             )}
           </CardContent>
         </Card>
+
       </div>
 
       <Card className="mt-6">
