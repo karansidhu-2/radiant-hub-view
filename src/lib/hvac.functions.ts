@@ -176,7 +176,7 @@ const orderItemSchema = z.object({
   installation_fee: z.number().min(0),
   include_installation: z.boolean(),
 });
-const orderSchema = z.object({
+export const orderSchema = z.object({
   full_name: z.string().min(2),
   email: z.string().email(),
   phone: z.string().min(7),
