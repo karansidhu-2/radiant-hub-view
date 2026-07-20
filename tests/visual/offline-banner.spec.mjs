@@ -47,9 +47,7 @@ async function bannerState(page) {
 }
 
 async function run() {
-  const execPath = process.env.PLAYWRIGHT_CHROMIUM_PATH
-    || (require("node:fs").existsSync("/chromium-1194/chrome-linux/chrome") ? "/chromium-1194/chrome-linux/chrome" : undefined);
-  const browser = await chromium.launch({ headless: true, executablePath: execPath });
+  const browser = await chromium.launch({ headless: true, executablePath: findChromium() });
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
 
