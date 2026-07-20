@@ -57,26 +57,24 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     const key = uniq();
     const max = 3;
     const window = 60;
-    const results: string[] = [];
-    for (let i = 0; i < max; i++) {
-      results.push(psql(
-        `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})`
-      ));
-    }
-    expect(results).toEqual(["t", "t", "t"]);
-    const blocked = psql(
-      `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})`
-    );
-    expect(blocked).toBe("f");
+    // Batch all 4 hits in one psql call so we don't blow the default 5s test timeout.
+    const rpc = `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})::text`;
+    const out = psql(
+      `${rpc}; ${rpc}; ${rpc}; ${rpc};`
+    ).split(/\s+/).filter(Boolean);
+    expect(out.slice(0, 3)).toEqual(["t", "t", "t"]);
+    expect(out[3]).toBe("f");
   });
 
   it("scopes limits per key (different buckets do not interfere)", () => {
     const a = uniq(); const b = uniq();
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("t");
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("f");
-    // Different key must still be allowed.
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${b}', 1, 60)`)).toBe("t");
-  }, 15_000);
+    const out = psql(`
+      SELECT public.check_and_hit_rate_limit('${a}', 1, 60)::text;
+      SELECT public.check_and_hit_rate_limit('${a}', 1, 60)::text;
+      SELECT public.check_and_hit_rate_limit('${b}', 1, 60)::text;
+    `).split(/\s+/).filter(Boolean);
+    expect(out).toEqual(["t", "f", "t"]);
+  });
 });
 
 describe.skipIf(!hasPg)("bookings.order_id backfill + FK invariants", () => {
