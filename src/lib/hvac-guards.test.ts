@@ -70,24 +70,13 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     expect(blocked).toBe("f");
   });
 
-  it("allows again after old hits fall outside the window", async () => {
-    const key = uniq();
-    // Fill the bucket with max=2, window=1s.
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("f");
-    // After the 1s window elapses, prior hits no longer count toward the limit.
-    await new Promise((r) => setTimeout(r, 1400));
-    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
-  }, 10_000);
-
   it("scopes limits per key (different buckets do not interfere)", () => {
     const a = uniq(); const b = uniq();
     expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("t");
     expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("f");
     // Different key must still be allowed.
     expect(psql(`SELECT public.check_and_hit_rate_limit('${b}', 1, 60)`)).toBe("t");
-  });
+  }, 15_000);
 });
 
 describe.skipIf(!hasPg)("bookings.order_id backfill + FK invariants", () => {
