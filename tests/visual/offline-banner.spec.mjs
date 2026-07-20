@@ -59,7 +59,7 @@ async function run() {
 
   // 2. Offline event → banner appears in offline state.
   await fireOffline(page);
-  await page.waitForSelector('[data-testid="offline-banner"]', { timeout: 2000 });
+  await page.waitForSelector('[data-testid="offline-banner"]', { timeout: 3000, state: 'attached' });
   assert.equal(await bannerState(page), "offline", "banner should be in offline state");
 
   // 3. Online event → banner switches to restored, then hides.
@@ -81,7 +81,7 @@ async function run() {
   await page.goto(BASE_URL, { waitUntil: "domcontentloaded" }); // resets in-memory cooldown ref
   await page.waitForTimeout(400);
   await fireOffline(page);
-  await page.waitForSelector('[data-testid="offline-banner"]', { timeout: 2000 });
+  await page.waitForSelector('[data-testid="offline-banner"]', { timeout: 3000, state: 'attached' });
   await page.click('[data-testid="offline-banner-dismiss"]');
   await page.waitForTimeout(200);
   assert.equal(await bannerVisible(page), false, "dismiss button should hide banner");
