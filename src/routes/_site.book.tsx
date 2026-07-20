@@ -16,7 +16,13 @@ export const Route = createFileRoute("/_site/book")({
   validateSearch: (s: Record<string, unknown>) => ({
     service: typeof s.service === "string" ? s.service : undefined,
   }),
-  head: () => ({ meta: [{ title: "Book Service — HVAC Pro" }] }),
+  head: () => ({
+    meta: [
+      { title: "Book HVAC Service — HVAC Pro" },
+      { name: "description", content: "Schedule an HVAC repair, tune-up, or installation. Pick a time that works — we confirm within an hour." },
+      { name: "robots", content: "noindex, follow" },
+    ],
+  }),
   component: BookPage,
 });
 

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_site/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/",
   }),
-  head: () => ({ meta: [{ title: "Sign in — HVAC Pro" }] }),
+  head: () => ({ meta: [{ title: "Sign in — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AuthPage,
 });
 
