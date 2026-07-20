@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useSwipeBack, type SwipeBackPhase } from "@/hooks/useSwipeBack";
 
@@ -22,7 +23,6 @@ export function SwipeBackIndicator({ fallback = "/" }: { fallback?: string }) {
     const p = Math.max(0, Math.min(1, progress));
     w.style.opacity = active ? String(0.15 + p * 0.85) : "0";
     w.style.transform = `translateX(${active ? Math.min(p * 8, 8) : -12}px)`;
-    // Height of the visible arc segment grows with progress.
     f.style.height = `${40 + p * 90}px`;
     f.style.width = `${6 + p * 6}px`;
     f.style.background = ready
@@ -33,6 +33,26 @@ export function SwipeBackIndicator({ fallback = "/" }: { fallback?: string }) {
     i.style.color = ready ? "hsl(var(--primary-foreground))" : "hsl(var(--primary))";
     i.style.background = ready ? "hsl(var(--primary))" : "transparent";
   }, []);
+
+  /** Force an immediate visual reset with no transition, then restore transitions. */
+  const snapReset = useCallback(() => {
+    const w = wrapRef.current, f = fillRef.current, i = iconRef.current;
+    targetRef.current = { progress: 0, active: false, ready: false };
+    if (!w || !f || !i) return;
+    const prev = { w: w.style.transition, f: f.style.transition, i: i.style.transition };
+    w.style.transition = "none";
+    f.style.transition = "none";
+    i.style.transition = "none";
+    apply();
+    // Force a reflow so the "none" transition takes effect before we restore.
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    w.offsetHeight;
+    requestAnimationFrame(() => {
+      if (w) w.style.transition = prev.w;
+      if (f) f.style.transition = prev.f;
+      if (i) i.style.transition = prev.i;
+    });
+  }, [apply]);
 
   const schedule = useCallback(() => {
     if (rafRef.current != null) return;
@@ -45,20 +65,30 @@ export function SwipeBackIndicator({ fallback = "/" }: { fallback?: string }) {
       t.active = true;
       t.progress = 0;
       t.ready = false;
+      schedule();
     } else if (phase === "move") {
       t.active = true;
       t.progress = progress;
       t.ready = progress >= 1;
-    } else {
-      // end or cancel — animate out.
+      schedule();
+    } else if (phase === "end") {
+      // Let the animated out-transition run.
       t.active = false;
       t.progress = 0;
       t.ready = false;
+      schedule();
+    } else {
+      // "cancel" — snap to initial state instantly, no transition.
+      snapReset();
     }
-    schedule();
-  }, [schedule]);
+  }, [schedule, snapReset]);
 
   useSwipeBack({ fallback, onProgress: handleProgress });
+
+  // Reset the moment the route actually changes, so the indicator never bleeds
+  // into the next screen.
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => { snapReset(); }, [pathname, snapReset]);
 
   useEffect(() => () => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
