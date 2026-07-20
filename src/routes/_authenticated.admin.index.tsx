@@ -139,7 +139,7 @@ function AdminDashboard() {
   const daily = data.daily.map((d: any) => ({
     ...d, label: d.date.slice(5), total: d.orderRevenue + d.serviceRevenue,
   }));
-  const statusData = Object.entries(data.statusCounts).map(([name, value]) => ({ name, value }));
+  const statusData = Object.entries(data.statusCounts).map(([name, value]) => ({ name, value: Number(value) }));
 
   const kpis = [
     { icon: DollarSign, label: "Total Revenue", value: fmt$(t.totalRevenue), sub: `${fmt$(t.orderRevenue)} orders · ${fmt$(t.serviceRevenue)} services` },
