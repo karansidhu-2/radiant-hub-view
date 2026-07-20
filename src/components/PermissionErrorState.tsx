@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LockKeyhole, RefreshCw, LifeBuoy, LogIn } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * Recognizes Supabase/PostgREST permission failures.
