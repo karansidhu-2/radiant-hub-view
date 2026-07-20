@@ -325,17 +325,9 @@ function AdminDashboard() {
             {data.topServices.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <div className="h-72 w-full">
-                <ResponsiveContainer>
-                  <BarChart data={data.topServices} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={140} />
-                    <Tooltip />
-                    <Bar dataKey="bookings" fill="#2563eb" name="Bookings" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <Suspense fallback={<ChartFallback />}>
+                <TopServicesChart data={data.topServices} />
+              </Suspense>
             )}
           </CardContent>
         </Card>
