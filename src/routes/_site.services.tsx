@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
