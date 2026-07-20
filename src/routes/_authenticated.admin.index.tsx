@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   adminAnalytics,
@@ -17,10 +17,19 @@ import {
   CheckCircle2, XCircle, Repeat, Wrench, Download, RotateCcw, Trash2, Play,
 } from "lucide-react";
 
-import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
-} from "recharts";
+const RevenueTrendChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.RevenueTrendChart })),
+);
+const TopServicesChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.TopServicesChart })),
+);
+const BookingStatusChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.BookingStatusChart })),
+);
+
+function ChartFallback() {
+  return <div className="h-72 w-full animate-pulse rounded-md bg-muted/50" />;
+}
 
 function csvEscape(v: any) {
   const s = v == null ? "" : String(v);
