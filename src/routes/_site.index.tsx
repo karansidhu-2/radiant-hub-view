@@ -57,28 +57,28 @@ function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
           <div className="flex flex-col justify-center text-primary-foreground">
             <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--ember)]" /> Same-day service across 28 states
             </span>
-            <h1 className="text-4xl font-bold leading-[1.05] md:text-5xl lg:text-6xl">
+            <h1 className="text-[2rem] font-bold leading-[1.1] md:text-5xl lg:text-6xl">
               Comfort you can count on.
               <span className="mt-2 block bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                 All year, every year.
               </span>
             </h1>
-            <p className="mt-5 max-w-lg text-base text-white/85 md:text-lg">
+            <p className="mt-4 max-w-lg text-[15px] text-white/85 md:mt-5 md:text-lg">
               Licensed heating, cooling, and air quality experts. Book same-day repair, order a new system with professional installation, or get a free replacement quote in minutes.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/book" search={{ service: undefined }}>
-                <Button size="lg" className="bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90">
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
+              <Link to="/book" search={{ service: undefined }} className="w-full sm:w-auto">
+                <Button size="lg" className="h-12 w-full bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90 sm:w-auto">
                   Book Service <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/shop">
-                <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+              <Link to="/shop" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="h-12 w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto">
                   Shop Systems
                 </Button>
               </Link>

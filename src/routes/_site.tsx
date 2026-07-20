@@ -12,10 +12,10 @@ function SiteLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const showBack = path !== "/" && path !== "";
   return (
-    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+    <div className="flex min-h-screen flex-col pb-20 md:pb-0">
       <SiteHeader />
       {showBack && (
-        <div className="mx-auto w-full max-w-7xl px-4 pt-3 md:px-6">
+        <div className="mx-auto w-full max-w-7xl px-4 pt-2 md:px-6 md:pt-3">
           <BackButton />
         </div>
       )}
