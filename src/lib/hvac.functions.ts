@@ -45,7 +45,7 @@ export const getBookedSlots = createServerFn({ method: "POST" })
 
 
 // ---------- Create booking ----------
-const bookingSchema = z.object({
+export const bookingSchema = z.object({
   full_name: z.string().min(2).max(80),
   email: z.string().email().max(120),
   phone: z.string().min(7).max(20),
