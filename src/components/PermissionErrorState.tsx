@@ -42,7 +42,7 @@ interface Props {
  * Explains what likely happened and offers retry, sign-in, and support.
  */
 export function PermissionErrorState({ action, onRetry, variant = "inline", error }: Props) {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const signedIn = Boolean(user);
 
   const title = signedIn
