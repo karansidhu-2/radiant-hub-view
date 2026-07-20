@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { CalendarCheck, LogIn, LogOut, Phone, Shield, ShoppingBag, Star, User as UserIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings, telHref } from "@/hooks/useSiteSettings";
+
+const LAST_TAP_STORAGE_KEY = "mqa:last-tapped";
 
 type Tile = {
   key: string;
