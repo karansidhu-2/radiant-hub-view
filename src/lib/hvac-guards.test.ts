@@ -50,12 +50,11 @@ describe("note length caps (Zod schema)", () => {
 });
 
 describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
-  const key = `vitest:rl:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-  beforeAll(() => {
-    psql(`DELETE FROM public.rate_limits WHERE key = '${key}'`);
-  });
+  const uniq = () =>
+    `vitest:rl:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`;
 
   it("allows up to _max hits, then blocks the next one in the same window", () => {
+    const key = uniq();
     const max = 3;
     const window = 60;
     const results: string[] = [];
@@ -71,17 +70,23 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     expect(blocked).toBe("f");
   });
 
-  it("allows again after old hits fall outside the window", () => {
-    const k = `${key}:rollover`;
-    psql(`DELETE FROM public.rate_limits WHERE key = '${k}'`);
-    // Seed 2 hits that already sit outside a 1-second window.
-    psql(`INSERT INTO public.rate_limits(key, hit_at) VALUES
-      ('${k}', now() - interval '5 seconds'),
-      ('${k}', now() - interval '5 seconds')`);
-    // With max=2, window=1s, the aged hits should not count -> new hit allowed.
-    const res = psql(`SELECT public.check_and_hit_rate_limit('${k}', 2, 1)`);
-    expect(res).toBe("t");
-    psql(`DELETE FROM public.rate_limits WHERE key = '${k}'`);
+  it("allows again after old hits fall outside the window", async () => {
+    const key = uniq();
+    // Fill the bucket with max=2, window=1s.
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("f");
+    // After the 1s window elapses, prior hits no longer count toward the limit.
+    await new Promise((r) => setTimeout(r, 1400));
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${key}', 2, 1)`)).toBe("t");
+  }, 10_000);
+
+  it("scopes limits per key (different buckets do not interfere)", () => {
+    const a = uniq(); const b = uniq();
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("t");
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`)).toBe("f");
+    // Different key must still be allowed.
+    expect(psql(`SELECT public.check_and_hit_rate_limit('${b}', 1, 60)`)).toBe("t");
   });
 });
 
