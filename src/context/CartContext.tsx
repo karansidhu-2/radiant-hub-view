@@ -136,6 +136,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
   }, [items, hydrated, dbProducts]);
 
+  // Prune stale slugs from persisted cart once the DB catalog has resolved.
+  // Runs only when the fetch actually succeeded (dbProducts non-empty) so a
+  // transient network failure never wipes the cart.
+  const prunedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || prunedRef.current || dbProducts.length === 0) return;
+    const known = new Set<string>();
+    for (const p of seedProducts) known.add(p.slug);
+    for (const p of dbProducts) known.add(p.slug);
+    const missing = items.filter((i) => !known.has(i.slug));
+    if (missing.length === 0) { prunedRef.current = true; return; }
+    prunedRef.current = true;
+    setItems((prev) => prev.filter((i) => known.has(i.slug)));
+    toast.info(
+      missing.length === 1
+        ? "1 item was removed from your cart (no longer available)."
+        : `${missing.length} items were removed from your cart (no longer available).`,
+    );
+  }, [hydrated, dbProducts, items]);
+
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
