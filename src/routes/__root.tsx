@@ -135,6 +135,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
+          <OfflineDetector />
           <Outlet />
           <Toaster richColors position="top-right" />
         </CartProvider>
