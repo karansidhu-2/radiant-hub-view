@@ -18,10 +18,14 @@ export const Route = createFileRoute("/_site/")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://radiant-hub-view.lovable.app/" },
     ],
-    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/" }],
+    links: [
+      { rel: "canonical", href: "https://radiant-hub-view.lovable.app/" },
+      { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" },
+    ],
   }),
   component: Home,
 });
+
 
 const trustPoints = [
   { icon: ShieldCheck, label: "Licensed & Insured" },
