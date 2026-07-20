@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   adminAnalytics,
@@ -17,10 +17,19 @@ import {
   CheckCircle2, XCircle, Repeat, Wrench, Download, RotateCcw, Trash2, Play,
 } from "lucide-react";
 
-import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
-} from "recharts";
+const RevenueTrendChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.RevenueTrendChart })),
+);
+const TopServicesChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.TopServicesChart })),
+);
+const BookingStatusChart = lazy(() =>
+  import("@/components/admin/DashboardCharts").then((m) => ({ default: m.BookingStatusChart })),
+);
+
+function ChartFallback() {
+  return <div className="h-72 w-full animate-pulse rounded-md bg-muted/50" />;
+}
 
 function csvEscape(v: any) {
   const s = v == null ? "" : String(v);
@@ -130,7 +139,7 @@ function AdminDashboard() {
   const daily = data.daily.map((d: any) => ({
     ...d, label: d.date.slice(5), total: d.orderRevenue + d.serviceRevenue,
   }));
-  const statusData = Object.entries(data.statusCounts).map(([name, value]) => ({ name, value }));
+  const statusData = Object.entries(data.statusCounts).map(([name, value]) => ({ name, value: Number(value) }));
 
   const kpis = [
     { icon: DollarSign, label: "Total Revenue", value: fmt$(t.totalRevenue), sub: `${fmt$(t.orderRevenue)} orders · ${fmt$(t.serviceRevenue)} services` },
@@ -300,29 +309,9 @@ function AdminDashboard() {
             <TrendingUp className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Trend</h2>
           </div>
-          <div className="h-72 w-full">
-            <ResponsiveContainer>
-              <AreaChart data={daily} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="rev1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="rev2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
-                <Tooltip formatter={(v: any) => fmt$(Number(v))} />
-                <Legend />
-                <Area type="monotone" name="Orders" dataKey="orderRevenue" stroke="#2563eb" fill="url(#rev1)" />
-                <Area type="monotone" name="Services" dataKey="serviceRevenue" stroke="#f59e0b" fill="url(#rev2)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <Suspense fallback={<ChartFallback />}>
+            <RevenueTrendChart daily={daily} />
+          </Suspense>
         </CardContent>
       </Card>
 
@@ -336,17 +325,9 @@ function AdminDashboard() {
             {data.topServices.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <div className="h-72 w-full">
-                <ResponsiveContainer>
-                  <BarChart data={data.topServices} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={140} />
-                    <Tooltip />
-                    <Bar dataKey="bookings" fill="#2563eb" name="Bookings" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <Suspense fallback={<ChartFallback />}>
+                <TopServicesChart data={data.topServices} />
+              </Suspense>
             )}
           </CardContent>
         </Card>
@@ -360,19 +341,9 @@ function AdminDashboard() {
             {statusData.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <div className="h-72 w-full">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
-                      {statusData.map((_, i) => (
-                        <Cell key={i} fill={PIE[i % PIE.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <Suspense fallback={<ChartFallback />}>
+                <BookingStatusChart data={statusData} />
+              </Suspense>
             )}
           </CardContent>
         </Card>
