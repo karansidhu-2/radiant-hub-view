@@ -86,7 +86,7 @@ afterEach(() => {
 
 describe("SwipeBackIndicator", () => {
   it("snap-resets immediately when the gesture is canceled mid-swipe", async () => {
-    const { container } = mountAt("/shop");
+    const { container } = mountAt("/shop"); await waitForCaptured();
     expect(captured).toBeTruthy();
 
     // Drive start + move to activate the indicator.
@@ -107,7 +107,7 @@ describe("SwipeBackIndicator", () => {
   });
 
   it("snap-resets on every route transition (shop → services → book → account)", async () => {
-    const { container, router } = mountAt("/shop");
+    const { container, router } = mountAt("/shop"); await waitForCaptured();
 
     for (const path of ["/services", "/book", "/account", "/"]) {
       // Simulate a partial swipe leaving the indicator visibly active.
@@ -126,7 +126,7 @@ describe("SwipeBackIndicator", () => {
   });
 
   it("emits a cancel at navigation start so the indicator does not bleed into the next screen", async () => {
-    const { container, router } = mountAt("/services");
+    const { container, router } = mountAt("/services"); await waitForCaptured();
     act(() => {
       captured!(0, "start");
       captured!(1, "move");
@@ -146,7 +146,7 @@ describe("SwipeBackIndicator", () => {
   });
 
   it("cancel is idempotent — calling it repeatedly keeps the reset state", async () => {
-    const { container } = mountAt("/book");
+    const { container } = mountAt("/book"); await waitForCaptured();
     act(() => {
       captured!(0, "start");
       captured!(0.4, "move");
