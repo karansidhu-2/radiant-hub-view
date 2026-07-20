@@ -20,7 +20,10 @@ export const Route = createFileRoute("/_site/shop")({
       { name: "description", content: "Shop top-rated central AC units, furnaces, heat pumps, mini-splits, smart thermostats, and air quality equipment — with professional installation." },
       { property: "og:title", content: "Shop HVAC Systems | HVAC Pro" },
       { property: "og:description", content: "AC units, furnaces, heat pumps, and more — installation included." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/shop" },
     ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/shop" }],
   }),
   component: ShopPage,
 });

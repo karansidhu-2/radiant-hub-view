@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_site/services")({
       { name: "description", content: "Complete HVAC services: AC repair, furnace repair, new system installation, duct cleaning, indoor air quality, and 24/7 emergency service." },
       { property: "og:title", content: "HVAC Services | HVAC Pro" },
       { property: "og:description", content: "Full-service heating, cooling, and air quality across the US." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/services" },
     ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/services" }],
   }),
   component: ServicesPage,
 });

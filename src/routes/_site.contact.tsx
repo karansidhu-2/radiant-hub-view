@@ -2,7 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Phone, Mail, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_site/contact")({
-  head: () => ({ meta: [{ title: "Contact — HVAC Pro" }, { name: "description", content: "Get in touch for service, quotes, or 24/7 HVAC emergencies." }] }),
+  head: () => ({
+    meta: [
+      { title: "Contact HVAC Pro — 24/7 HVAC Service & Free Quotes" },
+      { name: "description", content: "Call or message HVAC Pro for repairs, quotes, or 24/7 emergency AC and furnace service. Licensed technicians across the US." },
+      { property: "og:title", content: "Contact HVAC Pro" },
+      { property: "og:description", content: "24/7 HVAC support and free installation quotes." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/contact" },
+    ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/contact" }],
+  }),
   component: () => (
     <section className="mx-auto max-w-3xl px-4 py-16 md:px-6">
       <h1 className="text-3xl font-bold md:text-4xl">Contact us</h1>

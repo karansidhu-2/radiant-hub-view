@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_site/")({
       { name: "description", content: "Same-day HVAC repair, new system installation, and 24/7 emergency service. Shop AC units, furnaces, heat pumps, and thermostats — installation included." },
       { property: "og:title", content: "HVAC Pro — AC, Heating & Installation" },
       { property: "og:description", content: "Trusted, licensed HVAC service and installation across 28 US states." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/" }],
   }),
   component: Home,
 });
