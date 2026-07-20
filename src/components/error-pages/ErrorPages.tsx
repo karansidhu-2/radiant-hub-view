@@ -187,8 +187,15 @@ export function ServerErrorPage({ error, onRetry }: { error?: Error; onRetry?: (
         </>
       }
       details={
-        error?.message ? (
-          <p className="text-[11px] text-muted-foreground">{error.message.slice(0, 240)}</p>
+        error?.message && import.meta.env.DEV ? (
+          <details className="group">
+            <summary className="cursor-pointer select-none text-[11px] font-medium text-muted-foreground hover:text-foreground">
+              Technical details
+            </summary>
+            <p className="mt-2 break-words text-[11px] text-muted-foreground/80 font-mono">
+              {error.message.slice(0, 240)}
+            </p>
+          </details>
         ) : null
       }
     />

@@ -112,7 +112,8 @@ function BookPage() {
   }, [form.scheduled_date, bookedFn]);
 
   const setSvc = (slug: string) => {
-    const s = services.find((x) => x.slug === slug)!;
+    const s = services.find((x) => x.slug === slug);
+    if (!s) return;
     setForm((f) => ({ ...f, service_slug: s.slug, service_name: s.name }));
   };
 
