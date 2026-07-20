@@ -89,7 +89,7 @@ describe("bookingSchema validation", () => {
 
   it("allows optional/nullable service_slug + notes", () => {
     expect(
-      bookingSchema.safeParse({ ...validBooking, service_slug: null, notes: null }).success,
+      bookingSchema.safeParse({ ...validBooking, service_slug: null, notes: null } as any).success,
     ).toBe(true);
     const { service_slug: _s, notes: _n, ...noOpt } = validBooking;
     expect(bookingSchema.safeParse(noOpt).success).toBe(true);
