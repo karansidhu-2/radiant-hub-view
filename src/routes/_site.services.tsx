@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
+import { ServiceGridSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/_site/services")({
   head: () => ({
