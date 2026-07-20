@@ -796,7 +796,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      site_settings_public: {
+        Row: {
+          address: string | null
+          business_hours: string | null
+          company_name: string | null
+          emergency_phone: string | null
+          id: string | null
+          singleton: boolean | null
+          support_email: string | null
+          support_phone: string | null
+          tagline: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_hours?: string | null
+          company_name?: string | null
+          emergency_phone?: string | null
+          id?: string | null
+          singleton?: boolean | null
+          support_email?: string | null
+          support_phone?: string | null
+          tagline?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_hours?: string | null
+          company_name?: string | null
+          emergency_phone?: string | null
+          id?: string | null
+          singleton?: boolean | null
+          support_email?: string | null
+          support_phone?: string | null
+          tagline?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_and_hit_rate_limit: {
