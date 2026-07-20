@@ -163,7 +163,7 @@ function Home() {
             </div>
             <Link to="/shop" className="text-sm font-semibold text-primary hover:underline">Browse all products →</Link>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((p) => (
               <Link key={p.slug} to="/shop/$slug" params={{ slug: p.slug }}>
                 <Card className="card-pop group h-full overflow-hidden hover:border-primary/35">
@@ -180,12 +180,12 @@ function Home() {
                       </span>
                     )}
                   </div>
-                  <CardContent className="p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
-                    <h3 className="mt-1 text-base font-semibold leading-tight">{p.name}</h3>
-                    <div className="mt-3 flex items-baseline gap-1">
-                      <span className="text-lg font-bold">{formatMoney(p.price)}</span>
-                      <span className="text-xs text-muted-foreground">+ install</span>
+                  <CardContent className="p-3 sm:p-5">
+                    <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{p.brand}</p>
+                    <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-tight sm:text-base">{p.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-1 sm:mt-3">
+                      <span className="text-base font-bold sm:text-lg">{formatMoney(p.price)}</span>
+                      <span className="hidden text-xs text-muted-foreground sm:inline">+ install</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -244,7 +244,7 @@ function Home() {
       {/* Service area */}
       <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <Card className="overflow-hidden border-0 gradient-hero text-primary-foreground shadow-elevated">
-          <CardContent className="grid gap-8 p-10 md:grid-cols-[1.2fr_1fr] md:p-14">
+          <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_1fr] md:gap-8 md:p-14">
             <div>
               <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                 <MapPin className="h-3.5 w-3.5" /> 28 states · 140+ metro areas
