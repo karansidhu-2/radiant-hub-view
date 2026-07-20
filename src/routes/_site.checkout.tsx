@@ -70,10 +70,11 @@ function CheckoutPage() {
     setBusy(true);
     try {
       const items = detailed.map(({ item, product }) => ({
-        product_slug: product.slug, product_name: product.name, brand: product.brand,
-        quantity: item.quantity, unit_price: product.price,
-        installation_fee: product.installationFee, include_installation: item.includeInstallation,
+        product_slug: product.slug,
+        quantity: item.quantity,
+        include_installation: item.includeInstallation,
       }));
+
       const res = await orderFn({ data: { ...form, items, notes: form.notes || null } });
       clear();
       toast.success("Order placed!");
