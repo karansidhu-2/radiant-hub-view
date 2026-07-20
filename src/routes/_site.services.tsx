@@ -1,10 +1,12 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
+
 
 export const Route = createFileRoute("/_site/services")({
   head: () => ({
@@ -27,6 +29,8 @@ type Row = {
 };
 
 function ServicesPage() {
+  const navigate = useNavigate();
+
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["services", "public"],
     queryFn: async () => {
@@ -63,29 +67,44 @@ function ServicesPage() {
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
-              <Link key={s.slug} to="/services/$slug" params={{ slug: s.slug }} className="group">
-                <Card className="card-pop h-full hover:border-primary/35">
-                  <CardContent className="p-6">
-                    <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg gradient-cool text-primary-foreground">
-                      <DynamicIcon name={s.icon} className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-semibold">{s.name}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground">{s.short}</p>
-                    <ul className="mt-4 space-y-1.5 text-sm">
-                      {s.bullets.slice(0, 3).map((b) => (
-                        <li key={b} className="flex items-start gap-2 text-muted-foreground">
-                          <span className="mt-1.5 inline-block h-1 w-1 rounded-full bg-primary" />
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-5 flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Starting at <span className="font-semibold text-foreground">{formatMoney(Number(s.starting_at))}</span></span>
-                      <span className="font-semibold text-primary group-hover:underline">View →</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+              <Card key={s.slug} className="card-pop h-full hover:border-primary/35 flex flex-col">
+                <CardContent className="p-6 flex flex-col h-full">
+                  <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg gradient-cool text-primary-foreground">
+                    <DynamicIcon name={s.icon} className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold">
+                    <Link to="/services/$slug" params={{ slug: s.slug }} className="hover:underline">
+                      {s.name}
+                    </Link>
+                  </h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{s.short}</p>
+                  <ul className="mt-4 space-y-1.5 text-sm">
+                    {s.bullets.slice(0, 3).map((b) => (
+                      <li key={b} className="flex items-start gap-2 text-muted-foreground">
+                        <span className="mt-1.5 inline-block h-1 w-1 rounded-full bg-primary" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-5 flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Starting at <span className="font-semibold text-foreground">{formatMoney(Number(s.starting_at))}</span>
+                    </span>
+                    <Link to="/services/$slug" params={{ slug: s.slug }} className="font-semibold text-primary hover:underline">
+                      Details →
+                    </Link>
+                  </div>
+                  <Button
+                    type="button"
+                    className="mt-4 w-full gradient-cool text-primary-foreground"
+                    onClick={() => navigate({ to: "/book", search: { service: s.slug } })}
+                    aria-label={`Book ${s.name}`}
+                  >
+                    Book this service <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
             ))}
           </div>
         )}

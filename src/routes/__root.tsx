@@ -16,6 +16,9 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { NotFoundPage, GenericErrorPage } from "@/components/error-pages/ErrorPages";
 import { OfflineDetector } from "@/components/OfflineDetector";
+import { PerfProfilerControls } from "@/lib/perf-profiler";
+import { useAuth } from "@/hooks/useAuth";
+
 
 
 function NotFoundComponent() {
@@ -137,11 +140,19 @@ function RootComponent() {
         <CartProvider>
           <OfflineDetector />
           <Outlet />
+          <PerfControlsGate />
           <Toaster richColors position="top-right" />
         </CartProvider>
       </AuthProvider>
+
     </QueryClientProvider>
   );
 }
+
+function PerfControlsGate() {
+  const { isAdmin } = useAuth();
+  return <PerfProfilerControls isAdmin={!!isAdmin} />;
+}
+
 
 
