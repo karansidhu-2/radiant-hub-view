@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
+import { ServiceGridSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/_site/services")({
   head: () => ({
@@ -168,9 +169,7 @@ function ServicesPage() {
 
 
         {isLoading ? (
-          <div className="grid place-items-center py-16 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
+          <ServiceGridSkeleton count={6} />
         ) : filtered.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/60 p-10 text-center text-sm text-muted-foreground">
             No services in this category yet. Try another filter.
