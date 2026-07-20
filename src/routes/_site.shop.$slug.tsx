@@ -88,6 +88,31 @@ function ProductDetail() {
 
   return (
     <>
+      <JsonLd id={`product-${p.slug}`} data={{
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: p.name,
+        description: p.description,
+        brand: { "@type": "Brand", name: p.brand },
+        category: p.category,
+        image: p.image_url ? [p.image_url] : undefined,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "USD",
+          price: Number(p.price),
+          availability: p.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          url: `https://radiant-hub-view.lovable.app/shop/${p.slug}`,
+        },
+      }} />
+      <JsonLd id={`breadcrumb-product-${p.slug}`} data={{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://radiant-hub-view.lovable.app/" },
+          { "@type": "ListItem", position: 2, name: "Shop", item: "https://radiant-hub-view.lovable.app/shop" },
+          { "@type": "ListItem", position: 3, name: p.name, item: `https://radiant-hub-view.lovable.app/shop/${p.slug}` },
+        ],
+      }} />
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
         <Link to="/shop" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to shop
