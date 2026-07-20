@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Home, RefreshCw, WifiOff, Search, ShieldAlert, ServerCrash, ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { PermissionErrorState, isPermissionError } from "@/components/PermissionErrorState";
 
 type Tone = "danger" | "warning" | "info";
 
@@ -117,6 +118,14 @@ export function GenericErrorPage({ error, reset, onRetry }: GenericErrorProps) {
 
   if (isNetwork && typeof navigator !== "undefined" && !navigator.onLine) {
     return <OfflinePage onRetry={onRetry ?? reset} />;
+  }
+
+  if (isPermissionError(error)) {
+    return (
+      <div className="flex min-h-[60dvh] items-center justify-center px-4 py-16">
+        <PermissionErrorState onRetry={onRetry ?? reset} error={error} variant="inline" />
+      </div>
+    );
   }
 
   if (status === 401 || status === 403) return <UnauthorizedPage />;
