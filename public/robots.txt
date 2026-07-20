@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account
+Disallow: /account/
+Disallow: /auth
+Disallow: /checkout
+Disallow: /cart
+Disallow: /confirmation/
+Disallow: /mcp
+Disallow: /.well-known/
+
+Sitemap: https://radiant-hub-view.lovable.app/sitemap.xml
