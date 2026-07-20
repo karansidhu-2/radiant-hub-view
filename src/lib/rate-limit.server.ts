@@ -6,7 +6,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
  */
 export async function rateLimit(
   bucket: string,
-  opts: { max: number; windowSeconds: number; extra?: string },
+  opts: { max: number; windowSeconds: number; extra?: string; actorUserId?: string | null },
 ) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const ip =
@@ -21,6 +21,21 @@ export async function rateLimit(
   });
   if (error) return; // fail-open on infra hiccup rather than blocking real users
   if (data === false) {
+    // Structured audit: rate-limit denial (safe metadata only — bucket + limits,
+    // never raw IP or client-supplied fields).
+    try {
+      const { logRpcAudit } = await import("./rpc-audit.server");
+      await logRpcAudit({
+        event: `rateLimit.denied`,
+        outcome: "denied",
+        reason: "rate_limit_exceeded",
+        entity_type: "rate_limit",
+        entity_id: bucket,
+        actor_user_id: opts.actorUserId ?? null,
+        metadata: { bucket, max: opts.max, window_seconds: opts.windowSeconds },
+      });
+    } catch { /* never block on audit */ }
     throw new Error("Too many requests. Please wait a moment and try again.");
   }
 }
+
