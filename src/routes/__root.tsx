@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { NotFoundPage, GenericErrorPage } from "@/components/error-pages/ErrorPages";
+import { OfflineDetector } from "@/components/OfflineDetector";
 
 
 function NotFoundComponent() {
