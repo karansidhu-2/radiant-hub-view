@@ -309,29 +309,9 @@ function AdminDashboard() {
             <TrendingUp className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Trend</h2>
           </div>
-          <div className="h-72 w-full">
-            <ResponsiveContainer>
-              <AreaChart data={daily} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="rev1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="rev2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
-                <Tooltip formatter={(v: any) => fmt$(Number(v))} />
-                <Legend />
-                <Area type="monotone" name="Orders" dataKey="orderRevenue" stroke="#2563eb" fill="url(#rev1)" />
-                <Area type="monotone" name="Services" dataKey="serviceRevenue" stroke="#f59e0b" fill="url(#rev2)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <Suspense fallback={<ChartFallback />}>
+            <RevenueTrendChart daily={daily} />
+          </Suspense>
         </CardContent>
       </Card>
 
