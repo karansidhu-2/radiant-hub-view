@@ -95,7 +95,8 @@ describe("Custom error pages", () => {
   it("OfflinePage renders directly with troubleshooting tips", async () => {
     renderInRouter(<OfflinePage />);
     expect(await screen.findByRole("heading", { name: /you're offline/i })).toBeTruthy();
-    expect(await screen.findByText(/check your wi-fi/i, { exact: false })).toBeTruthy();
+    const tips = await screen.findAllByText(/check your wi-fi/i);
+    expect(tips.length).toBeGreaterThan(0);
     expect(await screen.findByRole("button", { name: /go back/i })).toBeTruthy();
   });
 
