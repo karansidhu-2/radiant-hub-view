@@ -169,11 +169,7 @@ export const createBooking = createServerFn({ method: "POST" })
 // ---------- Create order (cart checkout) ----------
 const orderItemSchema = z.object({
   product_slug: z.string(),
-  product_name: z.string(),
-  brand: z.string().nullable().optional(),
   quantity: z.number().int().min(1),
-  unit_price: z.number().min(0),
-  installation_fee: z.number().min(0),
   include_installation: z.boolean(),
 });
 export const orderSchema = z.object({
@@ -203,8 +199,40 @@ export const createOrder = createServerFn({ method: "POST" })
       .from("service_areas").select("zip").eq("zip", data.zip).eq("active", true).maybeSingle();
     if (!area) throw new Error("ZIP not in service area");
 
-    const subtotal = data.items.reduce((s, it) => s + it.unit_price * it.quantity, 0);
-    const installationTotal = data.items.reduce(
+    // Authoritative product lookup — never trust client-supplied prices.
+    const slugs = Array.from(new Set(data.items.map((i) => i.product_slug)));
+    const { data: products, error: prodErr } = await supabaseAdmin
+      .from("products")
+      .select("slug, name, brand, price, installation_fee, stock, available, published")
+      .in("slug", slugs);
+    if (prodErr) throw new Error(prodErr.message);
+    const byslug = new Map((products ?? []).map((p) => [p.slug, p]));
+
+    type Priced = {
+      product_slug: string; product_name: string; brand: string | null;
+      quantity: number; unit_price: number; installation_fee: number; include_installation: boolean;
+    };
+    const priced: Priced[] = [];
+    for (const it of data.items) {
+      const p = byslug.get(it.product_slug);
+      if (!p) throw new Error(`Product not found: ${it.product_slug}`);
+      if (!p.published || p.available === false) throw new Error(`Product unavailable: ${p.name}`);
+      if (typeof p.stock === "number" && p.stock < it.quantity) {
+        throw new Error(`Insufficient stock for ${p.name} (have ${p.stock}, requested ${it.quantity})`);
+      }
+      priced.push({
+        product_slug: p.slug,
+        product_name: p.name,
+        brand: p.brand ?? null,
+        quantity: it.quantity,
+        unit_price: Number(p.price),
+        installation_fee: Number(p.installation_fee ?? 0),
+        include_installation: it.include_installation,
+      });
+    }
+
+    const subtotal = priced.reduce((s, it) => s + it.unit_price * it.quantity, 0);
+    const installationTotal = priced.reduce(
       (s, it) => s + (it.include_installation ? it.installation_fee * it.quantity : 0), 0);
     const total = subtotal + installationTotal;
 
@@ -223,9 +251,10 @@ export const createOrder = createServerFn({ method: "POST" })
     if (error || !order) throw new Error(error?.message || "Failed to create order");
 
     const { error: itemErr } = await supabaseAdmin.from("order_items").insert(
-      data.items.map((it) => ({ ...it, order_id: order.id, brand: it.brand ?? null }))
+      priced.map((it) => ({ ...it, order_id: order.id }))
     );
     if (itemErr) throw new Error(itemErr.message);
+
 
     if (data.scheduled_date && data.scheduled_hour) {
       await supabaseAdmin.from("bookings").insert({
