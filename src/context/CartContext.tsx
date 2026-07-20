@@ -1,7 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { products as seedProducts, type Product } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { toErrorMessage } from "@/lib/error-toast";
 
 export interface CartItem {
   slug: string;
@@ -46,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Fetch live product catalog so admin-created (non-seeded) products
   // still resolve for cart totals, badge count, and checkout.
-  const { data: dbProducts = [] } = useQuery({
+  const { data: dbProducts = [], error: catalogError } = useQuery({
     queryKey: ["cart", "product-lookup"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -71,6 +73,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  // Surface a catalog fetch error once — otherwise the cart silently falls
+  // back to seed data and hides real outages.
+  const notifiedErrRef = useRef(false);
+  useEffect(() => {
+    if (catalogError && !notifiedErrRef.current) {
+      notifiedErrRef.current = true;
+      toast.error("Cart catalog unavailable", { description: toErrorMessage(catalogError) });
+    }
+  }, [catalogError]);
 
   const value = useMemo<CartContextValue>(() => {
     // DB first, seed as fallback so cart still works before the query resolves.
@@ -123,6 +135,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clear: () => setItems([]),
     };
   }, [items, hydrated, dbProducts]);
+
+  // Prune stale slugs from persisted cart once the DB catalog has resolved.
+  // Runs only when the fetch actually succeeded (dbProducts non-empty) so a
+  // transient network failure never wipes the cart.
+  const prunedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || prunedRef.current || dbProducts.length === 0) return;
+    const known = new Set<string>();
+    for (const p of seedProducts) known.add(p.slug);
+    for (const p of dbProducts) known.add(p.slug);
+    const missing = items.filter((i) => !known.has(i.slug));
+    if (missing.length === 0) { prunedRef.current = true; return; }
+    prunedRef.current = true;
+    setItems((prev) => prev.filter((i) => known.has(i.slug)));
+    toast.info(
+      missing.length === 1
+        ? "1 item was removed from your cart (no longer available)."
+        : `${missing.length} items were removed from your cart (no longer available).`,
+    );
+  }, [hydrated, dbProducts, items]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
