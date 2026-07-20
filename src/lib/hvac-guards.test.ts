@@ -73,7 +73,6 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     expect(out).toEqual(["t", "f", "t"]);
   });
 });
-});
 
 describe.skipIf(!hasPg)("bookings.order_id backfill + FK invariants", () => {
   it("has the bookings.order_id -> orders(id) foreign key", () => {
