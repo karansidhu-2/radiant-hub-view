@@ -15,9 +15,21 @@ import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 
 export const Route = createFileRoute("/_site/shop/$slug")({
-  head: ({ params }) => ({
-    meta: [{ title: `${params.slug.replace(/-/g, " ")} — HVAC Pro` }],
-  }),
+  head: ({ params }) => {
+    const name = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const url = `https://radiant-hub-view.lovable.app/shop/${params.slug}`;
+    return {
+      meta: [
+        { title: `${name} — HVAC Pro` },
+        { name: "description", content: `Buy ${name} from HVAC Pro with professional installation, warranty, and financing options.` },
+        { property: "og:title", content: `${name} — HVAC Pro` },
+        { property: "og:description", content: `Shop ${name} with installation included.` },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   errorComponent: ({ error }) => <div role="alert" className="p-10 text-center">{error.message}</div>,
   component: ProductDetail,
 });
