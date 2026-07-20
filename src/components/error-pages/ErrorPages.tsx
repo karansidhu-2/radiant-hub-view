@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Home, RefreshCw, WifiOff, Search, ShieldAlert, ServerCrash, ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { PermissionErrorState, isPermissionError } from "@/components/PermissionErrorState";
 
 type Tone = "danger" | "warning" | "info";
 
