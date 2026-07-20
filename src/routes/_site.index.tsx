@@ -123,7 +123,7 @@ function Home() {
       {/* Services */}
 
 
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">Our services</p>
@@ -153,7 +153,7 @@ function Home() {
       </section>
 
       {/* Featured products */}
-      <section className="bg-secondary/40 py-20">
+      <section className="bg-secondary/40 py-12 md:py-20">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -196,7 +196,7 @@ function Home() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <div className="mb-12 text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">How it works</p>
           <h2 className="mt-1 text-3xl font-bold md:text-4xl">Comfort in three simple steps</h2>
@@ -217,7 +217,7 @@ function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-secondary/40 py-20">
+      <section className="bg-secondary/40 py-12 md:py-20">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-10 text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">What customers say</p>
@@ -242,7 +242,7 @@ function Home() {
       </section>
 
       {/* Service area */}
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-20">
         <Card className="overflow-hidden border-0 gradient-hero text-primary-foreground shadow-elevated">
           <CardContent className="grid gap-8 p-10 md:grid-cols-[1.2fr_1fr] md:p-14">
             <div>
