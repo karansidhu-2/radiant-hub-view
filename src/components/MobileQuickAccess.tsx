@@ -70,12 +70,12 @@ export function MobileQuickAccess() {
   // horizontal snap rail so nothing gets cramped.
   const useGrid = tiles.length <= 4;
 
-  const tileClass = (accent?: boolean) =>
+  const tileClass = (accent?: boolean, selected?: boolean) =>
     `group flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 text-[11px] font-semibold transition-all active:scale-[0.97] ${
       accent
         ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
         : "border-border/70 bg-card text-foreground hover:border-primary/30 hover:bg-accent/60"
-    } ${useGrid ? "w-full" : "min-w-[92px] shrink-0 snap-start"}`;
+    } ${selected ? "ring-2 ring-primary/60 ring-offset-1 ring-offset-background" : ""} ${useGrid ? "w-full" : "min-w-[92px] shrink-0 snap-start"}`;
 
   const renderInner = (t: Tile) => {
     const Icon = t.icon;
@@ -96,7 +96,14 @@ export function MobileQuickAccess() {
   };
 
   const renderTile = (t: Tile) => {
-    const cls = tileClass(t.accent);
+    const selected = lastTapped === t.key;
+    const cls = tileClass(t.accent, selected);
+    const commonProps = {
+      "data-mqa-tile": t.key,
+      "data-selected": selected ? "true" : undefined,
+      "aria-current": selected ? ("true" as const) : undefined,
+      onClick: () => rememberTap(t.key),
+    };
     if (t.to) {
       return (
         <Link
@@ -104,6 +111,7 @@ export function MobileQuickAccess() {
           to={t.to}
           {...(t.to === "/auth" ? { search: { redirect: "/" } as any } : {})}
           className={cls}
+          {...commonProps}
         >
           {renderInner(t)}
         </Link>
@@ -111,17 +119,27 @@ export function MobileQuickAccess() {
     }
     if (t.href) {
       return (
-        <a key={t.key} href={t.href} className={cls}>
+        <a key={t.key} href={t.href} className={cls} {...commonProps}>
           {renderInner(t)}
         </a>
       );
     }
     return (
-      <button key={t.key} type="button" onClick={t.onClick} className={cls}>
+      <button
+        key={t.key}
+        type="button"
+        className={cls}
+        {...commonProps}
+        onClick={() => {
+          rememberTap(t.key);
+          t.onClick?.();
+        }}
+      >
         {renderInner(t)}
       </button>
     );
   };
+
 
   return (
     <section aria-label="Quick access" className="md:hidden">
