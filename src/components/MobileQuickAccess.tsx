@@ -26,6 +26,28 @@ export function MobileQuickAccess() {
   const { user, isAdmin, signOut } = useAuth();
   const settings = useSiteSettings();
 
+  // Persist the last tile the user tapped so the highlight survives refresh
+  // and navigation back to the home page during the same session.
+  const [lastTapped, setLastTapped] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(LAST_TAP_STORAGE_KEY);
+      if (stored) setLastTapped(stored);
+    } catch {
+      /* sessionStorage unavailable — ignore */
+    }
+  }, []);
+
+  const rememberTap = useCallback((key: string) => {
+    setLastTapped(key);
+    try {
+      sessionStorage.setItem(LAST_TAP_STORAGE_KEY, key);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+
   const tiles: Tile[] = user
     ? [
         { key: "account", label: "My account", icon: UserIcon, to: "/account" },
