@@ -12,6 +12,15 @@
  */
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+
+function findChromium() {
+  if (process.env.PLAYWRIGHT_CHROMIUM_PATH) return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  for (const p of ["/chromium-1194/chrome-linux/chrome", "/chromium-1187/chrome-linux/chrome"]) {
+    if (fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:8080";
 
