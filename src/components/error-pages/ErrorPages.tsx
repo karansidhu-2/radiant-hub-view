@@ -120,6 +120,14 @@ export function GenericErrorPage({ error, reset, onRetry }: GenericErrorProps) {
     return <OfflinePage onRetry={onRetry ?? reset} />;
   }
 
+  if (isPermissionError(error)) {
+    return (
+      <div className="flex min-h-[60dvh] items-center justify-center px-4 py-16">
+        <PermissionErrorState onRetry={onRetry ?? reset} error={error} variant="inline" />
+      </div>
+    );
+  }
+
   if (status === 401 || status === 403) return <UnauthorizedPage />;
   if (status === 500 || status === 502 || status === 503 || status === 504) return <ServerErrorPage error={error} onRetry={onRetry ?? reset} />;
 
