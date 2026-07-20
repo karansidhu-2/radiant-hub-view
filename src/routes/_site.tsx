@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BackButton } from "@/components/BackButton";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { useSwipeBack } from "@/hooks/useSwipeBack";
 
 export const Route = createFileRoute("/_site")({
   component: SiteLayout,
@@ -11,12 +12,15 @@ export const Route = createFileRoute("/_site")({
 function SiteLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const showBack = path !== "/" && path !== "";
+  useSwipeBack("/");
   return (
     <div className="flex min-h-screen flex-col pb-20 md:pb-0">
       <SiteHeader />
       {showBack && (
-        <div className="mx-auto w-full max-w-7xl px-4 pt-2 md:px-6 md:pt-3">
-          <BackButton />
+        <div className="sticky top-14 z-30 border-b border-border/60 bg-background/85 backdrop-blur-md md:static md:top-auto md:z-auto md:border-0 md:bg-transparent md:backdrop-blur-none">
+          <div className="mx-auto w-full max-w-7xl px-2 py-1 md:px-6 md:pt-3 md:pb-0">
+            <BackButton />
+          </div>
         </div>
       )}
       <main className="flex-1">
@@ -27,4 +31,3 @@ function SiteLayout() {
     </div>
   );
 }
-
