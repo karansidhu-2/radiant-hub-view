@@ -58,7 +58,10 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     const max = 3;
     const window = 60;
     const rpc = `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})`;
-    const out = psql(`${rpc}; ${rpc}; ${rpc}; ${rpc};`).split(/\s+/).filter(Boolean);
+    const sleep = `SELECT pg_sleep(0.005)`;
+    const out = psql(
+      `${rpc}; ${sleep}; ${rpc}; ${sleep}; ${rpc}; ${sleep}; ${rpc};`
+    ).split(/\s+/).filter((x) => x === "t" || x === "f");
     expect(out.slice(0, 3)).toEqual(["t", "t", "t"]);
     expect(out[3]).toBe("f");
   });
@@ -67,9 +70,11 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     const a = uniq(); const b = uniq();
     const out = psql(`
       SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
+      SELECT pg_sleep(0.005);
       SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
+      SELECT pg_sleep(0.005);
       SELECT public.check_and_hit_rate_limit('${b}', 1, 60);
-    `).split(/\s+/).filter(Boolean);
+    `).split(/\s+/).filter((x) => x === "t" || x === "f");
     expect(out).toEqual(["t", "f", "t"]);
   });
 });
