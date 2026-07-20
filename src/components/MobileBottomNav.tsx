@@ -30,12 +30,21 @@ export function MobileBottomNav() {
                 to={n.to}
                 aria-label={n.to === "/cart" && hydrated && count > 0 ? `${n.label}, ${count} item${count === 1 ? "" : "s"}` : n.label}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all duration-200 ease-out active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {active && <span aria-hidden className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />}
-                <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />
+                <span
+                  aria-hidden
+                  className={`absolute top-0 left-1/2 h-0.5 -translate-x-1/2 rounded-full bg-primary transition-all duration-300 ease-out ${
+                    active ? "w-8 opacity-100" : "w-0 opacity-0"
+                  }`}
+                />
+                <Icon
+                  className={`h-[22px] w-[22px] transition-transform duration-200 ease-out ${active ? "scale-110" : "scale-100"}`}
+                  strokeWidth={active ? 2.4 : 1.9}
+                  aria-hidden="true"
+                />
                 <span className="leading-none">{n.label}</span>
                 {n.to === "/cart" && hydrated && count > 0 && (
                   <span aria-hidden="true" className="absolute right-2 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[color:var(--ember)] px-1 text-[10px] font-bold text-[color:var(--ember-foreground)]">
