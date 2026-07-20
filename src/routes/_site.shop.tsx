@@ -256,7 +256,7 @@ function ShopPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid place-items-center py-20 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+          <ProductGridSkeleton count={8} />
         ) : filtered.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-10 text-center">
             <p className="font-semibold">No products match your filters</p>
