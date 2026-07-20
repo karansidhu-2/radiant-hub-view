@@ -1,9 +1,10 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { Link, createRouter } from "@tanstack/react-router";
+import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { reportLovableError } from "./lib/lovable-error-reporting";
 import { handleError, toErrorMessage } from "./lib/error-toast";
 import { toast } from "sonner";
+import { GenericErrorPage, NotFoundPage } from "./components/error-pages/ErrorPages";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   if (typeof window !== "undefined") {
