@@ -94,6 +94,18 @@ describe("bookingSchema validation", () => {
     const { service_slug: _s, notes: _n, ...noOpt } = validBooking as typeof validBooking & { notes?: string | null };
     expect(bookingSchema.safeParse(noOpt).success).toBe(true);
   });
+
+  it("passes a provided notes string through parse unchanged, and normalizes missing/null to null (matches server insert)", () => {
+    const withNotes = bookingSchema.safeParse({ ...validBooking, notes: "Gate code #4412; dog in yard" });
+    expect(withNotes.success).toBe(true);
+    if (!withNotes.success) return;
+    expect(withNotes.data.notes).toBe("Gate code #4412; dog in yard");
+    // Server does `notes: data.notes ?? null` before insert — assert both branches.
+    const missing = bookingSchema.parse(validBooking);
+    expect((missing.notes ?? null)).toBeNull();
+    const explicitNull = bookingSchema.parse({ ...validBooking, notes: null });
+    expect((explicitNull.notes ?? null)).toBeNull();
+  });
 });
 
 // ============================================================
