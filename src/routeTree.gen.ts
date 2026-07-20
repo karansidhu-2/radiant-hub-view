@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as SiteServicesRouteImport } from './routes/_site.services'
+import { Route as SiteOfflineRouteImport } from './routes/_site.offline'
 import { Route as SiteContactRouteImport } from './routes/_site.contact'
 import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteCartRouteImport } from './routes/_site.cart'
@@ -74,6 +75,11 @@ const SiteShopRoute = SiteShopRouteImport.update({
 const SiteServicesRoute = SiteServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteOfflineRoute = SiteOfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteContactRoute = SiteContactRouteImport.update({
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
+  '/offline': typeof SiteOfflineRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
+  '/offline': typeof SiteOfflineRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/_site/cart': typeof SiteCartRoute
   '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/contact': typeof SiteContactRoute
+  '/_site/offline': typeof SiteOfflineRoute
   '/_site/services': typeof SiteServicesRouteWithChildren
   '/_site/shop': typeof SiteShopRouteWithChildren
   '/_site/': typeof SiteIndexRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/offline'
     | '/services'
     | '/shop'
     | '/.lovable/oauth/consent'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/offline'
     | '/services'
     | '/shop'
     | '/.lovable/oauth/consent'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/_site/cart'
     | '/_site/checkout'
     | '/_site/contact'
+    | '/_site/offline'
     | '/_site/services'
     | '/_site/shop'
     | '/_site/'
@@ -538,6 +550,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof SiteServicesRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/_site/offline': {
+      id: '/_site/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof SiteOfflineRouteImport
       parentRoute: typeof SiteRoute
     }
     '/_site/contact': {
@@ -866,6 +885,7 @@ interface SiteRouteChildren {
   SiteCartRoute: typeof SiteCartRoute
   SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteContactRoute: typeof SiteContactRoute
+  SiteOfflineRoute: typeof SiteOfflineRoute
   SiteServicesRoute: typeof SiteServicesRouteWithChildren
   SiteShopRoute: typeof SiteShopRouteWithChildren
   SiteIndexRoute: typeof SiteIndexRoute
@@ -879,6 +899,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteCartRoute: SiteCartRoute,
   SiteCheckoutRoute: SiteCheckoutRoute,
   SiteContactRoute: SiteContactRoute,
+  SiteOfflineRoute: SiteOfflineRoute,
   SiteServicesRoute: SiteServicesRouteWithChildren,
   SiteShopRoute: SiteShopRouteWithChildren,
   SiteIndexRoute: SiteIndexRoute,
