@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Fetch live product catalog so admin-created (non-seeded) products
   // still resolve for cart totals, badge count, and checkout.
-  const { data: dbProducts = [] } = useQuery({
+  const { data: dbProducts = [], error: catalogError } = useQuery({
     queryKey: ["cart", "product-lookup"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -73,6 +73,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  // Surface a catalog fetch error once — otherwise the cart silently falls
+  // back to seed data and hides real outages.
+  const notifiedErrRef = useRef(false);
+  useEffect(() => {
+    if (catalogError && !notifiedErrRef.current) {
+      notifiedErrRef.current = true;
+      toast.error("Cart catalog unavailable", { description: toErrorMessage(catalogError) });
+    }
+  }, [catalogError]);
 
   const value = useMemo<CartContextValue>(() => {
     // DB first, seed as fallback so cart still works before the query resolves.
