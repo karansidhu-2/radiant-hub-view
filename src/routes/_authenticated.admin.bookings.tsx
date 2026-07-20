@@ -45,13 +45,35 @@ function AdminBookings() {
     });
   useEffect(() => {
     reload();
-    const channel = supabase
-      .channel("admin-bookings-rt")
-      .on("postgres_changes" as any, { event: "*", schema: "public", table: "bookings" }, () => {
-        reload();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const schedule = () => {
+      if (timer) return;
+      timer = setTimeout(() => { timer = null; reload(); }, 500);
+    };
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const subscribe = () => {
+      if (channel) return;
+      channel = supabase
+        .channel("admin-bookings-rt")
+        .on("postgres_changes" as any, { event: "*", schema: "public", table: "bookings" }, schedule)
+        .subscribe();
+    };
+    const unsubscribe = () => {
+      if (!channel) return;
+      supabase.removeChannel(channel);
+      channel = null;
+    };
+    const onVis = () => {
+      if (document.visibilityState === "visible") { subscribe(); schedule(); }
+      else { unsubscribe(); if (timer) { clearTimeout(timer); timer = null; } }
+    };
+    if (typeof document === "undefined" || document.visibilityState === "visible") subscribe();
+    document.addEventListener?.("visibilitychange", onVis);
+    return () => {
+      document.removeEventListener?.("visibilitychange", onVis);
+      if (timer) clearTimeout(timer);
+      unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
