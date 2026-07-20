@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  adminAnalytics,
   adminListCheckpoints,
   adminCreateCheckpoint,
   adminSetCheckpointActive,
   adminDeleteCheckpoint,
 } from "@/lib/hvac.functions";
+import {
+  adminAnalyticsQueryOptions,
+  prefetchDashboardChartsChunk,
+} from "@/lib/admin-analytics-query";
+import { PerfProfiler } from "@/lib/perf-profiler";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +53,15 @@ function downloadCsv(name: string, content: string) {
 }
 
 export const Route = createFileRoute("/_authenticated/admin/")({
+  // Route prefetch: when the dashboard link is hovered/focused (router
+  // `defaultPreload: "intent"`), warm both the analytics data and the
+  // recharts chunk so the page renders instantly on navigate.
+  loader: ({ context }) => {
+    prefetchDashboardChartsChunk();
+    return context.queryClient.ensureQueryData(
+      adminAnalyticsQueryOptions(30, null),
+    );
+  },
   component: AdminDashboard,
 });
 
@@ -59,10 +73,7 @@ function fmt$(n: number) {
 }
 
 function AdminDashboard() {
-  const analyticsFn = useServerFn(adminAnalytics);
   const [days, setDays] = useState<number>(30);
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const listCheckpoints = useServerFn(adminListCheckpoints);
   const createCheckpoint = useServerFn(adminCreateCheckpoint);
   const setActive = useServerFn(adminSetCheckpointActive);
@@ -75,13 +86,13 @@ function AdminDashboard() {
   const reloadCheckpoints = () => listCheckpoints().then(setCheckpoints).catch(() => {});
   useEffect(() => { reloadCheckpoints(); /* eslint-disable-next-line */ }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    analyticsFn({ data: { days, sinceOverride } })
-      .then((d) => setData(d))
-      .catch((e) => console.error(e))
-      .finally(() => setLoading(false));
-  }, [analyticsFn, days, sinceOverride]);
+  // Single shared, coalesced fetch — every KPI / chart reads from this
+  // cache entry. Concurrent components with the same (days, sinceOverride)
+  // dedupe to one network request via React Query.
+  const analyticsQuery = useQuery(adminAnalyticsQueryOptions(days, sinceOverride));
+  const data = analyticsQuery.data;
+  const loading = analyticsQuery.isLoading;
+
 
   const buildClosingReport = (label: string) => {
     if (!data) return;
