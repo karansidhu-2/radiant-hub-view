@@ -161,11 +161,12 @@ export function useRenderProfiler(label: string, deps: Record<string, unknown>) 
   }
 
   React.useEffect(() => {
-    if (!ENABLED) return;
+    if (!IS_DEV || !settings.enabled || !settings.detailedLogging) return;
     const end =
       typeof performance !== "undefined" ? performance.now() : Date.now();
     const dur = end - lastRenderTs.current;
-    if (dur >= SLOW_COMMIT_MS) {
+    if (dur >= settings.slowMs) {
+
       // eslint-disable-next-line no-console
       console.warn(
         `[perf] slow effect commit — ${label} took ${dur.toFixed(1)}ms`,
