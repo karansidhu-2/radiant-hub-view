@@ -70,7 +70,7 @@ export async function logRpcAudit(entry: AuditEntry): Promise<void> {
       ip_hash: hashIp(),
       entity_type: entry.entity_type ?? null,
       entity_id: entry.entity_id ? String(entry.entity_id).slice(0, 120) : null,
-      metadata: sanitize(entry.metadata ?? {}) as Record<string, unknown>,
+      metadata: sanitize(entry.metadata ?? {}) as any,
     });
   } catch (e) {
     // eslint-disable-next-line no-console
