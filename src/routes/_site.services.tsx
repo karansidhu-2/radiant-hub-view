@@ -122,17 +122,34 @@ function ServicesPage() {
           role="tablist"
           aria-label="Filter services by category"
           className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
+            e.preventDefault();
+            const i = CATEGORY_TABS.findIndex((t) => t.key === tab);
+            let ni = i;
+            if (e.key === "ArrowRight") ni = (i + 1) % CATEGORY_TABS.length;
+            if (e.key === "ArrowLeft") ni = (i - 1 + CATEGORY_TABS.length) % CATEGORY_TABS.length;
+            if (e.key === "Home") ni = 0;
+            if (e.key === "End") ni = CATEGORY_TABS.length - 1;
+            const next = CATEGORY_TABS[ni];
+            setTab(next.key);
+            const el = document.getElementById(`svc-tab-${next.key}`);
+            el?.focus();
+          }}
         >
           {CATEGORY_TABS.map((t) => {
             const active = t.key === tab;
             return (
               <button
                 key={t.key}
+                id={`svc-tab-${t.key}`}
                 type="button"
                 role="tab"
                 aria-selected={active}
+                aria-controls="services-grid"
+                tabIndex={active ? 0 : -1}
                 onClick={() => setTab(t.key)}
-                className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
+                className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active
                     ? "border-primary/40 gradient-cool text-primary-foreground shadow-soft"
                     : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
@@ -143,6 +160,12 @@ function ServicesPage() {
             );
           })}
         </div>
+
+        <p className="sr-only" aria-live="polite">
+          Showing {filtered.length} {filtered.length === 1 ? "service" : "services"} in{" "}
+          {CATEGORY_TABS.find((t) => t.key === tab)?.label ?? "all"}.
+        </p>
+
 
         {isLoading ? (
           <div className="grid place-items-center py-16 text-muted-foreground">
