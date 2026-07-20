@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Download, MapPin, Calendar, Clock, UserPlus } from "lucide-react";
 import { formatMoney } from "@/data/products";
-import jsPDF from "jspdf";
+// jsPDF is dynamically imported inside downloadInvoicePDF so the ~400KB
+// jspdf+html2canvas chunks only load when the user clicks "Download Invoice".
 
 export const Route = createFileRoute("/_site/confirmation/$kind/$ref")({
   head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }] }),
@@ -22,7 +23,8 @@ function statusColor(s: string) {
   return { pending: "secondary", confirmed: "default", in_progress: "default", scheduled: "default", completed: "default", installed: "default", cancelled: "destructive" }[s] || "secondary";
 }
 
-function downloadInvoicePDF(kind: string, data: any) {
+async function downloadInvoicePDF(kind: string, data: any) {
+  const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   doc.setFontSize(20); doc.text("HVAC Pro", 14, 20);
   doc.setFontSize(10); doc.text("Invoice / Confirmation", 14, 27);
