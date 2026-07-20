@@ -57,11 +57,8 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     const key = uniq();
     const max = 3;
     const window = 60;
-    // Batch all 4 hits in one psql call so we don't blow the default 5s test timeout.
-    const rpc = `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})::text`;
-    const out = psql(
-      `${rpc}; ${rpc}; ${rpc}; ${rpc};`
-    ).split(/\s+/).filter(Boolean);
+    const rpc = `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})`;
+    const out = psql(`${rpc}; ${rpc}; ${rpc}; ${rpc};`).split(/\s+/).filter(Boolean);
     expect(out.slice(0, 3)).toEqual(["t", "t", "t"]);
     expect(out[3]).toBe("f");
   });
@@ -69,12 +66,13 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
   it("scopes limits per key (different buckets do not interfere)", () => {
     const a = uniq(); const b = uniq();
     const out = psql(`
-      SELECT public.check_and_hit_rate_limit('${a}', 1, 60)::text;
-      SELECT public.check_and_hit_rate_limit('${a}', 1, 60)::text;
-      SELECT public.check_and_hit_rate_limit('${b}', 1, 60)::text;
+      SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
+      SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
+      SELECT public.check_and_hit_rate_limit('${b}', 1, 60);
     `).split(/\s+/).filter(Boolean);
     expect(out).toEqual(["t", "f", "t"]);
   });
+});
 });
 
 describe.skipIf(!hasPg)("bookings.order_id backfill + FK invariants", () => {
