@@ -12,7 +12,7 @@ import { formatMoney } from "@/data/products";
 // jspdf+html2canvas chunks only load when the user clicks "Download Invoice".
 
 export const Route = createFileRoute("/_site/confirmation/$kind/$ref")({
-  head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }] }),
+  head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: ConfirmationPage,
 });
 
