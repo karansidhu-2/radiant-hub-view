@@ -144,7 +144,7 @@ export function useSwipeBack(
       const isSwipe = distanceTrigger || flickTrigger;
       emit(isSwipe ? 1 : 0, "end");
       if (!isSwipe) return;
-      if (window.location.pathname === "/") return;
+      if (window.location.pathname === "/") { emit(0, "cancel"); return; }
 
       try { navigator.vibrate?.(10); } catch { /* noop */ }
       const state: any = window.history.state;
@@ -154,6 +154,9 @@ export function useSwipeBack(
       } else {
         router.navigate({ to: fallback });
       }
+      // Snap the indicator back to its initial state the moment navigation kicks in
+      // so it never lingers into the next screen.
+      emit(0, "cancel");
     };
 
     window.addEventListener("touchstart", onStart, { passive: true });
