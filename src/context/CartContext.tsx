@@ -1,7 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { products as seedProducts, type Product } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { toErrorMessage } from "@/lib/error-toast";
 
 export interface CartItem {
   slug: string;
