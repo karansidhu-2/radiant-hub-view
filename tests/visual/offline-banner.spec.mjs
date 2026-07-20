@@ -96,8 +96,97 @@ async function run() {
   await page.waitForTimeout(400);
   assert.equal(await bannerVisible(page), false, "session-dismissal must persist across reload");
 
+  // 6. Route changes: banner (root-mounted) persists across SPA navigation.
+  //    Fresh context clears sessionStorage dismissal + in-memory cooldown.
+  await context.close();
+  const context2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page2 = await context2.newPage();
+  await page2.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page2.waitForTimeout(800);
+
+  await fireOffline(page2);
+  await page2.waitForSelector('[data-testid="offline-banner"]', { timeout: 3000, state: "attached" });
+  assert.equal(await bannerState(page2), "offline", "banner should be offline on home route");
+
+  // SPA-navigate via in-app link to /shop — root remains mounted, banner should persist.
+  await page2.evaluate(() => {
+    const a = Array.from(document.querySelectorAll("a")).find(
+      (el) => (el.getAttribute("href") || "").replace(/\/$/, "") === "/shop",
+    );
+    if (a) a.click();
+  });
+  await page2.waitForURL(/\/shop/, { timeout: 5000 });
+  await page2.waitForTimeout(400);
+  assert.equal(
+    await bannerState(page2),
+    "offline",
+    "banner should persist across SPA route change (root-mounted)",
+  );
+
+  // Online while on new route → restored → idle.
+  await fireOnline(page2);
+  await page2.waitForFunction(() => {
+    const el = document.querySelector('[data-testid="offline-banner"]');
+    return el && el.getAttribute("data-state") === "restored";
+  }, null, { timeout: 2000 });
+  await page2.waitForTimeout(2800);
+  assert.equal(
+    await bannerVisible(page2),
+    false,
+    "banner should return to idle on the new route after online event",
+  );
+
+  // Hard navigation to a fresh route while online → no banner.
+  await page2.goto(`${BASE_URL}/services`, { waitUntil: "domcontentloaded" });
+  await page2.waitForTimeout(600);
+  assert.equal(
+    await bannerVisible(page2),
+    false,
+    "banner must not appear on fresh route load while online",
+  );
+
+  // 7. Rapid online/offline flapping: only ONE banner within cooldown window.
+  await context2.close();
+  const context3 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page3 = await context3.newPage();
+  await page3.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page3.waitForTimeout(800);
+
+  await page3.evaluate(() => {
+    window._offlineShowCount = 0;
+    window._lastShown = 0;
+    const observer = new MutationObserver(() => {
+      const el = document.querySelector('[data-testid="offline-banner"]');
+      if (el && el.getAttribute("data-state") === "offline") {
+        const now = performance.now();
+        if (now - window._lastShown > 50) {
+          window._offlineShowCount += 1;
+          window._lastShown = now;
+        }
+      }
+    });
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true });
+    window._offlineObserver = observer;
+  });
+
+  // Flap offline/online 6x quickly (well within 15s cooldown).
+  for (let i = 0; i < 6; i++) {
+    await fireOffline(page3);
+    await page3.waitForTimeout(80);
+    await fireOnline(page3);
+    await page3.waitForTimeout(80);
+  }
+  await page3.waitForTimeout(500);
+
+  const showCount = await page3.evaluate(() => window._offlineShowCount);
+  assert.equal(
+    showCount,
+    1,
+    `rapid flapping must show offline banner exactly once within cooldown (got ${showCount})`,
+  );
+
   await browser.close();
-  console.log("OK offline-banner: all 5 checks passed");
+  console.log("OK offline-banner: all 7 checks passed");
 }
 
 run().catch((err) => {
