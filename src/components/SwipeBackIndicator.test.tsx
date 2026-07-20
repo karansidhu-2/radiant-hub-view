@@ -67,14 +67,6 @@ function expectResetState(container: HTMLElement) {
   expect(icon.style.opacity).toBe("0");
 }
 
-function flushRaf() {
-  // Two frames: schedule() enqueues one; snapReset() restores transitions on the next.
-  act(() => {
-    // @ts-expect-error jsdom supports rAF
-    (globalThis.requestAnimationFrame as any)?.((_: number) => {});
-  });
-}
-
 beforeEach(() => {
   captured = null;
   // rAF in jsdom is setTimeout(0); flush via fake timers where needed.
