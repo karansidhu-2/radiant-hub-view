@@ -159,11 +159,11 @@ function BookPage() {
 
 
   return (
-    <section className="mx-auto max-w-2xl px-4 py-12 md:px-6">
-      <h1 className="text-3xl font-bold md:text-4xl">Book your appointment</h1>
-      <p className="mt-2 text-muted-foreground">Pick a service, verify your ZIP, and choose a time slot.</p>
+    <section className="mx-auto max-w-2xl px-4 py-8 md:px-6 md:py-12">
+      <h1 className="text-2xl font-bold md:text-4xl">Book your appointment</h1>
+      <p className="mt-2 text-sm text-muted-foreground md:text-base">Pick a service, verify your ZIP, and choose a time slot.</p>
 
-      <form onSubmit={submit} className="mt-8 grid gap-4">
+      <form onSubmit={submit} className="mt-6 grid gap-4 md:mt-8">
         <Card><CardContent className="p-5 grid gap-4">
           <div>
             <Label>Service</Label>
@@ -267,7 +267,7 @@ function BookPage() {
           </div>
         </CardContent></Card>
 
-        <Button type="submit" size="lg" disabled={busy || zipState !== "ok"} className="gradient-cool text-primary-foreground shadow-soft">
+        <Button type="submit" size="lg" disabled={busy || zipState !== "ok"} className="h-12 w-full gradient-cool text-primary-foreground shadow-soft md:h-10 md:w-auto md:self-start">
           {busy ? "Booking…" : "Confirm booking"}
         </Button>
       </form>
