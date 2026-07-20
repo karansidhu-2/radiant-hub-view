@@ -4,6 +4,13 @@ import { render, screen, act, cleanup } from "@testing-library/react";
 import { createMemoryHistory, createRouter, createRootRoute, createRoute, RouterProvider, Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+// PermissionErrorState pulls from AuthContext; stub it so the error pages
+// can render without a live Supabase session in jsdom.
+vi.mock("@/context/AuthContext", () => ({
+  useAuthContext: () => ({ session: null, user: null, loading: false, isAdmin: false, signOut: async () => ({ error: null }) }),
+  AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+
 import {
   NotFoundPage,
   GenericErrorPage,
