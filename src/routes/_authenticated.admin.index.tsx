@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  adminAnalytics,
   adminListCheckpoints,
   adminCreateCheckpoint,
   adminSetCheckpointActive,
   adminDeleteCheckpoint,
 } from "@/lib/hvac.functions";
+import {
+  adminAnalyticsQueryOptions,
+  prefetchDashboardChartsChunk,
+} from "@/lib/admin-analytics-query";
+import { PerfProfiler } from "@/lib/perf-profiler";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +53,15 @@ function downloadCsv(name: string, content: string) {
 }
 
 export const Route = createFileRoute("/_authenticated/admin/")({
+  // Route prefetch: when the dashboard link is hovered/focused (router
+  // `defaultPreload: "intent"`), warm both the analytics data and the
+  // recharts chunk so the page renders instantly on navigate.
+  loader: ({ context }) => {
+    prefetchDashboardChartsChunk();
+    return context.queryClient.ensureQueryData(
+      adminAnalyticsQueryOptions(30, null),
+    );
+  },
   component: AdminDashboard,
 });
 
@@ -59,10 +73,7 @@ function fmt$(n: number) {
 }
 
 function AdminDashboard() {
-  const analyticsFn = useServerFn(adminAnalytics);
   const [days, setDays] = useState<number>(30);
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const listCheckpoints = useServerFn(adminListCheckpoints);
   const createCheckpoint = useServerFn(adminCreateCheckpoint);
   const setActive = useServerFn(adminSetCheckpointActive);
@@ -75,13 +86,13 @@ function AdminDashboard() {
   const reloadCheckpoints = () => listCheckpoints().then(setCheckpoints).catch(() => {});
   useEffect(() => { reloadCheckpoints(); /* eslint-disable-next-line */ }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    analyticsFn({ data: { days, sinceOverride } })
-      .then((d) => setData(d))
-      .catch((e) => console.error(e))
-      .finally(() => setLoading(false));
-  }, [analyticsFn, days, sinceOverride]);
+  // Single shared, coalesced fetch — every KPI / chart reads from this
+  // cache entry. Concurrent components with the same (days, sinceOverride)
+  // dedupe to one network request via React Query.
+  const analyticsQuery = useQuery(adminAnalyticsQueryOptions(days, sinceOverride));
+  const data = analyticsQuery.data;
+  const loading = analyticsQuery.isLoading;
+
 
   const buildClosingReport = (label: string) => {
     if (!data) return;
@@ -204,20 +215,23 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label} className="card-pop">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-xs uppercase text-muted-foreground">{k.label}</p>
-                <k.icon className="h-4 w-4 text-primary" />
-              </div>
-              <p className="mt-1 text-2xl font-bold">{k.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{k.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <PerfProfiler id="admin-kpi-grid">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {kpis.map((k) => (
+            <Card key={k.label} className="card-pop">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs uppercase text-muted-foreground">{k.label}</p>
+                  <k.icon className="h-4 w-4 text-primary" />
+                </div>
+                <p className="mt-1 text-2xl font-bold">{k.value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{k.sub}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </PerfProfiler>
+
 
       <Card className="mt-6 border-primary/30">
         <CardContent className="p-5">
@@ -309,11 +323,14 @@ function AdminDashboard() {
             <TrendingUp className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase text-muted-foreground">Revenue Trend</h2>
           </div>
-          <Suspense fallback={<ChartFallback />}>
-            <RevenueTrendChart daily={daily} />
-          </Suspense>
+          <PerfProfiler id="admin-chart-revenue-trend">
+            <Suspense fallback={<ChartFallback />}>
+              <RevenueTrendChart daily={daily} />
+            </Suspense>
+          </PerfProfiler>
         </CardContent>
       </Card>
+
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card>
@@ -325,9 +342,11 @@ function AdminDashboard() {
             {data.topServices.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <Suspense fallback={<ChartFallback />}>
-                <TopServicesChart data={data.topServices} />
-              </Suspense>
+              <PerfProfiler id="admin-chart-top-services">
+                <Suspense fallback={<ChartFallback />}>
+                  <TopServicesChart data={data.topServices} />
+                </Suspense>
+              </PerfProfiler>
             )}
           </CardContent>
         </Card>
@@ -341,12 +360,15 @@ function AdminDashboard() {
             {statusData.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <Suspense fallback={<ChartFallback />}>
-                <BookingStatusChart data={statusData} />
-              </Suspense>
+              <PerfProfiler id="admin-chart-booking-status">
+                <Suspense fallback={<ChartFallback />}>
+                  <BookingStatusChart data={statusData} />
+                </Suspense>
+              </PerfProfiler>
             )}
           </CardContent>
         </Card>
+
       </div>
 
       <Card className="mt-6">
