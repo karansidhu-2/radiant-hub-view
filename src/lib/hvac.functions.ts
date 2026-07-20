@@ -45,7 +45,7 @@ export const getBookedSlots = createServerFn({ method: "POST" })
 
 
 // ---------- Create booking ----------
-const bookingSchema = z.object({
+export const bookingSchema = z.object({
   full_name: z.string().min(2).max(80),
   email: z.string().email().max(120),
   phone: z.string().min(7).max(20),
@@ -176,7 +176,7 @@ const orderItemSchema = z.object({
   installation_fee: z.number().min(0),
   include_installation: z.boolean(),
 });
-const orderSchema = z.object({
+export const orderSchema = z.object({
   full_name: z.string().min(2),
   email: z.string().email(),
   phone: z.string().min(7),
