@@ -1,37 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WifiOff, Wifi } from "lucide-react";
 
 /**
- * Small toast-style banner that appears when the user goes offline and
- * briefly confirms when connectivity is restored. Non-blocking; individual
- * pages/queries can still show the full OfflinePage on failed fetches.
+ * Only shows a banner when the browser actually fires an `offline` event,
+ * and briefly confirms when `online` fires afterward. We deliberately do
+ * NOT trust `navigator.onLine` on first render — in iframes / previews /
+ * some browsers it can report `false` even when the network is fine, which
+ * caused the banner to appear for online users.
  */
 export function OfflineDetector() {
-  const [online, setOnline] = useState<boolean>(() =>
-    typeof navigator === "undefined" ? true : navigator.onLine
-  );
-  const [showRestored, setShowRestored] = useState(false);
+  const [state, setState] = useState<"idle" | "offline" | "restored">("idle");
+  const restoreTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const goOffline = () => {
-      setOnline(false);
-      setShowRestored(false);
+      if (restoreTimer.current) window.clearTimeout(restoreTimer.current);
+      setState("offline");
     };
     const goOnline = () => {
-      setOnline(true);
-      setShowRestored(true);
-      const t = setTimeout(() => setShowRestored(false), 2500);
-      return () => clearTimeout(t);
+      // Only celebrate a restore if we were actually offline before.
+      setState((prev) => (prev === "offline" ? "restored" : prev));
+      if (restoreTimer.current) window.clearTimeout(restoreTimer.current);
+      restoreTimer.current = window.setTimeout(() => setState("idle"), 2500);
     };
     window.addEventListener("offline", goOffline);
     window.addEventListener("online", goOnline);
     return () => {
       window.removeEventListener("offline", goOffline);
       window.removeEventListener("online", goOnline);
+      if (restoreTimer.current) window.clearTimeout(restoreTimer.current);
     };
   }, []);
 
-  if (online && !showRestored) return null;
+  if (state === "idle") return null;
+  const online = state === "restored";
 
   return (
     <div
