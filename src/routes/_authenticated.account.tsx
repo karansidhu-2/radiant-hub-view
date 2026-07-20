@@ -17,6 +17,7 @@ import {
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
+import { ListSkeleton } from "@/components/skeletons";
 
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -227,7 +228,7 @@ function EmptyState({ icon, title, hint, action }: { icon: React.ReactNode; titl
 }
 
 function BookingsList({ rows, loading }: { rows: any[]; loading: boolean }) {
-  if (loading) return <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <ListSkeleton count={3} />;
   if (!rows.length)
     return (
       <EmptyState
@@ -271,7 +272,7 @@ function BookingsList({ rows, loading }: { rows: any[]; loading: boolean }) {
 }
 
 function OrdersList({ rows, loading }: { rows: any[]; loading: boolean }) {
-  if (loading) return <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <ListSkeleton count={3} />;
   if (!rows.length)
     return (
       <EmptyState
@@ -413,7 +414,7 @@ function AddressesPanel({ rows, uid, loading }: { rows: any[]; uid: string; load
       </div>
 
       {loading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>
+        <ListSkeleton count={2} />
       ) : rows.length === 0 ? (
         <EmptyState icon={<MapPin className="h-5 w-5" />} title="No saved addresses" hint="Add your home or office to speed up booking." />
       ) : (
@@ -451,7 +452,7 @@ function AddressesPanel({ rows, uid, loading }: { rows: any[]; uid: string; load
 }
 
 function ReviewsPanel({ rows, loading }: { rows: any[]; loading: boolean }) {
-  if (loading) return <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>;
+  if (loading) return <ListSkeleton count={3} />;
   if (!rows.length)
     return (
       <EmptyState
