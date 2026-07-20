@@ -107,16 +107,17 @@ function ProductDetail() {
           url: `https://radiant-hub-view.lovable.app/shop/${p.slug}`,
           itemCondition: "https://schema.org/NewCondition",
         },
-        ...(auto && auto.count > 0 ? {
+        ...(auto && auto.related_review_count > 0 ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: Number(auto.rating ?? auto.avg ?? 0).toFixed(1),
-            reviewCount: auto.count,
+            ratingValue: Number(auto.avg_related_rating ?? auto.auto_rating ?? 0).toFixed(1),
+            reviewCount: auto.related_review_count,
             bestRating: 5,
             worstRating: 1,
           },
         } : {}),
       }} />
+
       <JsonLd id={`breadcrumb-product-${p.slug}`} data={{
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
