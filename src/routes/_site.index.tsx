@@ -93,10 +93,13 @@ function Home() {
             <img
               src={heroImg}
               alt="HVAC Pro technician servicing an outdoor air conditioning condenser"
-              width={1600}
-              height={1100}
+              width={1200}
+              height={825}
+              fetchPriority="high"
+              decoding="async"
               className="h-full w-full rounded-2xl object-cover shadow-elevated ring-1 ring-white/20"
             />
+
             <div className="absolute -bottom-5 left-4 hidden items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-elevated md:flex">
               <div className="flex -space-x-1">
                 {[...Array(5)].map((_, i) => (
