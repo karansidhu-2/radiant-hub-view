@@ -5,6 +5,12 @@ import { bookingSchema, orderSchema } from "./hvac.functions";
 const hasPg = !!process.env.PGHOST;
 const psql = (sql: string) =>
   execFileSync("psql", ["-Atqc", sql], { encoding: "utf8" }).trim();
+// Multi-statement variant: each -c gets its own implicit transaction, so
+// `now()` advances between statements (the rate_limits PK is (key, hit_at)).
+const psqlMany = (statements: string[]) =>
+  execFileSync("psql", ["-At", ...statements.flatMap((s) => ["-c", s])], {
+    encoding: "utf8",
+  }).trim();
 
 const baseBooking = {
   full_name: "Test User",
@@ -58,23 +64,18 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     const max = 3;
     const window = 60;
     const rpc = `SELECT public.check_and_hit_rate_limit('${key}', ${max}, ${window})`;
-    const sleep = `SELECT pg_sleep(0.005)`;
-    const out = psql(
-      `${rpc}; ${sleep}; ${rpc}; ${sleep}; ${rpc}; ${sleep}; ${rpc};`
-    ).split(/\s+/).filter((x) => x === "t" || x === "f");
+    const out = psqlMany([rpc, rpc, rpc, rpc]).split(/\s+/).filter((x) => x === "t" || x === "f");
     expect(out.slice(0, 3)).toEqual(["t", "t", "t"]);
     expect(out[3]).toBe("f");
   });
 
   it("scopes limits per key (different buckets do not interfere)", () => {
     const a = uniq(); const b = uniq();
-    const out = psql(`
-      SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
-      SELECT pg_sleep(0.005);
-      SELECT public.check_and_hit_rate_limit('${a}', 1, 60);
-      SELECT pg_sleep(0.005);
-      SELECT public.check_and_hit_rate_limit('${b}', 1, 60);
-    `).split(/\s+/).filter((x) => x === "t" || x === "f");
+    const out = psqlMany([
+      `SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`,
+      `SELECT public.check_and_hit_rate_limit('${a}', 1, 60)`,
+      `SELECT public.check_and_hit_rate_limit('${b}', 1, 60)`,
+    ]).split(/\s+/).filter((x) => x === "t" || x === "f");
     expect(out).toEqual(["t", "f", "t"]);
   });
 });
