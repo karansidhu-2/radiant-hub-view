@@ -90,8 +90,14 @@ function SecurityPage() {
             <div className="space-y-3 rounded-md border border-border p-4">
               <p className="text-sm">Scan the QR in Google Authenticator, 1Password, Authy, etc. Then enter the 6-digit code below.</p>
               <div className="flex flex-col items-start gap-3 md:flex-row">
-                {/* Supabase returns a data:image/svg or svg string; render directly */}
-                <div className="rounded bg-white p-2" dangerouslySetInnerHTML={{ __html: enroll.qr }} />
+                {/* Supabase returns a data:image/svg+xml URL — render as <img> (data URLs cannot execute script in an image element). */}
+                <img
+                  src={enroll.qr}
+                  alt="Scan this QR code with your authenticator app"
+                  width={192}
+                  height={192}
+                  className="rounded bg-white p-2"
+                />
                 <div className="text-xs text-muted-foreground">
                   <div>Can't scan? Enter this secret manually:</div>
                   <code className="mt-1 block break-all rounded bg-secondary px-2 py-1">{enroll.secret}</code>

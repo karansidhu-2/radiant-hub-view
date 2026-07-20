@@ -308,24 +308,54 @@ export const createOrder = createServerFn({ method: "POST" })
 
 
 // ---------- Get booking / order for confirmation (public: reference acts as capability token) ----------
+// Security: rate-limited per IP + audit-logged misses (defence against reference enumeration).
+// Only confirmation-safe columns are returned — never `user_id`, admin notes, or `service_charge`.
+const REF_RE = /^(BK|OR)-[A-F0-9]{8}$/;
+const BOOKING_PUBLIC_COLS =
+  "reference,service_slug,service_name,scheduled_date,scheduled_hour,status,full_name,email,phone,street,city,state,zip,notes,created_at";
+const ORDER_PUBLIC_COLS =
+  "id,reference,status,subtotal,installation_total,total,full_name,email,phone,street,city,state,zip,scheduled_date,scheduled_hour,created_at";
+const ORDER_ITEM_PUBLIC_COLS =
+  "product_slug,product_name,brand,quantity,unit_price,installation_fee,include_installation";
+
 export const getBookingByRef = createServerFn({ method: "POST" })
-  .inputValidator((d: { reference: string }) => d)
+  .inputValidator((d: { reference: string }) => ({ reference: String(d.reference ?? "").trim().toUpperCase() }))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("lookupBooking", { max: 30, windowSeconds: 60 });
+    if (!REF_RE.test(data.reference)) return null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
-      .from("bookings").select("*").eq("reference", data.reference).maybeSingle();
+      .from("bookings").select(BOOKING_PUBLIC_COLS).eq("reference", data.reference).maybeSingle();
+    if (!row) {
+      const { logRpcAudit } = await import("./rpc-audit.server");
+      await logRpcAudit({
+        event: "lookupBooking.miss", outcome: "denied", reason: "not_found",
+        entity_type: "booking", metadata: { ref_prefix: data.reference.slice(0, 3) },
+      }).catch(() => {});
+    }
     return row;
   });
 
 export const getOrderByRef = createServerFn({ method: "POST" })
-  .inputValidator((d: { reference: string }) => d)
+  .inputValidator((d: { reference: string }) => ({ reference: String(d.reference ?? "").trim().toUpperCase() }))
   .handler(async ({ data }) => {
+    const { rateLimit } = await import("./rate-limit.server");
+    await rateLimit("lookupOrder", { max: 30, windowSeconds: 60 });
+    if (!REF_RE.test(data.reference)) return null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
-      .from("orders").select("*").eq("reference", data.reference).maybeSingle();
-    if (!row) return null;
+      .from("orders").select(ORDER_PUBLIC_COLS).eq("reference", data.reference).maybeSingle();
+    if (!row) {
+      const { logRpcAudit } = await import("./rpc-audit.server");
+      await logRpcAudit({
+        event: "lookupOrder.miss", outcome: "denied", reason: "not_found",
+        entity_type: "order", metadata: { ref_prefix: data.reference.slice(0, 3) },
+      }).catch(() => {});
+      return null;
+    }
     const { data: items } = await supabaseAdmin
-      .from("order_items").select("*").eq("order_id", row.id);
+      .from("order_items").select(ORDER_ITEM_PUBLIC_COLS).eq("order_id", row.id);
     return { ...row, items: items ?? [] };
   });
 
