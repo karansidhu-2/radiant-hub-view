@@ -48,6 +48,13 @@ function mountAt(initial: string) {
   return { ...utils, router };
 }
 
+async function waitForCaptured() {
+  for (let i = 0; i < 50 && !captured; i++) {
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+  }
+  if (!captured) throw new Error("useSwipeBack was never called");
+}
+
 /** The three refs the indicator mutates directly. */
 function readRefs(container: HTMLElement) {
   const wrap = container.querySelector('[aria-hidden]') as HTMLElement;
