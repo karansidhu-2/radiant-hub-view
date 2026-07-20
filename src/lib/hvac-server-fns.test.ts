@@ -91,7 +91,7 @@ describe("bookingSchema validation", () => {
     expect(
       bookingSchema.safeParse({ ...validBooking, service_slug: null, notes: null } as any).success,
     ).toBe(true);
-    const { service_slug: _s, notes: _n, ...noOpt } = validBooking;
+    const { service_slug: _s, notes: _n, ...noOpt } = validBooking as typeof validBooking & { notes?: string | null };
     expect(bookingSchema.safeParse(noOpt).success).toBe(true);
   });
 });
