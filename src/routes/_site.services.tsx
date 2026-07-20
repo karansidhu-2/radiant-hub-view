@@ -86,13 +86,10 @@ function ServicesPage() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-5 flex items-center justify-between text-sm">
+                  <div className="mt-5 text-sm">
                     <span className="text-muted-foreground">
                       Starting at <span className="font-semibold text-foreground">{formatMoney(Number(s.starting_at))}</span>
                     </span>
-                    <Link to="/services/$slug" params={{ slug: s.slug }} className="font-semibold text-primary hover:underline">
-                      Details →
-                    </Link>
                   </div>
                   <Button
                     type="button"
