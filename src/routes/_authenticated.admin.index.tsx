@@ -215,20 +215,23 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label} className="card-pop">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-xs uppercase text-muted-foreground">{k.label}</p>
-                <k.icon className="h-4 w-4 text-primary" />
-              </div>
-              <p className="mt-1 text-2xl font-bold">{k.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{k.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <PerfProfiler id="admin-kpi-grid">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {kpis.map((k) => (
+            <Card key={k.label} className="card-pop">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs uppercase text-muted-foreground">{k.label}</p>
+                  <k.icon className="h-4 w-4 text-primary" />
+                </div>
+                <p className="mt-1 text-2xl font-bold">{k.value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{k.sub}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </PerfProfiler>
+
 
       <Card className="mt-6 border-primary/30">
         <CardContent className="p-5">
