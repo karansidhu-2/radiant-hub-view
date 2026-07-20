@@ -174,3 +174,83 @@ export function useRenderProfiler(label: string, deps: Record<string, unknown>) 
     }
   });
 }
+
+/** Subscribe to profiler settings changes (dev only). */
+export function usePerfSettings(): Settings {
+  const [, force] = React.useReducer((x) => x + 1, 0);
+  React.useEffect(() => {
+    if (!IS_DEV) return;
+    subs.add(force);
+    return () => { subs.delete(force); };
+  }, []);
+  return settings;
+}
+
+/**
+ * Dev-only, admin-scoped floating controls to adjust profiler thresholds
+ * and toggle detailed logging. Renders nothing in production.
+ */
+export function PerfProfilerControls({ isAdmin }: { isAdmin: boolean }) {
+  const s = usePerfSettings();
+  const [open, setOpen] = React.useState(false);
+  if (!IS_DEV || !isAdmin) return null;
+  return (
+    <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 9999 }}>
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          style={{
+            fontSize: 11, padding: "6px 10px", borderRadius: 999,
+            background: "hsl(var(--card))", color: "hsl(var(--foreground))",
+            border: "1px solid hsl(var(--border))", boxShadow: "0 2px 8px rgba(0,0,0,.15)",
+          }}
+          aria-label="Open performance profiler settings"
+        >
+          ⚙ perf {s.enabled ? "on" : "off"} · {s.slowMs}/{s.verySlowMs}ms
+        </button>
+      ) : (
+        <div style={{
+          width: 260, padding: 12, borderRadius: 10,
+          background: "hsl(var(--card))", color: "hsl(var(--foreground))",
+          border: "1px solid hsl(var(--border))", boxShadow: "0 6px 24px rgba(0,0,0,.2)",
+          fontSize: 12,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <strong>Perf profiler (dev)</strong>
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+            <input type="checkbox" checked={s.enabled} onChange={(e) => updatePerfSettings({ enabled: e.target.checked })} />
+            Enable profiler
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+            <input type="checkbox" checked={s.detailedLogging} onChange={(e) => updatePerfSettings({ detailedLogging: e.target.checked })} />
+            Detailed console logs
+          </label>
+          <label style={{ display: "block", marginBottom: 6 }}>
+            Slow (ms): {s.slowMs}
+            <input type="range" min={8} max={200} value={s.slowMs}
+              onChange={(e) => updatePerfSettings({ slowMs: Number(e.target.value) })}
+              style={{ width: "100%" }} />
+          </label>
+          <label style={{ display: "block", marginBottom: 6 }}>
+            Very slow (ms): {s.verySlowMs}
+            <input type="range" min={16} max={500} value={s.verySlowMs}
+              onChange={(e) => updatePerfSettings({ verySlowMs: Number(e.target.value) })}
+              style={{ width: "100%" }} />
+          </label>
+          <button
+            type="button"
+            onClick={() => updatePerfSettings(DEFAULTS)}
+            style={{ marginTop: 6, fontSize: 11, textDecoration: "underline" }}
+          >
+            Reset defaults
+          </button>
+          <p style={{ marginTop: 8, opacity: 0.7 }}>Never active in production builds.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
