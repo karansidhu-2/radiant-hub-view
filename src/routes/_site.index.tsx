@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BadgeCheck, Clock, DollarSign, MapPin, PhoneCall, ShieldCheck, Sparkles, Star, Wrench } from "lucide-react";
-import heroImg from "@/assets/hvac-hero.jpg";
+import heroImg from "@/assets/hvac-hero.webp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { services } from "@/data/services";
