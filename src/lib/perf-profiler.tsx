@@ -16,13 +16,51 @@ import * as React from "react";
  * `import.meta.env.PROD` is true.
  */
 
-const ENABLED =
+const IS_DEV =
   typeof import.meta !== "undefined" &&
   !(import.meta as unknown as { env?: { PROD?: boolean } }).env?.PROD;
 
-// A single 16ms budget frame. Anything above ~50ms is jank-visible.
-const SLOW_COMMIT_MS = 32;
-const VERY_SLOW_COMMIT_MS = 80;
+// Detailed logging is ALWAYS off in production regardless of any stored flag.
+// In development, admins can adjust thresholds + toggle logging via
+// <PerfProfilerControls />; settings persist in localStorage.
+const LS_KEY = "perf-profiler:settings:v1";
+type Settings = {
+  enabled: boolean;
+  slowMs: number;
+  verySlowMs: number;
+  detailedLogging: boolean;
+};
+const DEFAULTS: Settings = {
+  enabled: true,
+  slowMs: 32,
+  verySlowMs: 80,
+  detailedLogging: true,
+};
+
+function readSettings(): Settings {
+  if (!IS_DEV) return { ...DEFAULTS, enabled: false, detailedLogging: false };
+  try {
+    if (typeof localStorage === "undefined") return DEFAULTS;
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return DEFAULTS;
+    const parsed = JSON.parse(raw) as Partial<Settings>;
+    return { ...DEFAULTS, ...parsed };
+  } catch {
+    return DEFAULTS;
+  }
+}
+
+let settings: Settings = readSettings();
+const subs = new Set<() => void>();
+function notify() { for (const fn of subs) fn(); }
+
+export function updatePerfSettings(patch: Partial<Settings>) {
+  if (!IS_DEV) return;
+  settings = { ...settings, ...patch };
+  try { localStorage.setItem(LS_KEY, JSON.stringify(settings)); } catch { /* noop */ }
+  notify();
+}
+export function getPerfSettings(): Settings { return settings; }
 
 type Sample = {
   id: string;
@@ -44,7 +82,7 @@ function onRender(
   actualDuration: number,
   baseDuration: number,
 ) {
-  if (!ENABLED) return;
+  if (!IS_DEV || !settings.enabled) return;
   const sample: Sample = {
     id,
     phase,
@@ -55,8 +93,9 @@ function onRender(
   recent.push(sample);
   if (recent.length > 100) recent.shift();
 
-  if (actualDuration >= SLOW_COMMIT_MS) {
-    const level = actualDuration >= VERY_SLOW_COMMIT_MS ? "error" : "warn";
+  if (!settings.detailedLogging) return;
+  if (actualDuration >= settings.slowMs) {
+    const level = actualDuration >= settings.verySlowMs ? "error" : "warn";
     // eslint-disable-next-line no-console
     console[level](
       `[perf] slow render — ${id} (${phase}) actual=${actualDuration.toFixed(
@@ -66,6 +105,7 @@ function onRender(
   }
 }
 
+
 export function PerfProfiler({
   id,
   children,
@@ -73,7 +113,7 @@ export function PerfProfiler({
   id: string;
   children: React.ReactNode;
 }) {
-  if (!ENABLED) return <>{children}</>;
+  if (!IS_DEV || !settings.enabled) return <>{children}</>;
   return (
     <React.Profiler id={id} onRender={onRender}>
       {children}
@@ -91,7 +131,8 @@ export function useRenderProfiler(label: string, deps: Record<string, unknown>) 
     typeof performance !== "undefined" ? performance.now() : Date.now(),
   );
 
-  if (ENABLED) {
+  if (IS_DEV && settings.enabled && settings.detailedLogging) {
+
     const now =
       typeof performance !== "undefined" ? performance.now() : Date.now();
     const gap = now - lastRenderTs.current;
