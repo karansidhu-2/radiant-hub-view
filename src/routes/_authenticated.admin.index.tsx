@@ -341,19 +341,9 @@ function AdminDashboard() {
             {statusData.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No bookings in this range.</p>
             ) : (
-              <div className="h-72 w-full">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
-                      {statusData.map((_, i) => (
-                        <Cell key={i} fill={PIE[i % PIE.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <Suspense fallback={<ChartFallback />}>
+                <BookingStatusChart data={statusData} />
+              </Suspense>
             )}
           </CardContent>
         </Card>
