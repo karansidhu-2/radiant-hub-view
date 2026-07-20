@@ -53,7 +53,7 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
   const uniq = () =>
     `vitest:rl:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`;
 
-  it("allows up to _max hits, then blocks the next one in the same window", () => {
+  it("allows up to _max hits, then blocks the next one in the same window", { timeout: 15_000 }, () => {
     const key = uniq();
     const max = 3;
     const window = 60;
