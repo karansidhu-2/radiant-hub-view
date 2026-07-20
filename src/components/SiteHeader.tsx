@@ -20,13 +20,13 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-          <span className="grid h-9 w-9 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft">
-            <Wind className="h-5 w-5" strokeWidth={2.4} />
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 md:bg-background/95 md:backdrop-blur-none">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 md:h-16 md:px-6">
+        <Link to="/" className="flex min-w-0 items-center gap-2 text-base font-bold tracking-tight md:text-lg">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
+            <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
-          <span>{settings.company_name}</span>
+          <span className="truncate">{settings.company_name}</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
