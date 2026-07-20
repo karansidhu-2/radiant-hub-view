@@ -9,9 +9,10 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Search, X, SlidersHorizontal } from "lucide-react";
+import { Search, X, SlidersHorizontal } from "lucide-react";
 import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
+import { ProductGridSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
