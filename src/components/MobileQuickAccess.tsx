@@ -40,58 +40,81 @@ export function MobileQuickAccess() {
       ];
 
 
+  // Few tiles (signed-out): render an even grid so buttons align edge-to-edge
+  // instead of clustering on the left. Many tiles (signed-in): keep the
+  // horizontal snap rail so nothing gets cramped.
+  const useGrid = tiles.length <= 4;
+
+  const tileClass = (accent?: boolean) =>
+    `group flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 text-[11px] font-semibold transition-all active:scale-[0.97] ${
+      accent
+        ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
+        : "border-border/70 bg-card text-foreground hover:border-primary/30 hover:bg-accent/60"
+    } ${useGrid ? "w-full" : "min-w-[92px] shrink-0 snap-start"}`;
+
+  const renderInner = (t: Tile) => {
+    const Icon = t.icon;
+    return (
+      <>
+        <span
+          className={`grid h-9 w-9 place-items-center rounded-lg ${
+            t.accent
+              ? "gradient-cool text-primary-foreground shadow-soft"
+              : "bg-secondary text-secondary-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" strokeWidth={2.3} />
+        </span>
+        <span className="w-full truncate text-center leading-tight">{t.label}</span>
+      </>
+    );
+  };
+
+  const renderTile = (t: Tile) => {
+    const cls = tileClass(t.accent);
+    if (t.to) {
+      return (
+        <Link
+          key={t.key}
+          to={t.to}
+          {...(t.to === "/auth" ? { search: { redirect: "/" } as any } : {})}
+          className={cls}
+        >
+          {renderInner(t)}
+        </Link>
+      );
+    }
+    if (t.href) {
+      return (
+        <a key={t.key} href={t.href} className={cls}>
+          {renderInner(t)}
+        </a>
+      );
+    }
+    return (
+      <button key={t.key} type="button" onClick={t.onClick} className={cls}>
+        {renderInner(t)}
+      </button>
+    );
+  };
+
   return (
     <section aria-label="Quick access" className="md:hidden">
       <div className="mx-auto max-w-7xl px-4 pt-4">
-        <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {tiles.map((t) => {
-            const Icon = t.icon;
-            const cls = `group flex min-w-[92px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-xl border px-3 py-3 text-[11px] font-semibold transition-all active:scale-[0.97] ${
-              t.accent
-                ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
-                : "border-border/70 bg-card text-foreground hover:border-primary/30 hover:bg-accent/60"
-            }`;
-            const inner = (
-              <>
-                <span
-                  className={`grid h-9 w-9 place-items-center rounded-lg ${
-                    t.accent
-                      ? "gradient-cool text-primary-foreground shadow-soft"
-                      : "bg-secondary text-secondary-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={2.3} />
-                </span>
-                <span className="leading-tight">{t.label}</span>
-              </>
-            );
-            if (t.to) {
-              return (
-                <Link
-                  key={t.key}
-                  to={t.to}
-                  {...(t.to === "/auth" ? { search: { redirect: "/" } as any } : {})}
-                  className={cls}
-                >
-                  {inner}
-                </Link>
-              );
-            }
-            if (t.href) {
-              return (
-                <a key={t.key} href={t.href} className={cls}>
-                  {inner}
-                </a>
-              );
-            }
-            return (
-              <button key={t.key} type="button" onClick={t.onClick} className={cls}>
-                {inner}
-              </button>
-            );
-          })}
-        </div>
+        {useGrid ? (
+          <div
+            className="grid gap-2.5"
+            style={{ gridTemplateColumns: `repeat(${tiles.length}, minmax(0, 1fr))` }}
+          >
+            {tiles.map(renderTile)}
+          </div>
+        ) : (
+          <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {tiles.map(renderTile)}
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
