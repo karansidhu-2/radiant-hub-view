@@ -9,6 +9,8 @@ export type SiteSettings = {
   address: string;
   business_hours: string;
   emergency_phone: string;
+  quote_estimator_enabled?: boolean;
+  quote_estimator?: any;
 };
 
 // Neutral placeholders. Real values live in site_settings and are edited from
@@ -21,6 +23,7 @@ const FALLBACK: SiteSettings = {
   address: "123 Main St, City, ST 00000",
   business_hours: "Mon–Sat 8am–6pm",
   emergency_phone: "(555) 555-0199",
+  quote_estimator_enabled: true,
 };
 
 export function useSiteSettings() {

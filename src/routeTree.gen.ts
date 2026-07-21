@@ -26,6 +26,7 @@ import { Route as SiteCartRouteImport } from './routes/_site.cart'
 import { Route as SiteCheckoutRouteImport } from './routes/_site.checkout'
 import { Route as SiteContactRouteImport } from './routes/_site.contact'
 import { Route as SiteOfflineRouteImport } from './routes/_site.offline'
+import { Route as SiteQuoteRouteImport } from './routes/_site.quote'
 import { Route as SiteServicesRouteImport } from './routes/_site.services'
 import { Route as SiteShopRouteImport } from './routes/_site.shop'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -40,6 +41,7 @@ import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminObservabilityRouteImport } from './routes/_authenticated.admin.observability'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
+import { Route as AuthenticatedAdminQuoteLeadsRouteImport } from './routes/_authenticated.admin.quote-leads'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
 import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated.admin.security'
 import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated.admin.services'
@@ -137,6 +139,11 @@ const SiteOfflineRoute = SiteOfflineRouteImport.update({
   path: '/offline',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteQuoteRoute = SiteQuoteRouteImport.update({
+  id: '/quote',
+  path: '/quote',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteServicesRoute = SiteServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -213,6 +220,12 @@ const AuthenticatedAdminProductsRoute =
   AuthenticatedAdminProductsRouteImport.update({
     id: '/products',
     path: '/products',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminQuoteLeadsRoute =
+  AuthenticatedAdminQuoteLeadsRouteImport.update({
+    id: '/quote-leads',
+    path: '/quote-leads',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminReviewsRoute =
@@ -294,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
   '/offline': typeof SiteOfflineRoute
+  '/quote': typeof SiteQuoteRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -307,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/quote-leads': typeof AuthenticatedAdminQuoteLeadsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
@@ -335,6 +350,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof SiteCheckoutRoute
   '/contact': typeof SiteContactRoute
   '/offline': typeof SiteOfflineRoute
+  '/quote': typeof SiteQuoteRoute
   '/services': typeof SiteServicesRouteWithChildren
   '/shop': typeof SiteShopRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -348,6 +364,7 @@ export interface FileRoutesByTo {
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/quote-leads': typeof AuthenticatedAdminQuoteLeadsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
@@ -379,6 +396,7 @@ export interface FileRoutesById {
   '/_site/checkout': typeof SiteCheckoutRoute
   '/_site/contact': typeof SiteContactRoute
   '/_site/offline': typeof SiteOfflineRoute
+  '/_site/quote': typeof SiteQuoteRoute
   '/_site/services': typeof SiteServicesRouteWithChildren
   '/_site/shop': typeof SiteShopRouteWithChildren
   '/_site/': typeof SiteIndexRoute
@@ -393,6 +411,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/quote-leads': typeof AuthenticatedAdminQuoteLeadsRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
   '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
@@ -424,6 +443,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/offline'
+    | '/quote'
     | '/services'
     | '/shop'
     | '/.lovable/oauth/consent'
@@ -437,6 +457,7 @@ export interface FileRouteTypes {
     | '/admin/observability'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/quote-leads'
     | '/admin/reviews'
     | '/admin/security'
     | '/admin/services'
@@ -465,6 +486,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/offline'
+    | '/quote'
     | '/services'
     | '/shop'
     | '/.lovable/oauth/consent'
@@ -478,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/observability'
     | '/admin/orders'
     | '/admin/products'
+    | '/admin/quote-leads'
     | '/admin/reviews'
     | '/admin/security'
     | '/admin/services'
@@ -508,6 +531,7 @@ export interface FileRouteTypes {
     | '/_site/checkout'
     | '/_site/contact'
     | '/_site/offline'
+    | '/_site/quote'
     | '/_site/services'
     | '/_site/shop'
     | '/_site/'
@@ -522,6 +546,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/observability'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
+    | '/_authenticated/admin/quote-leads'
     | '/_authenticated/admin/reviews'
     | '/_authenticated/admin/security'
     | '/_authenticated/admin/services'
@@ -669,6 +694,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteOfflineRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/quote': {
+      id: '/_site/quote'
+      path: '/quote'
+      fullPath: '/quote'
+      preLoaderRoute: typeof SiteQuoteRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/services': {
       id: '/_site/services'
       path: '/services'
@@ -765,6 +797,13 @@ declare module '@tanstack/react-router' {
       path: '/products'
       fullPath: '/admin/products'
       preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/quote-leads': {
+      id: '/_authenticated/admin/quote-leads'
+      path: '/quote-leads'
+      fullPath: '/admin/quote-leads'
+      preLoaderRoute: typeof AuthenticatedAdminQuoteLeadsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/reviews': {
@@ -871,6 +910,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminObservabilityRoute: typeof AuthenticatedAdminObservabilityRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminQuoteLeadsRoute: typeof AuthenticatedAdminQuoteLeadsRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRouteWithChildren
   AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
   AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
@@ -890,6 +930,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminObservabilityRoute: AuthenticatedAdminObservabilityRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminQuoteLeadsRoute: AuthenticatedAdminQuoteLeadsRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRouteWithChildren,
   AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
   AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
@@ -949,6 +990,7 @@ interface SiteRouteChildren {
   SiteCheckoutRoute: typeof SiteCheckoutRoute
   SiteContactRoute: typeof SiteContactRoute
   SiteOfflineRoute: typeof SiteOfflineRoute
+  SiteQuoteRoute: typeof SiteQuoteRoute
   SiteServicesRoute: typeof SiteServicesRouteWithChildren
   SiteShopRoute: typeof SiteShopRouteWithChildren
   SiteIndexRoute: typeof SiteIndexRoute
@@ -963,6 +1005,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteCheckoutRoute: SiteCheckoutRoute,
   SiteContactRoute: SiteContactRoute,
   SiteOfflineRoute: SiteOfflineRoute,
+  SiteQuoteRoute: SiteQuoteRoute,
   SiteServicesRoute: SiteServicesRouteWithChildren,
   SiteShopRoute: SiteShopRouteWithChildren,
   SiteIndexRoute: SiteIndexRoute,
