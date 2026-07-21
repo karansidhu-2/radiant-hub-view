@@ -65,7 +65,7 @@ function SettingsPage() {
 
   useEffect(() => {
     supabase.from("site_settings")
-      .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians,crew_capacity_enabled,crew_capacity")
+      .select("company_name,tagline,support_phone,support_email,address,business_hours,emergency_phone,notify_email_enabled,notify_sms_enabled,notify_on_reschedule,notify_on_status_change,twilio_from_phone,technicians,crew_capacity_enabled,crew_capacity,review_request_enabled,review_request_delay_hours,google_review_url,review_request_sms_template")
       .eq("singleton", true).maybeSingle()
       .then(({ data }) => {
         if (data) setForm({ ...empty, ...data } as S);
