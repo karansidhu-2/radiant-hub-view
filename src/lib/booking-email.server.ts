@@ -90,27 +90,26 @@ function buildVars(b: BookingRow, s: Settings): TemplateVars {
   };
 }
 
-async function sendEmail(b: BookingRow, kind: BookingEventKind, s: Settings) {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) return { sent: false, reason: "no_api_key" as const };
-  const tpl = mergedTemplate(kind, s.notification_templates);
-  const vars = buildVars(b, s);
+async function sendEmail(b: BookingRow, kind: BookingEventKind, _s: Settings) {
+  const tpl = mergedTemplate(kind, _s.notification_templates);
+  const vars = buildVars(b, _s);
   const subject = renderTemplate(tpl.email_subject, vars);
   const bodyText = renderTemplate(tpl.email_body, vars);
-  const html = wrapEmailHtml(bodyToHtml(bodyText), s.company_name);
+  const html = wrapEmailHtml(bodyToHtml(bodyText), _s.company_name);
   try {
-    const res = await fetch("https://api.lovable.dev/v1/email/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ to: b.email, subject, html }),
+    const { enqueueEmail } = await import("@/lib/email-outbox.server");
+    const r = await enqueueEmail({
+      to: b.email,
+      subject,
+      html,
+      idempotencyKey: `booking:${b.id}:${kind}`,
+      context: { booking_id: b.id, reference: b.reference, kind },
     });
-    if (!res.ok) {
-      console.warn("email send failed:", res.status, await res.text());
-      return { sent: false, reason: "api_error" as const };
-    }
-    return { sent: true as const };
+    return r.sent
+      ? { sent: true as const }
+      : { sent: false as const, reason: "queued_retry" as const };
   } catch (err) {
-    console.warn("email send threw:", err);
+    console.warn("email enqueue threw:", err);
     return { sent: false, reason: "exception" as const };
   }
 }
