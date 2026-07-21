@@ -259,8 +259,44 @@ function SettingsPage() {
           </CardContent>
         </Card>
 
-
-
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="mb-1 text-lg font-semibold">Google review requests (SMS)</h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Automatically text the customer a Google review link a few hours after a booking is marked <b>completed</b>.
+              Requires SMS notifications and the Twilio connector to be linked. Placeholders: <code>{"{{name}}"}</code>, <code>{"{{company}}"}</code>, <code>{"{{review_url}}"}</code>, <code>{"{{reference}}"}</code>.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {toggle("review_request_enabled", "Enable review request SMS", "Sent once per completed booking.")}
+              <div className={`rounded-md border border-border p-3 ${form.review_request_enabled ? "" : "opacity-60"}`}>
+                <Label>Delay after completion (hours)</Label>
+                <Input type="number" min={0} max={168} value={form.review_request_delay_hours}
+                  disabled={!form.review_request_enabled}
+                  onChange={(e) => setForm({ ...form, review_request_delay_hours: Math.max(0, Math.min(168, Number(e.target.value) || 0)) })} />
+                <p className="mt-1 text-xs text-muted-foreground">Typical: 2–4 hours after the job is done.</p>
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Google review link</Label>
+                <Input type="url" placeholder="https://g.page/r/…/review"
+                  value={form.google_review_url}
+                  onChange={(e) => setForm({ ...form, google_review_url: e.target.value })} />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Find yours in Google Business Profile → Home → “Get more reviews” → copy short URL.
+                </p>
+              </div>
+              <div className="sm:col-span-2">
+                <Label>SMS message template</Label>
+                <textarea
+                  className="mt-1 flex min-h-[90px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  maxLength={480}
+                  value={form.review_request_sms_template}
+                  onChange={(e) => setForm({ ...form, review_request_sms_template: e.target.value })}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">{form.review_request_sms_template.length}/480 characters.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
 
         <Button type="submit" disabled={busy} className="gradient-cool text-primary-foreground">
