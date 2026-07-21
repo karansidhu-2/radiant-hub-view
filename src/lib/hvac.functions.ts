@@ -813,6 +813,17 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
       const n = Math.floor(Number(patch.crew_capacity));
       patch.crew_capacity = Math.min(50, Math.max(1, Number.isFinite(n) ? n : 1));
     }
+    if (patch.review_request_delay_hours != null) {
+      const n = Math.floor(Number(patch.review_request_delay_hours));
+      patch.review_request_delay_hours = Math.min(168, Math.max(0, Number.isFinite(n) ? n : 2));
+    }
+    if (typeof patch.google_review_url === "string") {
+      const u = patch.google_review_url.trim();
+      patch.google_review_url = u ? u.slice(0, 500) : null;
+    }
+    if (typeof patch.review_request_sms_template === "string") {
+      patch.review_request_sms_template = patch.review_request_sms_template.slice(0, 480);
+    }
     if (patch.notification_templates && typeof patch.notification_templates === "object") {
       const allowed = ["pending", "confirmed", "completed", "cancelled", "rescheduled"];
       const clean: any = {};
