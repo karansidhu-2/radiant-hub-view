@@ -1551,3 +1551,56 @@ export const adminDeleteTechnician = createServerFn({ method: "POST" })
     await logAdminAction(context, { action: "technician.delete", entity_type: "technician", entity_id: data.id, before });
     return { ok: true };
   });
+
+// ============ Review request queue (admin) ============
+
+export const adminListReviewRequests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { status?: string; limit?: number }) => d ?? {})
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase
+      .from("review_request_queue")
+      .select("id, booking_id, reference, phone, message, send_after, status, attempts, last_error, sent_at, provider_sid, created_at")
+      .order("created_at", { ascending: false })
+      .limit(Math.min(500, Math.max(1, Number(data?.limit ?? 100))));
+    if (data?.status && data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminRetryReviewRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("review_request_queue")
+      .update({ status: "pending", attempts: 0, last_error: null, send_after: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminCancelReviewRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("review_request_queue")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminProcessReviewRequestsNow = createServerFn({ method: "POST" })
+  .handler(async ({ context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { processReviewRequestQueue } = await import("./review-request.server");
+    return await processReviewRequestQueue(supabaseAdmin, 25);
+  })
+  .middleware([requireSupabaseAuth]);
