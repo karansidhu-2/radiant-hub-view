@@ -59,7 +59,7 @@ async function flush() {
       meta: e.meta ?? {},
       user_agent: e.user_agent ?? (typeof navigator !== "undefined" ? navigator.userAgent : null),
     }));
-    await supabase.from("observability_events").insert(rows);
+    await (supabase as any).from("observability_events").insert(rows);
   } catch {
     // swallow — telemetry must never break the app
   }

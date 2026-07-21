@@ -20,7 +20,7 @@ export const getObservability = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const since = new Date(Date.now() - data.hours * 3600_000).toISOString();
 
-    const { data: rows, error } = await supabaseAdmin
+    const { data: rows, error } = await (supabaseAdmin as any)
       .from("observability_events")
       .select("id, kind, name, path, session_id, user_id, duration_ms, value, message, stack, created_at, meta, user_agent")
       .gte("created_at", since)
