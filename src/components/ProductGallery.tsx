@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
