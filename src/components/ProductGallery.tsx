@@ -193,7 +193,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           aria-label="Keyboard shortcuts"
           aria-expanded={showHelp}
           aria-controls={helpId}
-          onClick={() => setShowHelp((s) => !s)}
+          onClick={toggleHelp}
           className="absolute left-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Keyboard className="h-4 w-4" aria-hidden />
@@ -202,7 +202,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         <button
           type="button"
           aria-label="Open full screen"
-          onClick={() => setLightbox(true)}
+          onClick={openLightbox}
           className="absolute right-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Maximize2 className="h-4 w-4" aria-hidden />
@@ -212,11 +212,11 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         {total > 1 && (
           <>
             <button
-              type="button" aria-label={`Previous media (${active === 0 ? total : active} of ${total})`} onClick={() => go(-1)}
+              type="button" aria-label={`Previous media (${active === 0 ? total : active} of ${total})`} onClick={goPrev}
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
             ><ChevronLeft className="h-5 w-5" aria-hidden /></button>
             <button
-              type="button" aria-label={`Next media (${active + 2 > total ? 1 : active + 2} of ${total})`} onClick={() => go(1)}
+              type="button" aria-label={`Next media (${active + 2 > total ? 1 : active + 2} of ${total})`} onClick={goNext}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
             ><ChevronRight className="h-5 w-5" aria-hidden /></button>
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-background/80 px-2.5 py-0.5 text-[11px] font-medium" aria-hidden>
@@ -225,6 +225,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           </>
         )}
       </div>
+
 
       <div
         id={helpId}
@@ -296,7 +297,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           items={resolved}
           index={active}
           name={name}
-          onClose={() => setLightbox(false)}
+          onClose={closeLightbox}
           onIndex={setActive}
           renderMain={renderMain}
         />
