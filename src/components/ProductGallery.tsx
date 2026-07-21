@@ -76,6 +76,11 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
     return () => { alive = false; };
   }, [items]);
 
+  // Preload the first (LCP) image at high priority, matching srcset/sizes below.
+  const first = resolved[0];
+  useLcpImagePreload(first?.rendered, first?.type !== "video");
+
+
   const total = resolved.length;
   const go = useCallback((dir: number) => {
     setActive((a) => (a + dir + total) % Math.max(total, 1));
