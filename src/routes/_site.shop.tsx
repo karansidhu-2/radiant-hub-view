@@ -13,6 +13,7 @@ import { Search, X, SlidersHorizontal } from "lucide-react";
 import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 import { ProductGridSkeleton } from "@/components/skeletons";
+import { SmartImage } from "@/components/SmartImage";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
@@ -270,7 +271,13 @@ function ShopPage() {
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
                   <div className="relative aspect-[4/3] gradient-cool overflow-hidden">
                     {(p as any).resolved_image ? (
-                      <img src={(p as any).resolved_image} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
+                      <SmartImage
+                        src={(p as any).resolved_image}
+                        alt={p.name}
+                        widths={[240, 320, 480, 640]}
+                        sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 48vw"
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
                         <DynamicIcon name={iconForCategory(p.category)} className="h-16 w-16 opacity-90" />

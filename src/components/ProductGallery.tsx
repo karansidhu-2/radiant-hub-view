@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } fro
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";
+import { SmartImage } from "@/components/SmartImage";
 
 
 
@@ -111,10 +112,14 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
       );
     }
     return (
-      <img
+      <SmartImage
         key={m.rendered}
         src={m.rendered}
         alt={idxLabel}
+        eager={active === 0 && !opts?.large}
+        widths={opts?.large ? [640, 960, 1280, 1600, 1920] : [400, 600, 800, 1024, 1280]}
+        sizes={opts?.large ? "100vw" : "(min-width: 1024px) 60vw, 100vw"}
+        fit={opts?.large ? "inside" : "cover"}
         className={opts?.large
           ? "max-h-full max-w-full object-contain"
           : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"}
