@@ -246,51 +246,16 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
 
 
       {total > 1 && (
-        <div
-          role="tablist"
-          aria-label={`${name} media thumbnails`}
+        <Thumbnails
+          items={resolved}
+          active={active}
+          onSelect={setActive}
+          onOpen={openLightbox}
           onKeyDown={onThumbsKey}
-          className="flex gap-2 overflow-x-auto pb-1"
-        >
-          {resolved.map((m, i) => {
-            const isActive = i === active;
-            return (
-              <button
-                key={m.url + i}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-label={`${m.type === "video" ? "Video" : "Image"} ${i + 1} of ${total}`}
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActive(i)}
-                onDoubleClick={() => { setActive(i); setLightbox(true); }}
-                className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:ring-2 focus-visible:ring-primary ${
-                  isActive ? "border-primary" : "border-border hover:border-primary/50"
-                }`}
-              >
-                {m.type === "video" ? (
-                  youtubeId(m.rendered) ? (
-                    <>
-                      <img
-                        src={`https://i.ytimg.com/vi/${youtubeId(m.rendered)}/mqdefault.jpg`}
-                        alt="" className="h-full w-full object-cover"
-                      />
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
-                    </>
-                  ) : (
-                    <>
-                      <video src={m.rendered} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-hidden />
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
-                    </>
-                  )
-                ) : (
-                  <img src={m.rendered} alt="" className="h-full w-full object-cover" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+          name={name}
+        />
       )}
+
 
       {lightbox && (
         <Lightbox
