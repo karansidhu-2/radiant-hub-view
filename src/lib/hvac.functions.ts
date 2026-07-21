@@ -1597,10 +1597,10 @@ export const adminCancelReviewRequest = createServerFn({ method: "POST" })
   });
 
 export const adminProcessReviewRequestsNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { processReviewRequestQueue } = await import("./review-request.server");
     return await processReviewRequestQueue(supabaseAdmin, 25);
-  })
-  .middleware([requireSupabaseAuth]);
+  });
