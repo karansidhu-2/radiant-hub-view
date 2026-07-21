@@ -566,6 +566,15 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
       await notifyBookingEvent(row as any, data.status as any).catch((e) =>
         console.error("booking notification failed", e),
       );
+      if (data.status === "completed") {
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { enqueueReviewRequest } = await import("./review-request.server");
+          await enqueueReviewRequest(supabaseAdmin, row as any);
+        } catch (e) {
+          console.error("review request enqueue failed", e);
+        }
+      }
     }
     const { logAdminAction } = await import("./audit.server");
     await logAdminAction(context, {
@@ -791,6 +800,8 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     twilio_from_phone?: string; technicians?: string[];
     crew_capacity_enabled?: boolean; crew_capacity?: number;
     notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string; composer?: unknown }>;
+    review_request_enabled?: boolean; review_request_delay_hours?: number;
+    google_review_url?: string | null; review_request_sms_template?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -801,6 +812,17 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     if (patch.crew_capacity != null) {
       const n = Math.floor(Number(patch.crew_capacity));
       patch.crew_capacity = Math.min(50, Math.max(1, Number.isFinite(n) ? n : 1));
+    }
+    if (patch.review_request_delay_hours != null) {
+      const n = Math.floor(Number(patch.review_request_delay_hours));
+      patch.review_request_delay_hours = Math.min(168, Math.max(0, Number.isFinite(n) ? n : 2));
+    }
+    if (typeof patch.google_review_url === "string") {
+      const u = patch.google_review_url.trim();
+      patch.google_review_url = u ? u.slice(0, 500) : null;
+    }
+    if (typeof patch.review_request_sms_template === "string") {
+      patch.review_request_sms_template = patch.review_request_sms_template.slice(0, 480);
     }
     if (patch.notification_templates && typeof patch.notification_templates === "object") {
       const allowed = ["pending", "confirmed", "completed", "cancelled", "rescheduled"];
@@ -1528,4 +1550,57 @@ export const adminDeleteTechnician = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     await logAdminAction(context, { action: "technician.delete", entity_type: "technician", entity_id: data.id, before });
     return { ok: true };
+  });
+
+// ============ Review request queue (admin) ============
+
+export const adminListReviewRequests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { status?: string; limit?: number }) => d ?? {})
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase
+      .from("review_request_queue")
+      .select("id, booking_id, reference, phone, message, send_after, status, attempts, last_error, sent_at, provider_sid, created_at")
+      .order("created_at", { ascending: false })
+      .limit(Math.min(500, Math.max(1, Number(data?.limit ?? 100))));
+    if (data?.status && data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminRetryReviewRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("review_request_queue")
+      .update({ status: "pending", attempts: 0, last_error: null, send_after: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminCancelReviewRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("review_request_queue")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminProcessReviewRequestsNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { processReviewRequestQueue } = await import("./review-request.server");
+    return await processReviewRequestQueue(supabaseAdmin, 25);
   });
