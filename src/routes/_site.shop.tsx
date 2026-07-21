@@ -13,6 +13,7 @@ import { Search, X, SlidersHorizontal } from "lucide-react";
 import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 import { ProductGridSkeleton } from "@/components/skeletons";
+import { SmartImage } from "@/components/SmartImage";
 
 export const Route = createFileRoute("/_site/shop")({
   head: () => ({
