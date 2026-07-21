@@ -666,6 +666,62 @@ export type Database = {
         }
         Relationships: []
       }
+      review_request_queue: {
+        Row: {
+          attempts: number
+          booking_id: string
+          created_at: string
+          id: string
+          last_error: string | null
+          message: string
+          phone: string
+          provider_sid: string | null
+          reference: string
+          send_after: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          message: string
+          phone: string
+          provider_sid?: string | null
+          reference: string
+          send_after: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          message?: string
+          phone?: string
+          provider_sid?: string | null
+          reference?: string
+          send_after?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_request_queue_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           admin_note: string | null
@@ -887,6 +943,7 @@ export type Database = {
           crew_capacity: number
           crew_capacity_enabled: boolean
           emergency_phone: string
+          google_review_url: string | null
           id: string
           notification_templates: Json
           notify_email_enabled: boolean
@@ -895,6 +952,9 @@ export type Database = {
           notify_sms_enabled: boolean
           quote_estimator: Json
           quote_estimator_enabled: boolean
+          review_request_delay_hours: number
+          review_request_enabled: boolean
+          review_request_sms_template: string
           singleton: boolean
           support_email: string
           support_phone: string
@@ -911,6 +971,7 @@ export type Database = {
           crew_capacity?: number
           crew_capacity_enabled?: boolean
           emergency_phone?: string
+          google_review_url?: string | null
           id?: string
           notification_templates?: Json
           notify_email_enabled?: boolean
@@ -919,6 +980,9 @@ export type Database = {
           notify_sms_enabled?: boolean
           quote_estimator?: Json
           quote_estimator_enabled?: boolean
+          review_request_delay_hours?: number
+          review_request_enabled?: boolean
+          review_request_sms_template?: string
           singleton?: boolean
           support_email?: string
           support_phone?: string
@@ -935,6 +999,7 @@ export type Database = {
           crew_capacity?: number
           crew_capacity_enabled?: boolean
           emergency_phone?: string
+          google_review_url?: string | null
           id?: string
           notification_templates?: Json
           notify_email_enabled?: boolean
@@ -943,6 +1008,9 @@ export type Database = {
           notify_sms_enabled?: boolean
           quote_estimator?: Json
           quote_estimator_enabled?: boolean
+          review_request_delay_hours?: number
+          review_request_enabled?: boolean
+          review_request_sms_template?: string
           singleton?: boolean
           support_email?: string
           support_phone?: string
