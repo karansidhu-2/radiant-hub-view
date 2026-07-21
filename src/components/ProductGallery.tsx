@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } from "lucide-react";
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
@@ -87,38 +87,31 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
   }, [total]);
 
   // Keyboard nav on the main viewer region
-  const onViewerKey = (e: React.KeyboardEvent) => {
+  const onViewerKey = useCallback((e: React.KeyboardEvent) => {
     if (total <= 1) return;
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     else if (e.key === "Home") { e.preventDefault(); setActive(0); }
     else if (e.key === "End") { e.preventDefault(); setActive(total - 1); }
     else if (e.key === "Enter" || e.key === " ") {
-      // Only open lightbox when focus is on the viewer itself, not inner controls
       if (e.currentTarget === e.target) { e.preventDefault(); setLightbox(true); }
     }
-  };
+  }, [total, go]);
 
-  const onThumbsKey = (e: React.KeyboardEvent) => {
+  const onThumbsKey = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     else if (e.key === "Home") { e.preventDefault(); setActive(0); }
     else if (e.key === "End") { e.preventDefault(); setActive(total - 1); }
-  };
+  }, [total, go]);
 
-  if (items.length === 0) {
-    return (
-      <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated" role="img" aria-label={`${name} (no media available)`}>
-        <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-          <DynamicIcon name={emptyIcon} className="h-40 w-40 opacity-90" aria-hidden />
-        </div>
-      </div>
-    );
-  }
+  const openLightbox = useCallback(() => setLightbox(true), []);
+  const closeLightbox = useCallback(() => setLightbox(false), []);
+  const toggleHelp = useCallback(() => setShowHelp((s) => !s), []);
+  const goPrev = useCallback(() => go(-1), [go]);
+  const goNext = useCallback(() => go(1), [go]);
 
-  const current = resolved[active];
-
-  const renderMain = (m: Resolved | undefined, opts?: { large?: boolean }) => {
+  const renderMain = useCallback((m: Resolved | undefined, opts?: { large?: boolean }) => {
     if (!m) return <div className="grid h-full w-full place-items-center text-muted-foreground"><ImageOff className="h-10 w-10" aria-hidden /></div>;
     const idxLabel = `${name}, ${m.type === "video" ? "video" : "image"} ${active + 1} of ${total}`;
     if (m.type === "video") {
@@ -163,7 +156,21 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"}
       />
     );
-  };
+  }, [active, total, name]);
+
+
+
+  if (items.length === 0) {
+    return (
+      <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated" role="img" aria-label={`${name} (no media available)`}>
+        <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
+          <DynamicIcon name={emptyIcon} className="h-40 w-40 opacity-90" aria-hidden />
+        </div>
+      </div>
+    );
+  }
+
+  const current = resolved[active];
 
   return (
     <div className="space-y-3">
@@ -186,7 +193,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           aria-label="Keyboard shortcuts"
           aria-expanded={showHelp}
           aria-controls={helpId}
-          onClick={() => setShowHelp((s) => !s)}
+          onClick={toggleHelp}
           className="absolute left-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Keyboard className="h-4 w-4" aria-hidden />
@@ -195,7 +202,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         <button
           type="button"
           aria-label="Open full screen"
-          onClick={() => setLightbox(true)}
+          onClick={openLightbox}
           className="absolute right-2 top-2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Maximize2 className="h-4 w-4" aria-hidden />
@@ -205,11 +212,11 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         {total > 1 && (
           <>
             <button
-              type="button" aria-label={`Previous media (${active === 0 ? total : active} of ${total})`} onClick={() => go(-1)}
+              type="button" aria-label={`Previous media (${active === 0 ? total : active} of ${total})`} onClick={goPrev}
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
             ><ChevronLeft className="h-5 w-5" aria-hidden /></button>
             <button
-              type="button" aria-label={`Next media (${active + 2 > total ? 1 : active + 2} of ${total})`} onClick={() => go(1)}
+              type="button" aria-label={`Next media (${active + 2 > total ? 1 : active + 2} of ${total})`} onClick={goNext}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-2 shadow-soft opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-primary"
             ><ChevronRight className="h-5 w-5" aria-hidden /></button>
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-background/80 px-2.5 py-0.5 text-[11px] font-medium" aria-hidden>
@@ -218,6 +225,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           </>
         )}
       </div>
+
 
       <div
         id={helpId}
@@ -238,58 +246,23 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
 
 
       {total > 1 && (
-        <div
-          role="tablist"
-          aria-label={`${name} media thumbnails`}
+        <Thumbnails
+          items={resolved}
+          active={active}
+          onSelect={setActive}
+          onOpen={openLightbox}
           onKeyDown={onThumbsKey}
-          className="flex gap-2 overflow-x-auto pb-1"
-        >
-          {resolved.map((m, i) => {
-            const isActive = i === active;
-            return (
-              <button
-                key={m.url + i}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-label={`${m.type === "video" ? "Video" : "Image"} ${i + 1} of ${total}`}
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setActive(i)}
-                onDoubleClick={() => { setActive(i); setLightbox(true); }}
-                className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:ring-2 focus-visible:ring-primary ${
-                  isActive ? "border-primary" : "border-border hover:border-primary/50"
-                }`}
-              >
-                {m.type === "video" ? (
-                  youtubeId(m.rendered) ? (
-                    <>
-                      <img
-                        src={`https://i.ytimg.com/vi/${youtubeId(m.rendered)}/mqdefault.jpg`}
-                        alt="" className="h-full w-full object-cover"
-                      />
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
-                    </>
-                  ) : (
-                    <>
-                      <video src={m.rendered} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-hidden />
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
-                    </>
-                  )
-                ) : (
-                  <img src={m.rendered} alt="" className="h-full w-full object-cover" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+          name={name}
+        />
       )}
+
 
       {lightbox && (
         <Lightbox
           items={resolved}
           index={active}
           name={name}
-          onClose={() => setLightbox(false)}
+          onClose={closeLightbox}
           onIndex={setActive}
           renderMain={renderMain}
         />
@@ -298,7 +271,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
   );
 }
 
-function Lightbox({
+const Lightbox = memo(function Lightbox({
   items, index, name, onClose, onIndex, renderMain,
 }: {
   items: Resolved[];
@@ -311,10 +284,23 @@ function Lightbox({
   const total = items.length;
   const closeRef = useRef<HTMLButtonElement>(null);
   const swipeAreaRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   const touchDelta = useRef({ x: 0, y: 0 });
   const swipeLocked = useRef<"h" | "v" | null>(null);
-  const [dragX, setDragX] = useState(0);
+
+  const applyDrag = useCallback((dx: number) => {
+    const el = stageRef.current;
+    if (!el) return;
+    if (dx === 0) {
+      el.style.transition = "transform 200ms ease-out";
+      el.style.transform = "";
+    } else {
+      el.style.transition = "none";
+      el.style.transform = `translate3d(${dx}px,0,0)`;
+    }
+  }, []);
+
 
   const go = useCallback((dir: number) => {
     if (total <= 1) return;
@@ -348,7 +334,7 @@ function Lightbox({
       touchStart.current = { x: t.clientX, y: t.clientY, t: performance.now() };
       touchDelta.current = { x: 0, y: 0 };
       swipeLocked.current = null;
-      setDragX(0);
+      applyDrag(0);
     };
     const onMove = (e: TouchEvent) => {
       if (!touchStart.current) return;
@@ -359,7 +345,7 @@ function Lightbox({
       if (!swipeLocked.current) swipeLocked.current = resolveAxisLock(dx, dy);
       if (swipeLocked.current === "h") {
         e.preventDefault(); // block page scroll during horizontal drag
-        setDragX(dx);
+        applyDrag(dx);
       }
     };
     const onEnd = () => {
@@ -368,7 +354,7 @@ function Lightbox({
       const locked = swipeLocked.current;
       touchStart.current = null;
       swipeLocked.current = null;
-      setDragX(0);
+      applyDrag(0);
       if (!start) return;
       const decision = decideSwipe({
         dx,
@@ -388,7 +374,7 @@ function Lightbox({
       el.removeEventListener("touchend", onEnd);
       el.removeEventListener("touchcancel", onEnd);
     };
-  }, [go]);
+  }, [go, applyDrag]);
 
 
 
@@ -423,11 +409,9 @@ function Lightbox({
         style={{ touchAction: "pan-y" }}
       >
         <div
+          ref={stageRef}
           className="absolute inset-0 flex items-center justify-center p-4 will-change-transform"
-          style={{
-            transform: dragX ? `translate3d(${dragX}px,0,0)` : undefined,
-            transition: dragX ? "none" : "transform 200ms ease-out",
-          }}
+          style={{ transition: "transform 200ms ease-out" }}
         >
           {renderMain(current, { large: true })}
         </div>
@@ -479,4 +463,68 @@ function Lightbox({
       )}
     </div>
   );
-}
+});
+
+type ThumbnailsProps = {
+  items: Resolved[];
+  active: number;
+  onSelect: (i: number) => void;
+  onOpen: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  name: string;
+};
+
+const Thumbnails = memo(function Thumbnails({ items, active, onSelect, onOpen, onKeyDown, name }: ThumbnailsProps) {
+  // Precompute yt IDs once per items change so we don't call youtubeId twice per video per render.
+  const prepped = useMemo(
+    () => items.map((m) => ({ ...m, yt: m.type === "video" ? youtubeId(m.rendered) : null })),
+    [items],
+  );
+  const total = prepped.length;
+  return (
+    <div
+      role="tablist"
+      aria-label={`${name} media thumbnails`}
+      onKeyDown={onKeyDown}
+      className="flex gap-2 overflow-x-auto pb-1"
+    >
+      {prepped.map((m, i) => {
+        const isActive = i === active;
+        return (
+          <button
+            key={m.url + i}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-label={`${m.type === "video" ? "Video" : "Image"} ${i + 1} of ${total}`}
+            tabIndex={isActive ? 0 : -1}
+            onClick={() => onSelect(i)}
+            onDoubleClick={() => { onSelect(i); onOpen(); }}
+            className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:ring-2 focus-visible:ring-primary ${
+              isActive ? "border-primary" : "border-border hover:border-primary/50"
+            }`}
+          >
+            {m.type === "video" ? (
+              m.yt ? (
+                <>
+                  <img
+                    src={`https://i.ytimg.com/vi/${m.yt}/mqdefault.jpg`}
+                    alt="" loading="lazy" decoding="async" className="h-full w-full object-cover"
+                  />
+                  <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
+                </>
+              ) : (
+                <>
+                  <video src={m.rendered} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-hidden />
+                  <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
+                </>
+              )
+            ) : (
+              <img src={m.rendered} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
