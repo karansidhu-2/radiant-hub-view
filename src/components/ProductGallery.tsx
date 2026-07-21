@@ -486,4 +486,4 @@ const Lightbox = memo(function Lightbox({
       )}
     </div>
   );
-}
+});
