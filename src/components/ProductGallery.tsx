@@ -368,7 +368,7 @@ const Lightbox = memo(function Lightbox({
       touchStart.current = { x: t.clientX, y: t.clientY, t: performance.now() };
       touchDelta.current = { x: 0, y: 0 };
       swipeLocked.current = null;
-      setDragX(0);
+      applyDrag(0);
     };
     const onMove = (e: TouchEvent) => {
       if (!touchStart.current) return;
@@ -379,7 +379,7 @@ const Lightbox = memo(function Lightbox({
       if (!swipeLocked.current) swipeLocked.current = resolveAxisLock(dx, dy);
       if (swipeLocked.current === "h") {
         e.preventDefault(); // block page scroll during horizontal drag
-        setDragX(dx);
+        applyDrag(dx);
       }
     };
     const onEnd = () => {
@@ -388,7 +388,7 @@ const Lightbox = memo(function Lightbox({
       const locked = swipeLocked.current;
       touchStart.current = null;
       swipeLocked.current = null;
-      setDragX(0);
+      applyDrag(0);
       if (!start) return;
       const decision = decideSwipe({
         dx,
@@ -408,7 +408,7 @@ const Lightbox = memo(function Lightbox({
       el.removeEventListener("touchend", onEnd);
       el.removeEventListener("touchcancel", onEnd);
     };
-  }, [go]);
+  }, [go, applyDrag]);
 
 
 
@@ -443,11 +443,9 @@ const Lightbox = memo(function Lightbox({
         style={{ touchAction: "pan-y" }}
       >
         <div
+          ref={stageRef}
           className="absolute inset-0 flex items-center justify-center p-4 will-change-transform"
-          style={{
-            transform: dragX ? `translate3d(${dragX}px,0,0)` : undefined,
-            transition: dragX ? "none" : "transform 200ms ease-out",
-          }}
+          style={{ transition: "transform 200ms ease-out" }}
         >
           {renderMain(current, { large: true })}
         </div>
