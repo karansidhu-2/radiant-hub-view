@@ -48,6 +48,7 @@ function ProductDetail() {
   const { addItem } = useCart();
   const [withInstall, setWithInstall] = useState(true);
   const { data: autoRatings } = useAutoRatings();
+  useEffect(() => { import("@/lib/observability").then((m) => m.track("view_product", { product: slug })); }, [slug]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", slug],
