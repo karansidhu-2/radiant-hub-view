@@ -74,6 +74,29 @@ describe("Custom error pages", () => {
     expect(await screen.findByRole("link", { name: /sign in/i })).toBeTruthy();
   });
 
+  it("403 status via GenericErrorPage routes to UnauthorizedPage (not PermissionErrorState)", async () => {
+    const err = Object.assign(new Error("forbidden"), { status: 403 });
+    renderInRouter(<GenericErrorPage error={err} />);
+    expect(await screen.findByText(/Error 403/i)).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: /don't have access/i })).toBeTruthy();
+    // PermissionErrorState uses data-testid="permission-error"; must NOT render.
+    expect(screen.queryByTestId("permission-error")).toBeNull();
+  });
+
+  it("PostgREST 42501 (no HTTP status) renders PermissionErrorState, not UnauthorizedPage", async () => {
+    const err = Object.assign(new Error("permission denied for table bookings"), { code: "42501" });
+    renderInRouter(<GenericErrorPage error={err} />);
+    expect(await screen.findByTestId("permission-error")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: /don't have access/i })).toBeNull();
+  });
+
+  it("RLS violation message (no status) renders PermissionErrorState", async () => {
+    const err = new Error("new row violates row-level security policy for table orders");
+    renderInRouter(<GenericErrorPage error={err} />);
+    expect(await screen.findByTestId("permission-error")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: /don't have access/i })).toBeNull();
+  });
+
   it("403 UnauthorizedPage renders directly with sign-in CTA", async () => {
     renderInRouter(<UnauthorizedPage />);
     expect(await screen.findByRole("heading", { name: /don't have access/i })).toBeTruthy();
