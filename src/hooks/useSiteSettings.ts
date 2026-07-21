@@ -11,14 +11,16 @@ export type SiteSettings = {
   emergency_phone: string;
 };
 
+// Neutral placeholders. Real values live in site_settings and are edited from
+// /admin/settings after handover.
 const FALLBACK: SiteSettings = {
-  company_name: "HVAC Pro",
+  company_name: "Your Company Name",
   tagline: "Trusted heating & cooling experts",
-  support_phone: "(800) 555-0199",
-  support_email: "support@hvacpro.com",
-  address: "123 Main St, Dallas, TX 75201",
-  business_hours: "Mon–Sat 7am–8pm • 24/7 emergency",
-  emergency_phone: "(800) 555-0911",
+  support_phone: "(555) 555-0100",
+  support_email: "support@example.com",
+  address: "123 Main St, City, ST 00000",
+  business_hours: "Mon–Sat 8am–6pm",
+  emergency_phone: "(555) 555-0199",
 };
 
 export function useSiteSettings() {
