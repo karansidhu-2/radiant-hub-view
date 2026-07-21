@@ -156,6 +156,9 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"}
       />
     );
+  }, [active, total, name]);
+
+
 
   if (items.length === 0) {
     return (
