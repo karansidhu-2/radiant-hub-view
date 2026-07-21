@@ -28,6 +28,8 @@ type S = {
   notify_on_reschedule: boolean; notify_on_status_change: boolean;
   twilio_from_phone: string; technicians: string[];
   crew_capacity_enabled: boolean; crew_capacity: number;
+  review_request_enabled: boolean; review_request_delay_hours: number;
+  google_review_url: string; review_request_sms_template: string;
 };
 
 const empty: S = {
@@ -35,6 +37,9 @@ const empty: S = {
   notify_email_enabled: true, notify_sms_enabled: false, notify_on_reschedule: true, notify_on_status_change: true,
   twilio_from_phone: "", technicians: [],
   crew_capacity_enabled: false, crew_capacity: 1,
+  review_request_enabled: false, review_request_delay_hours: 2,
+  google_review_url: "",
+  review_request_sms_template: "Hi {{name}}, thanks for choosing {{company}}! We'd love your feedback — leave us a quick Google review: {{review_url}}",
 };
 
 function SettingsPage() {
