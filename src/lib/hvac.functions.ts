@@ -800,6 +800,8 @@ export const adminUpdateSiteSettings = createServerFn({ method: "POST" })
     twilio_from_phone?: string; technicians?: string[];
     crew_capacity_enabled?: boolean; crew_capacity?: number;
     notification_templates?: Record<string, { email_subject?: string; email_body?: string; sms_body?: string; composer?: unknown }>;
+    review_request_enabled?: boolean; review_request_delay_hours?: number;
+    google_review_url?: string | null; review_request_sms_template?: string;
   }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
