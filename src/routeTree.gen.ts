@@ -53,6 +53,7 @@ import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
 import { Route as AuthenticatedAdminReviewsAuditRouteImport } from './routes/_authenticated.admin.reviews.audit'
 import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
 import { Route as ApiPublicHooksProcessEmailOutboxRouteImport } from './routes/api/public/hooks/process-email-outbox'
+import { Route as ApiPublicHooksProcessReviewRequestsRouteImport } from './routes/api/public/hooks/process-review-requests'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -290,6 +291,12 @@ const ApiPublicHooksProcessEmailOutboxRoute =
     path: '/api/public/hooks/process-email-outbox',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksProcessReviewRequestsRoute =
+  ApiPublicHooksProcessReviewRequestsRouteImport.update({
+    id: '/api/public/hooks/process-review-requests',
+    path: '/api/public/hooks/process-review-requests',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
   '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
+  '/api/public/hooks/process-review-requests': typeof ApiPublicHooksProcessReviewRequestsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof SiteIndexRoute
@@ -377,6 +385,7 @@ export interface FileRoutesByTo {
   '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
   '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
+  '/api/public/hooks/process-review-requests': typeof ApiPublicHooksProcessReviewRequestsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -424,6 +433,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/_site/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
   '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
+  '/api/public/hooks/process-review-requests': typeof ApiPublicHooksProcessReviewRequestsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -470,6 +480,7 @@ export interface FileRouteTypes {
     | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
     | '/api/public/hooks/process-email-outbox'
+    | '/api/public/hooks/process-review-requests'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
     | '/api/public/hooks/process-email-outbox'
+    | '/api/public/hooks/process-review-requests'
   id:
     | '__root__'
     | '/_authenticated'
@@ -559,6 +571,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reviews/audit'
     | '/_site/confirmation/$kind/$ref'
     | '/api/public/hooks/process-email-outbox'
+    | '/api/public/hooks/process-review-requests'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -571,6 +584,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksProcessEmailOutboxRoute: typeof ApiPublicHooksProcessEmailOutboxRoute
+  ApiPublicHooksProcessReviewRequestsRoute: typeof ApiPublicHooksProcessReviewRequestsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -883,6 +897,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksProcessEmailOutboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/process-review-requests': {
+      id: '/api/public/hooks/process-review-requests'
+      path: '/api/public/hooks/process-review-requests'
+      fullPath: '/api/public/hooks/process-review-requests'
+      preLoaderRoute: typeof ApiPublicHooksProcessReviewRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1025,6 +1046,8 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksProcessEmailOutboxRoute: ApiPublicHooksProcessEmailOutboxRoute,
+  ApiPublicHooksProcessReviewRequestsRoute:
+    ApiPublicHooksProcessReviewRequestsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
