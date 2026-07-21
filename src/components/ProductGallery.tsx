@@ -4,6 +4,39 @@ import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/produc
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";
 import { SmartImage } from "@/components/SmartImage";
+import { cdnSrcSet, cdnUrl } from "@/lib/cdn-image";
+
+/**
+ * LCP preload widths + sizes MUST match the first <img> in the gallery so the
+ * browser reuses the preloaded response instead of firing a second request.
+ * Keep in sync with the non-`large` branch of `renderMain` below.
+ */
+const LCP_WIDTHS = [400, 600, 800, 1024, 1280];
+const LCP_SIZES = "(min-width: 1024px) 60vw, 100vw";
+
+/** Inject <link rel=preload as=image> for the first gallery image (AVIF + WebP). */
+function useLcpImagePreload(url: string | undefined, isImage: boolean) {
+  useEffect(() => {
+    if (!url || !isImage) return;
+    if (typeof document === "undefined") return;
+    if (!/^https?:\/\//i.test(url)) return;
+
+    const mk = (fmt: "avif" | "webp") => {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.type = `image/${fmt}`;
+      link.setAttribute("imagesrcset", cdnSrcSet(url, LCP_WIDTHS, fmt));
+      link.setAttribute("imagesizes", LCP_SIZES);
+      link.setAttribute("fetchpriority", "high");
+      link.href = cdnUrl(url, { w: 800, fmt });
+      document.head.appendChild(link);
+      return link;
+    };
+    const links = [mk("avif"), mk("webp")];
+    return () => { for (const l of links) l.remove(); };
+  }, [url, isImage]);
+}
 
 
 
