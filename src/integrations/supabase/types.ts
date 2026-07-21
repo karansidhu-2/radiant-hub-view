@@ -208,6 +208,57 @@ export type Database = {
         }
         Relationships: []
       }
+      email_outbox: {
+        Row: {
+          attempts: number
+          context: Json | null
+          created_at: string
+          html: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          sent_at: string | null
+          status: string
+          subject: string
+          to_email: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          context?: Json | null
+          created_at?: string
+          html: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          sent_at?: string | null
+          status?: string
+          subject: string
+          to_email: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          context?: Json | null
+          created_at?: string
+          html?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          to_email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       observability_events: {
         Row: {
           created_at: string
