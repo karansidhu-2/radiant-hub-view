@@ -318,10 +318,23 @@ const Lightbox = memo(function Lightbox({
   const total = items.length;
   const closeRef = useRef<HTMLButtonElement>(null);
   const swipeAreaRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   const touchDelta = useRef({ x: 0, y: 0 });
   const swipeLocked = useRef<"h" | "v" | null>(null);
-  const [dragX, setDragX] = useState(0);
+
+  const applyDrag = useCallback((dx: number) => {
+    const el = stageRef.current;
+    if (!el) return;
+    if (dx === 0) {
+      el.style.transition = "transform 200ms ease-out";
+      el.style.transform = "";
+    } else {
+      el.style.transition = "none";
+      el.style.transform = `translate3d(${dx}px,0,0)`;
+    }
+  }, []);
+
 
   const go = useCallback((dir: number) => {
     if (total <= 1) return;
