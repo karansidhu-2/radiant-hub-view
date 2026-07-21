@@ -4,6 +4,39 @@ import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/produc
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";
 import { SmartImage } from "@/components/SmartImage";
+import { cdnSrcSet, cdnUrl } from "@/lib/cdn-image";
+
+/**
+ * LCP preload widths + sizes MUST match the first <img> in the gallery so the
+ * browser reuses the preloaded response instead of firing a second request.
+ * Keep in sync with the non-`large` branch of `renderMain` below.
+ */
+const LCP_WIDTHS = [400, 600, 800, 1024, 1280];
+const LCP_SIZES = "(min-width: 1024px) 60vw, 100vw";
+
+/** Inject <link rel=preload as=image> for the first gallery image (AVIF + WebP). */
+function useLcpImagePreload(url: string | undefined, isImage: boolean) {
+  useEffect(() => {
+    if (!url || !isImage) return;
+    if (typeof document === "undefined") return;
+    if (!/^https?:\/\//i.test(url)) return;
+
+    const mk = (fmt: "avif" | "webp") => {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.type = `image/${fmt}`;
+      link.setAttribute("imagesrcset", cdnSrcSet(url, LCP_WIDTHS, fmt));
+      link.setAttribute("imagesizes", LCP_SIZES);
+      link.setAttribute("fetchpriority", "high");
+      link.href = cdnUrl(url, { w: 800, fmt });
+      document.head.appendChild(link);
+      return link;
+    };
+    const links = [mk("avif"), mk("webp")];
+    return () => { for (const l of links) l.remove(); };
+  }, [url, isImage]);
+}
 
 
 
@@ -42,6 +75,11 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
     })();
     return () => { alive = false; };
   }, [items]);
+
+  // Preload the first (LCP) image at high priority, matching srcset/sizes below.
+  const first = resolved[0];
+  useLcpImagePreload(first?.rendered, first?.type !== "video");
+
 
   const total = resolved.length;
   const go = useCallback((dir: number) => {
@@ -117,8 +155,8 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         src={m.rendered}
         alt={idxLabel}
         eager={active === 0 && !opts?.large}
-        widths={opts?.large ? [640, 960, 1280, 1600, 1920] : [400, 600, 800, 1024, 1280]}
-        sizes={opts?.large ? "100vw" : "(min-width: 1024px) 60vw, 100vw"}
+        widths={opts?.large ? [640, 960, 1280, 1600, 1920] : LCP_WIDTHS}
+        sizes={opts?.large ? "100vw" : LCP_SIZES}
         fit={opts?.large ? "inside" : "cover"}
         className={opts?.large
           ? "max-h-full max-w-full object-contain"
