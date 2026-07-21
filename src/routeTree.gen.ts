@@ -50,6 +50,7 @@ import { Route as SiteServicesSlugRouteImport } from './routes/_site.services.$s
 import { Route as SiteShopSlugRouteImport } from './routes/_site.shop.$slug'
 import { Route as AuthenticatedAdminReviewsAuditRouteImport } from './routes/_authenticated.admin.reviews.audit'
 import { Route as SiteConfirmationKindRefRouteImport } from './routes/_site.confirmation.$kind.$ref'
+import { Route as ApiPublicHooksProcessEmailOutboxRouteImport } from './routes/api/public/hooks/process-email-outbox'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -270,6 +271,12 @@ const SiteConfirmationKindRefRoute = SiteConfirmationKindRefRouteImport.update({
   path: '/confirmation/$kind/$ref',
   getParentRoute: () => SiteRoute,
 } as any)
+const ApiPublicHooksProcessEmailOutboxRoute =
+  ApiPublicHooksProcessEmailOutboxRouteImport.update({
+    id: '/api/public/hooks/process-email-outbox',
+    path: '/api/public/hooks/process-email-outbox',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
+  '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof SiteIndexRoute
@@ -351,6 +359,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
+  '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -395,6 +404,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/reviews/audit': typeof AuthenticatedAdminReviewsAuditRoute
   '/_site/confirmation/$kind/$ref': typeof SiteConfirmationKindRefRoute
+  '/api/public/hooks/process-email-outbox': typeof ApiPublicHooksProcessEmailOutboxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -438,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
+    | '/api/public/hooks/process-email-outbox'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -478,6 +489,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/reviews/audit'
     | '/confirmation/$kind/$ref'
+    | '/api/public/hooks/process-email-outbox'
   id:
     | '__root__'
     | '/_authenticated'
@@ -521,6 +533,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/reviews/audit'
     | '/_site/confirmation/$kind/$ref'
+    | '/api/public/hooks/process-email-outbox'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -532,6 +545,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicHooksProcessEmailOutboxRoute: typeof ApiPublicHooksProcessEmailOutboxRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -823,6 +837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteConfirmationKindRefRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/api/public/hooks/process-email-outbox': {
+      id: '/api/public/hooks/process-email-outbox'
+      path: '/api/public/hooks/process-email-outbox'
+      fullPath: '/api/public/hooks/process-email-outbox'
+      preLoaderRoute: typeof ApiPublicHooksProcessEmailOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -960,6 +981,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicHooksProcessEmailOutboxRoute: ApiPublicHooksProcessEmailOutboxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
