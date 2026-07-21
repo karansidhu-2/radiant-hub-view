@@ -115,6 +115,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    void import("../lib/observability").then((m) => m.initObservability());
     const onError = (event: ErrorEvent) => {
       reportLovableError(event.error ?? event.message, {
         source: "window_onerror",
