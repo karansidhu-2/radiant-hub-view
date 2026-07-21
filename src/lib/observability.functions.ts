@@ -28,7 +28,7 @@ export const getObservability = createServerFn({ method: "POST" })
       .limit(10000);
     if (error) throw new Error(error.message);
 
-    const events = rows ?? [];
+    const events: any[] = rows ?? [];
     const buckets = Math.min(48, Math.max(12, Math.round(data.hours <= 24 ? data.hours : 24)));
     const bucketMs = (data.hours * 3600_000) / buckets;
     const start = Date.now() - data.hours * 3600_000;
