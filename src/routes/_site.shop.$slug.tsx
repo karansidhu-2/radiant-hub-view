@@ -202,6 +202,7 @@ function ProductDetail() {
                   className="mt-4 w-full gradient-cool text-primary-foreground shadow-soft"
                   onClick={() => {
                     addItem(p.slug, { includeInstallation: withInstall });
+                    import("@/lib/observability").then((m) => m.track("add_to_cart", { product: p.slug, install: withInstall }));
                     toast.success("Added to cart");
                   }}
                 >
