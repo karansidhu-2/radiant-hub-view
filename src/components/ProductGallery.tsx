@@ -156,8 +156,18 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"}
       />
     );
-  }, [active, total, name]);
 
+  if (items.length === 0) {
+    return (
+      <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated" role="img" aria-label={`${name} (no media available)`}>
+        <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
+          <DynamicIcon name={emptyIcon} className="h-40 w-40 opacity-90" aria-hidden />
+        </div>
+      </div>
+    );
+  }
+
+  const current = resolved[active];
 
   return (
     <div className="space-y-3">
