@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, Check, ShieldCheck, Truck, Loader2, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +48,7 @@ function ProductDetail() {
   const { addItem } = useCart();
   const [withInstall, setWithInstall] = useState(true);
   const { data: autoRatings } = useAutoRatings();
+  useEffect(() => { import("@/lib/observability").then((m) => m.track("view_product", { product: slug })); }, [slug]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", slug],
@@ -202,6 +203,7 @@ function ProductDetail() {
                   className="mt-4 w-full gradient-cool text-primary-foreground shadow-soft"
                   onClick={() => {
                     addItem(p.slug, { includeInstallation: withInstall });
+                    import("@/lib/observability").then((m) => m.track("add_to_cart", { product: p.slug, install: withInstall }));
                     toast.success("Added to cart");
                   }}
                 >

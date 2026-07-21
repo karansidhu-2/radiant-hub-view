@@ -208,6 +208,60 @@ export type Database = {
         }
         Relationships: []
       }
+      observability_events: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          id: string
+          is_admin: boolean | null
+          kind: string
+          message: string | null
+          meta: Json
+          name: string
+          path: string | null
+          session_id: string | null
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_admin?: boolean | null
+          kind: string
+          message?: string | null
+          meta?: Json
+          name: string
+          path?: string | null
+          session_id?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_admin?: boolean | null
+          kind?: string
+          message?: string | null
+          meta?: Json
+          name?: string
+          path?: string | null
+          session_id?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           brand: string | null

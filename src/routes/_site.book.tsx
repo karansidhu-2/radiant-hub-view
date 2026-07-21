@@ -127,7 +127,9 @@ function BookPage() {
     setCapacityConflict(null);
     setAlternatives([]);
     try {
+      import("@/lib/observability").then((m) => m.track("begin_booking", { service: form.service_slug }));
       const res = await bookFn({ data: payload });
+      import("@/lib/observability").then((m) => m.track("booking_placed", { reference: res.reference, service: form.service_slug }));
       toast.success("Booking confirmed!");
       navigate({ to: "/confirmation/$kind/$ref", params: { kind: "booking", ref: res.reference } });
     } catch (err: any) {

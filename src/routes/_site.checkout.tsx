@@ -74,8 +74,9 @@ function CheckoutPage() {
         quantity: item.quantity,
         include_installation: item.includeInstallation,
       }));
-
+      import("@/lib/observability").then((m) => m.track("begin_checkout", { items: items.length }));
       const res = await orderFn({ data: { ...form, items, notes: form.notes || null } });
+      import("@/lib/observability").then((m) => m.track("order_placed", { reference: res.reference }));
       clear();
       toast.success("Order placed!");
       navigate({ to: "/confirmation/$kind/$ref", params: { kind: "order", ref: res.reference } });

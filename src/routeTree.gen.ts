@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminBookingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminCalendarRouteImport } from './routes/_authenticated.admin.calendar'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated.admin.inbox'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated.admin.notifications'
+import { Route as AuthenticatedAdminObservabilityRouteImport } from './routes/_authenticated.admin.observability'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated.admin.orders'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated.admin.products'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated.admin.reviews'
@@ -195,6 +196,12 @@ const AuthenticatedAdminNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminObservabilityRoute =
+  AuthenticatedAdminObservabilityRouteImport.update({
+    id: '/observability',
+    path: '/observability',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/orders',
@@ -290,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
@@ -329,6 +337,7 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
@@ -372,6 +381,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/calendar': typeof AuthenticatedAdminCalendarRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/_authenticated/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRouteWithChildren
@@ -414,6 +424,7 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/inbox'
     | '/admin/notifications'
+    | '/admin/observability'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reviews'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/inbox'
     | '/admin/notifications'
+    | '/admin/observability'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reviews'
@@ -495,6 +507,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/calendar'
     | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/notifications'
+    | '/_authenticated/admin/observability'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/reviews'
@@ -719,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/observability': {
+      id: '/_authenticated/admin/observability'
+      path: '/observability'
+      fullPath: '/admin/observability'
+      preLoaderRoute: typeof AuthenticatedAdminObservabilityRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/orders': {
       id: '/_authenticated/admin/orders'
       path: '/orders'
@@ -827,6 +847,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendarRoute: typeof AuthenticatedAdminCalendarRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
+  AuthenticatedAdminObservabilityRoute: typeof AuthenticatedAdminObservabilityRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRouteWithChildren
@@ -845,6 +866,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCalendarRoute: AuthenticatedAdminCalendarRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
+  AuthenticatedAdminObservabilityRoute: AuthenticatedAdminObservabilityRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRouteWithChildren,
