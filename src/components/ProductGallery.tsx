@@ -155,8 +155,8 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
         src={m.rendered}
         alt={idxLabel}
         eager={active === 0 && !opts?.large}
-        widths={opts?.large ? [640, 960, 1280, 1600, 1920] : [400, 600, 800, 1024, 1280]}
-        sizes={opts?.large ? "100vw" : "(min-width: 1024px) 60vw, 100vw"}
+        widths={opts?.large ? [640, 960, 1280, 1600, 1920] : LCP_WIDTHS}
+        sizes={opts?.large ? "100vw" : LCP_SIZES}
         fit={opts?.large ? "inside" : "cover"}
         className={opts?.large
           ? "max-h-full max-w-full object-contain"
