@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } fro
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";
+import { SmartImage } from "@/components/SmartImage";
 
 
 
