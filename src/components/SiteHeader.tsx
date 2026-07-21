@@ -9,6 +9,7 @@ import { useSiteSettings, telHref } from "@/hooks/useSiteSettings";
 const nav = [
   { to: "/services", label: "Services" },
   { to: "/shop", label: "Shop" },
+  { to: "/quote", label: "Instant Quote" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ] as const;

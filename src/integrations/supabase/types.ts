@@ -522,6 +522,69 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_leads: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string
+          estimate_high: number
+          estimate_low: number
+          full_name: string
+          id: string
+          multiplier: number
+          notes: string | null
+          phone: string | null
+          square_footage: number
+          state: string | null
+          status: string
+          system_type_key: string
+          system_type_label: string
+          updated_at: string
+          user_id: string | null
+          zip: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email: string
+          estimate_high: number
+          estimate_low: number
+          full_name: string
+          id?: string
+          multiplier?: number
+          notes?: string | null
+          phone?: string | null
+          square_footage: number
+          state?: string | null
+          status?: string
+          system_type_key: string
+          system_type_label: string
+          updated_at?: string
+          user_id?: string | null
+          zip: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string
+          estimate_high?: number
+          estimate_low?: number
+          full_name?: string
+          id?: string
+          multiplier?: number
+          notes?: string | null
+          phone?: string | null
+          square_footage?: number
+          state?: string | null
+          status?: string
+          system_type_key?: string
+          system_type_label?: string
+          updated_at?: string
+          user_id?: string | null
+          zip?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           hit_at: string
@@ -830,6 +893,8 @@ export type Database = {
           notify_on_reschedule: boolean
           notify_on_status_change: boolean
           notify_sms_enabled: boolean
+          quote_estimator: Json
+          quote_estimator_enabled: boolean
           singleton: boolean
           support_email: string
           support_phone: string
@@ -852,6 +917,8 @@ export type Database = {
           notify_on_reschedule?: boolean
           notify_on_status_change?: boolean
           notify_sms_enabled?: boolean
+          quote_estimator?: Json
+          quote_estimator_enabled?: boolean
           singleton?: boolean
           support_email?: string
           support_phone?: string
@@ -874,6 +941,8 @@ export type Database = {
           notify_on_reschedule?: boolean
           notify_on_status_change?: boolean
           notify_sms_enabled?: boolean
+          quote_estimator?: Json
+          quote_estimator_enabled?: boolean
           singleton?: boolean
           support_email?: string
           support_phone?: string
@@ -969,6 +1038,8 @@ export type Database = {
           business_hours: string
           company_name: string
           emergency_phone: string
+          quote_estimator: Json
+          quote_estimator_enabled: boolean
           support_email: string
           support_phone: string
           tagline: string
