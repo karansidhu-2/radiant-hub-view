@@ -305,7 +305,7 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
   );
 }
 
-function Lightbox({
+const Lightbox = memo(function Lightbox({
   items, index, name, onClose, onIndex, renderMain,
 }: {
   items: Resolved[];
