@@ -464,3 +464,67 @@ const Lightbox = memo(function Lightbox({
     </div>
   );
 });
+
+type ThumbnailsProps = {
+  items: Resolved[];
+  active: number;
+  onSelect: (i: number) => void;
+  onOpen: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  name: string;
+};
+
+const Thumbnails = memo(function Thumbnails({ items, active, onSelect, onOpen, onKeyDown, name }: ThumbnailsProps) {
+  // Precompute yt IDs once per items change so we don't call youtubeId twice per video per render.
+  const prepped = useMemo(
+    () => items.map((m) => ({ ...m, yt: m.type === "video" ? youtubeId(m.rendered) : null })),
+    [items],
+  );
+  const total = prepped.length;
+  return (
+    <div
+      role="tablist"
+      aria-label={`${name} media thumbnails`}
+      onKeyDown={onKeyDown}
+      className="flex gap-2 overflow-x-auto pb-1"
+    >
+      {prepped.map((m, i) => {
+        const isActive = i === active;
+        return (
+          <button
+            key={m.url + i}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-label={`${m.type === "video" ? "Video" : "Image"} ${i + 1} of ${total}`}
+            tabIndex={isActive ? 0 : -1}
+            onClick={() => onSelect(i)}
+            onDoubleClick={() => { onSelect(i); onOpen(); }}
+            className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:ring-2 focus-visible:ring-primary ${
+              isActive ? "border-primary" : "border-border hover:border-primary/50"
+            }`}
+          >
+            {m.type === "video" ? (
+              m.yt ? (
+                <>
+                  <img
+                    src={`https://i.ytimg.com/vi/${m.yt}/mqdefault.jpg`}
+                    alt="" loading="lazy" decoding="async" className="h-full w-full object-cover"
+                  />
+                  <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
+                </>
+              ) : (
+                <>
+                  <video src={m.rendered} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-hidden />
+                  <span className="absolute inset-0 grid place-items-center bg-black/30 text-white" aria-hidden><Play className="h-4 w-4" /></span>
+                </>
+              )
+            ) : (
+              <img src={m.rendered} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
