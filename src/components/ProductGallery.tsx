@@ -87,38 +87,31 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
   }, [total]);
 
   // Keyboard nav on the main viewer region
-  const onViewerKey = (e: React.KeyboardEvent) => {
+  const onViewerKey = useCallback((e: React.KeyboardEvent) => {
     if (total <= 1) return;
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     else if (e.key === "Home") { e.preventDefault(); setActive(0); }
     else if (e.key === "End") { e.preventDefault(); setActive(total - 1); }
     else if (e.key === "Enter" || e.key === " ") {
-      // Only open lightbox when focus is on the viewer itself, not inner controls
       if (e.currentTarget === e.target) { e.preventDefault(); setLightbox(true); }
     }
-  };
+  }, [total, go]);
 
-  const onThumbsKey = (e: React.KeyboardEvent) => {
+  const onThumbsKey = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     else if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     else if (e.key === "Home") { e.preventDefault(); setActive(0); }
     else if (e.key === "End") { e.preventDefault(); setActive(total - 1); }
-  };
+  }, [total, go]);
 
-  if (items.length === 0) {
-    return (
-      <div className="relative aspect-square overflow-hidden rounded-2xl gradient-cool shadow-elevated" role="img" aria-label={`${name} (no media available)`}>
-        <div className="absolute inset-0 grid place-items-center text-primary-foreground/95">
-          <DynamicIcon name={emptyIcon} className="h-40 w-40 opacity-90" aria-hidden />
-        </div>
-      </div>
-    );
-  }
+  const openLightbox = useCallback(() => setLightbox(true), []);
+  const closeLightbox = useCallback(() => setLightbox(false), []);
+  const toggleHelp = useCallback(() => setShowHelp((s) => !s), []);
+  const goPrev = useCallback(() => go(-1), [go]);
+  const goNext = useCallback(() => go(1), [go]);
 
-  const current = resolved[active];
-
-  const renderMain = (m: Resolved | undefined, opts?: { large?: boolean }) => {
+  const renderMain = useCallback((m: Resolved | undefined, opts?: { large?: boolean }) => {
     if (!m) return <div className="grid h-full w-full place-items-center text-muted-foreground"><ImageOff className="h-10 w-10" aria-hidden /></div>;
     const idxLabel = `${name}, ${m.type === "video" ? "video" : "image"} ${active + 1} of ${total}`;
     if (m.type === "video") {
@@ -163,7 +156,8 @@ export function ProductGallery({ media, fallbackImage, name, emptyIcon = "Snowfl
           : "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"}
       />
     );
-  };
+  }, [active, total, name]);
+
 
   return (
     <div className="space-y-3">
