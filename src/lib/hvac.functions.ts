@@ -566,6 +566,15 @@ export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
       await notifyBookingEvent(row as any, data.status as any).catch((e) =>
         console.error("booking notification failed", e),
       );
+      if (data.status === "completed") {
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { enqueueReviewRequest } = await import("./review-request.server");
+          await enqueueReviewRequest(supabaseAdmin, row as any);
+        } catch (e) {
+          console.error("review request enqueue failed", e);
+        }
+      }
     }
     const { logAdminAction } = await import("./audit.server");
     await logAdminAction(context, {
