@@ -196,9 +196,45 @@ function QuotePage() {
                 <Input placeholder="Any details about your home or system"
                   value={form.notes} onChange={(e) => set("notes", e.target.value)} />
               </div>
+
+              {livePreview && (
+                <div className="rounded-xl border border-primary/25 bg-primary/5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                      <Sparkles className="h-3.5 w-3.5" /> Live estimate
+                    </div>
+                    <span className="text-xs text-muted-foreground">Updates as you type</span>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold md:text-3xl">
+                    ${livePreview.low.toLocaleString()} – ${livePreview.high.toLocaleString()}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {livePreview.systemLabel} · ~{form.square_footage.toLocaleString()} sq ft
+                    {livePreview.hasZipMatch ? ` · ZIP-adjusted ×${livePreview.mult}` : " · using default regional rate"}
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="rounded-md bg-background/60 p-2">
+                      <div className="text-muted-foreground">Low</div>
+                      <div className="font-semibold">${livePreview.low.toLocaleString()}</div>
+                    </div>
+                    <div className="rounded-md border border-primary/30 bg-background/80 p-2">
+                      <div className="text-muted-foreground">Typical</div>
+                      <div className="font-semibold">${livePreview.mid.toLocaleString()}</div>
+                    </div>
+                    <div className="rounded-md bg-background/60 p-2">
+                      <div className="text-muted-foreground">High</div>
+                      <div className="font-semibold">${livePreview.high.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    Preview only — submit to save your estimate and get email confirmation.
+                  </p>
+                </div>
+              )}
+
               <Button type="submit" disabled={busy} className="w-full gradient-cool text-primary-foreground">
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Calculator className="mr-2 h-4 w-4" />}
-                Get my instant estimate
+                {livePreview ? `Confirm my estimate (~$${livePreview.mid.toLocaleString()})` : "Get my instant estimate"}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
                 By submitting you agree to be contacted about your quote.
