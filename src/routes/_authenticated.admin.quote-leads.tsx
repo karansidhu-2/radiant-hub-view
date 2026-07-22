@@ -83,6 +83,11 @@ function QuoteLeadsPage() {
   };
 
   useEffect(() => { load();  }, [filter.status]);
+  useEffect(() => {
+    const t = setTimeout(() => { load(); }, 300);
+    return () => clearTimeout(t);
+     
+  }, [filter.q]);
 
   const saveConfig = async () => {
     setSavingCfg(true);
