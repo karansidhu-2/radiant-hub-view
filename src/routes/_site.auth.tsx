@@ -72,7 +72,14 @@ function AuthPage() {
   };
 
   if (checking) {
-    return <section className="mx-auto max-w-md px-4 py-16 md:px-6" aria-hidden />;
+    return (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-3">
+          <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span className="text-sm text-muted-foreground">Checking your session…</span>
+        </div>
+      </div>
+    );
   }
 
 
