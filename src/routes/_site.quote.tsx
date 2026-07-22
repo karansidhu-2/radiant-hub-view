@@ -43,7 +43,19 @@ const DEFAULT_TYPES = [
   { key: "tankless", label: "Tankless Water Heater", basePrice: 2200, perSqft: 0 },
 ];
 
+const CATEGORY_TO_SYSTEM_KEY: Partial<Record<ProductCategory, string>> = {
+  ac: "central_ac",
+  "heat-pump": "heat_pump",
+  furnace: "furnace",
+  "mini-split": "mini_split",
+};
+
 function QuotePage() {
+  const navigate = Route.useNavigate();
+  const { product: productSlug, qty: rawQty } = Route.useSearch();
+  const preselected = productSlug ? productBySlug(productSlug) ?? null : null;
+  const qty = Math.max(1, Math.min(20, rawQty ?? 1));
+
   const settings = useSiteSettings();
   const submit = useServerFn(submitQuoteEstimate);
   const cfg = (settings.quote_estimator ?? {}) as Partial<EstimatorConfig>;
