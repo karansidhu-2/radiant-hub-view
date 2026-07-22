@@ -795,7 +795,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { data: prev } = await context.supabase.from("orders").select("status, reference").eq("id", data.id).maybeSingle();
+    const { data: prev } = await context.supabase.from("orders").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("orders").update({ status: data.status as any }).eq("id", data.id);
     if (error) throw new Error(error.message);
     const { logAdminAction } = await import("./audit.server");
@@ -804,6 +804,33 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
       before: { status: prev?.status }, after: { status: data.status },
       details: { reference: prev?.reference },
     });
+    // Auto-send invoice email once the order is marked installed (completed).
+    if (prev && data.status === "installed" && prev.status !== "installed" && prev.email) {
+      try {
+        const { enqueueEmail } = await import("./email-outbox.server");
+        const origin = process.env.PUBLIC_APP_URL || "";
+        const amount = `$${Number(prev.total).toLocaleString()}`;
+        const invoiceUrl = `${origin}/confirmation/order/${prev.reference}`;
+        const safeName = String(prev.full_name || "").replace(/[<>]/g, "");
+        const subject = `Invoice ${prev.reference} — ${amount}`;
+        const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px">
+          <h2 style="margin:0 0 12px">Thanks, ${safeName}!</h2>
+          <p>Your order <b>${prev.reference}</b> has been installed and completed.</p>
+          <p style="font-size:15px">Order total: <b>${amount}</b></p>
+          <p><a href="${invoiceUrl}" style="display:inline-block;padding:10px 16px;background:#0ea5e9;color:#fff;text-decoration:none;border-radius:6px">View &amp; download invoice</a></p>
+          <p style="color:#666;font-size:12px">If the button doesn't work, open: ${invoiceUrl}</p>
+        </div>`;
+        await enqueueEmail({
+          to: prev.email,
+          subject,
+          html,
+          idempotencyKey: `invoice:order:${prev.id}:${prev.total}`,
+          context: { order_id: prev.id, reference: prev.reference, kind: "invoice" },
+        });
+      } catch (e) {
+        console.warn("order invoice email enqueue failed:", e);
+      }
+    }
     return { ok: true };
   });
 
