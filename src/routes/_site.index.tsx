@@ -9,6 +9,9 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
 import { HomeQuickReview } from "@/components/HomeQuickReview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+import { ShoppingCart } from "lucide-react";
 
 const faqs = [
   { q: "How quickly can you come out for a repair?", a: "In most of our 28 service states we offer same-day or next-day appointments, and 24/7 emergency dispatch for no-heat and no-cool calls. You'll get a confirmed 2-hour arrival window within an hour of booking." },
@@ -61,10 +64,17 @@ function Home() {
   const featured = products.slice(0, 4);
   const homeServices = services.slice(0, 6);
   const navigate = useNavigate();
+  const { addItem } = useCart();
   const goQuote = (slug: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     navigate({ to: "/quote", search: { product: slug, qty: 1 } });
+  };
+  const addToCart = (slug: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(slug, { includeInstallation: true });
+    toast.success("Added to cart");
   };
   return (
     <>
@@ -206,14 +216,24 @@ function Home() {
                       <span className="text-base font-bold sm:text-lg">{formatMoney(p.price)}</span>
                       <span className="hidden text-xs text-muted-foreground sm:inline">+ install</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={goQuote(p.slug)}
-                      className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10"
-                      aria-label={`Get an instant quote for ${p.name}`}
-                    >
-                      <Calculator className="h-3.5 w-3.5" /> Quote this
-                    </button>
+                    <div className="mt-3 flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={addToCart(p.slug)}
+                        className="inline-flex w-full items-center justify-center gap-1 rounded-md bg-primary px-2 py-1.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
+                        aria-label={`Add ${p.name} to cart`}
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5" /> Add to cart
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goQuote(p.slug)}
+                        className="inline-flex w-full items-center justify-center gap-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10"
+                        aria-label={`Get an instant quote for ${p.name}`}
+                      >
+                        <Calculator className="h-3.5 w-3.5" /> Quote this
+                      </button>
+                    </div>
                   </CardContent>
                 </Card>
               </Link>
