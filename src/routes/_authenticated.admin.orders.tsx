@@ -28,9 +28,10 @@ function AdminOrders() {
         {rows.map((o) => (
           <Card key={o.id}><CardContent className="p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold">{formatMoney(Number(o.total))}</p>
                 <Badge variant="secondary">{o.reference}</Badge>
+                <InvoiceBadge invoice={o.invoice} />
               </div>
               <p className="text-xs text-muted-foreground">{o.full_name} • {o.email} • {o.phone}</p>
               <p className="text-xs text-muted-foreground">{o.street}, {o.city}, {o.state} {o.zip}{o.scheduled_date && ` • Install ${o.scheduled_date} @ ${o.scheduled_hour}:00`}</p>
