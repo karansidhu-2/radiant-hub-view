@@ -52,9 +52,12 @@ async function run() {
 
   // Click Sign out in the header. AuthContext.signOut() ends with
   // window.location.assign("/"), so wait for that navigation.
-  const nav = page.waitForURL((u) => new URL(u).pathname === "/", { timeout: 10_000 });
+  // AuthContext.signOut() ends with window.location.assign("/"), which is a
+  // full navigation. Use waitForFunction on the pathname — waitForURL with a
+  // predicate can miss same-origin hard nav races.
   await page.getByRole("button", { name: "Sign out" }).first().click();
-  await nav.catch(() => {});
+  await page.waitForFunction(() => location.pathname === "/", null, { timeout: 10_000 })
+    .catch(() => {});
   await page.waitForLoadState("domcontentloaded").catch(() => {});
 
   const after = await page.evaluate(() => ({
