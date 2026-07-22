@@ -71,6 +71,16 @@ export function clearRememberMe(): void {
   }
 }
 
+/** Read the current "Remember me" preference (defaults to true). */
+export function getRememberMe(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return localStorage.getItem(EPHEMERAL_FLAG) !== "1";
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Nuke every trace of the auth session from BOTH local and session storage.
  * Used for secure sign-out and when an expired/invalid session is detected.
