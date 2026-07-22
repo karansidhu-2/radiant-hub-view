@@ -51,15 +51,28 @@ async function run() {
     ok(`setup seeded ${before.local.length} local + ${before.session.length} session auth keys`);
   }
 
-  // Wait for the signed-in Sign out button to render, then click it.
-  // AuthContext.signOut() ends with window.location.assign("/"), a full nav.
+  // Wait for the signed-in Sign out button to render.
   const signOutBtn = page.getByRole("button", { name: "Sign out" }).first();
   await signOutBtn.waitFor({ state: "visible", timeout: 15_000 });
+
+  // The mock installs an addInitScript that re-seeds the auth token on every
+  // navigation — that would mask the wipe when signOut() reloads via
+  // window.location.assign("/"). Stub the reload so we inspect storage in
+  // the same document, and record that assign() was called.
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.__navigatedTo = null;
+    const origAssign = window.location.assign.bind(window.location);
+    window.location.assign = (url) => { /* @ts-ignore */ window.__navigatedTo = String(url); };
+    // Silence origAssign — we never want it to actually navigate here.
+    void origAssign;
+  });
+
   await signOutBtn.click();
-  await page.waitForFunction(() => location.pathname === "/", null, { timeout: 10_000 })
+  // Give AuthContext.signOut() time to resolve supabase.auth.signOut(),
+  // hardClearAuthStorage(), and call window.location.assign (now stubbed).
+  await page.waitForFunction(() => (window /* @ts-ignore */).__navigatedTo === "/", null, { timeout: 10_000 })
     .catch(() => {});
-  await page.waitForLoadState("domcontentloaded").catch(() => {});
-  await page.waitForTimeout(300);
 
   const after = await page.evaluate(() => ({
     local: Object.keys(localStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
