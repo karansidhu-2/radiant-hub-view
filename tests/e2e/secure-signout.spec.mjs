@@ -25,7 +25,9 @@ async function run() {
   const page = await ctx.newPage();
 
   await installSupabaseMocks(page, { session: mockSession() });
-  await page.goto(`${BASE_URL}/account`, { waitUntil: "domcontentloaded" });
+  // Land on the home page — that's where SiteHeader (with the Sign out
+  // button) lives; the _authenticated layout does not render SiteHeader.
+  await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => {});
 
   // Seed extra Supabase-flavoured leftovers in BOTH storages so we can prove
@@ -39,7 +41,6 @@ async function run() {
     sessionStorage.setItem("hvac:auth:tab-alive", "1");
   }, AUTH_TOKEN_KEY);
 
-  // Sanity: we actually seeded stuff on both sides.
   const before = await page.evaluate(() => ({
     local: Object.keys(localStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
     session: Object.keys(sessionStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
@@ -50,15 +51,15 @@ async function run() {
     ok(`setup seeded ${before.local.length} local + ${before.session.length} session auth keys`);
   }
 
-  // Click Sign out in the header. AuthContext.signOut() ends with
-  // window.location.assign("/"), so wait for that navigation.
-  // AuthContext.signOut() ends with window.location.assign("/"), which is a
-  // full navigation. Use waitForFunction on the pathname — waitForURL with a
-  // predicate can miss same-origin hard nav races.
-  await page.getByRole("button", { name: "Sign out" }).first().click();
+  // Wait for the signed-in Sign out button to render, then click it.
+  // AuthContext.signOut() ends with window.location.assign("/"), a full nav.
+  const signOutBtn = page.getByRole("button", { name: "Sign out" }).first();
+  await signOutBtn.waitFor({ state: "visible", timeout: 15_000 });
+  await signOutBtn.click();
   await page.waitForFunction(() => location.pathname === "/", null, { timeout: 10_000 })
     .catch(() => {});
   await page.waitForLoadState("domcontentloaded").catch(() => {});
+  await page.waitForTimeout(300);
 
   const after = await page.evaluate(() => ({
     local: Object.keys(localStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
