@@ -61,6 +61,7 @@ function CartPage() {
               </CardContent>
             </Card>
           ))}
+          <FinancingOption total={total} />
         </div>
 
         <Card className="h-fit sticky top-24">
