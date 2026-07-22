@@ -50,6 +50,12 @@ const testimonials = [
 function Home() {
   const featured = products.slice(0, 4);
   const homeServices = services.slice(0, 6);
+  const navigate = useNavigate();
+  const goQuote = (slug: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate({ to: "/quote", search: { product: slug, qty: 1 } });
+  };
   return (
     <>
       <MobileQuickAccess />
