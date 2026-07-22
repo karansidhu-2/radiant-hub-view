@@ -8,6 +8,16 @@ import { products, formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
 import { HomeQuickReview } from "@/components/HomeQuickReview";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const faqs = [
+  { q: "How quickly can you come out for a repair?", a: "In most of our 28 service states we offer same-day or next-day appointments, and 24/7 emergency dispatch for no-heat and no-cool calls. You'll get a confirmed 2-hour arrival window within an hour of booking." },
+  { q: "Do your prices include installation?", a: "Yes. Every system on our shop — AC units, furnaces, heat pumps, and thermostats — includes professional installation, standard permits, haul-away of your old equipment, and a full system startup." },
+  { q: "Are your technicians licensed and insured?", a: "All of our technicians are NATE-certified, background-checked, and we carry full liability and workers' comp insurance. We're licensed in every state we serve." },
+  { q: "What warranty do you offer?", a: "New systems come with a 10-year manufacturer parts warranty and a 2-year HVAC Pro labor warranty. Repair work is guaranteed for 1 year, parts and labor." },
+  { q: "Do you offer financing or help with rebates?", a: "We help you claim available federal IRA tax credits, local utility rebates, and manufacturer promotions on qualifying high-efficiency systems. Ask your tech for a personalized savings estimate." },
+  { q: "How do I know if you service my area?", a: "Enter your ZIP on the booking or quote page and we'll instantly confirm availability, pricing, and next-available time slots for your address." },
+];
 
 export const Route = createFileRoute("/_site/")({
   head: () => ({
@@ -122,6 +132,29 @@ function Home() {
                 <div className="text-muted-foreground">Verified customer reviews</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-b bg-background py-12 md:py-16">
+        <div className="mx-auto max-w-4xl px-4 md:px-6">
+          <div className="mb-8 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Frequently asked</p>
+            <h2 className="mt-1 text-3xl font-bold md:text-4xl">Answers to common questions</h2>
+            <p className="mt-2 text-muted-foreground">Everything you need to know before you book — pricing, coverage, warranties, and more.</p>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`}>
+                <AccordionTrigger className="text-left text-base font-semibold">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-[15px] text-muted-foreground">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
+            <span className="text-muted-foreground">Still have questions?</span>
+            <Link to="/contact" className="font-semibold text-primary hover:underline">Contact our team →</Link>
           </div>
         </div>
       </section>
