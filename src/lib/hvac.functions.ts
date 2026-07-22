@@ -539,13 +539,30 @@ export const adminRemoveAllowlistEmail = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const adminListBookings = createServerFn({ method: "GET" })
+// Returns the active checkpoint's started_at (ISO) or null.
+async function activeCheckpointSince(context: any): Promise<string | null> {
+  const { data } = await context.supabase
+    .from("revenue_checkpoints")
+    .select("started_at")
+    .eq("active", true)
+    .maybeSingle();
+  return data?.started_at ?? null;
+}
+
+export const adminListBookings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: { includeArchived?: boolean } | undefined) => d ?? {})
+  .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { data } = await context.supabase.from("bookings").select("*").order("scheduled_date", { ascending: false });
-    return data ?? [];
+    let q = context.supabase.from("bookings").select("*").order("scheduled_date", { ascending: false });
+    if (!data.includeArchived) {
+      const since = await activeCheckpointSince(context);
+      if (since) q = q.gte("created_at", since);
+    }
+    const { data: rows } = await q;
+    return rows ?? [];
   });
+
 
 export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
