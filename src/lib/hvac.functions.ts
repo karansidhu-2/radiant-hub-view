@@ -539,13 +539,28 @@ export const adminRemoveAllowlistEmail = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Returns the active checkpoint's started_at (ISO) or null.
+async function activeCheckpointSince(context: any): Promise<string | null> {
+  const { data } = await context.supabase
+    .from("revenue_checkpoints")
+    .select("started_at")
+    .eq("active", true)
+    .maybeSingle();
+  return data?.started_at ?? null;
+}
+
 export const adminListBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { data } = await context.supabase.from("bookings").select("*").order("scheduled_date", { ascending: false });
-    return data ?? [];
+    let q = context.supabase.from("bookings").select("*").order("scheduled_date", { ascending: false });
+    const since = await activeCheckpointSince(context);
+    if (since) q = q.gte("created_at", since);
+    const { data: rows } = await q;
+    return rows ?? [];
   });
+
+
 
 export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -726,9 +741,14 @@ export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { data } = await context.supabase.from("orders").select("*").order("created_at", { ascending: false });
-    return data ?? [];
+    let q = context.supabase.from("orders").select("*").order("created_at", { ascending: false });
+    const since = await activeCheckpointSince(context);
+    if (since) q = q.gte("created_at", since);
+    const { data: rows } = await q;
+    return rows ?? [];
   });
+
+
 
 export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -1361,6 +1381,34 @@ export const adminCreateCheckpoint = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
+// Detailed rows for a closing period report — bookings, orders, order items, calendar entries.
+// Pulls from checkpoint's started_at (or provided sinceOverride) until now.
+export const adminPeriodDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { sinceOverride?: string | null }) => ({ sinceOverride: d.sinceOverride ?? null }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const since = data.sinceOverride ?? (await activeCheckpointSince(context));
+    const sinceIso = since ?? new Date(Date.now() - 30 * 86400000).toISOString();
+
+    const [bookingsRes, ordersRes] = await Promise.all([
+      context.supabase.from("bookings").select("*").gte("created_at", sinceIso).order("scheduled_date", { ascending: true }),
+      context.supabase.from("orders").select("*").gte("created_at", sinceIso).order("created_at", { ascending: true }),
+    ]);
+    const bookings = bookingsRes.data ?? [];
+    const orders = ordersRes.data ?? [];
+
+    const orderIds = orders.map((o: any) => o.id);
+    let items: any[] = [];
+    if (orderIds.length) {
+      const { data: it } = await context.supabase
+        .from("order_items").select("*").in("order_id", orderIds);
+      items = it ?? [];
+    }
+    return { since: sinceIso, bookings, orders, orderItems: items };
+  });
+
 
 export const adminSetCheckpointActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

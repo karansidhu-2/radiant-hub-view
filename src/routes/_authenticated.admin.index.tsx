@@ -7,7 +7,9 @@ import {
   adminCreateCheckpoint,
   adminSetCheckpointActive,
   adminDeleteCheckpoint,
+  adminPeriodDetails,
 } from "@/lib/hvac.functions";
+
 import {
   adminAnalyticsQueryOptions,
   prefetchDashboardChartsChunk,
@@ -79,7 +81,9 @@ function AdminDashboard() {
   const createCheckpoint = useServerFn(adminCreateCheckpoint);
   const setActive = useServerFn(adminSetCheckpointActive);
   const delCheckpoint = useServerFn(adminDeleteCheckpoint);
+  const fetchPeriodDetails = useServerFn(adminPeriodDetails);
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
+
   const [customDate, setCustomDate] = useState("");
   const active = checkpoints.find((c) => c.active) ?? null;
   const sinceOverride = active ? active.started_at : null;
@@ -95,7 +99,7 @@ function AdminDashboard() {
   const loading = analyticsQuery.isLoading;
 
 
-  const buildClosingReport = (label: string) => {
+  const buildClosingReport = async (label: string) => {
     if (!data) return;
     const t = data.totals;
     const stamp = new Date().toISOString().slice(0, 10);
@@ -129,18 +133,81 @@ function AdminDashboard() {
     lines.push("Booking status counts");
     lines.push("status,count");
     for (const [k, v] of Object.entries(data.statusCounts)) lines.push(`${csvEscape(k)},${csvEscape(v as any)}`);
+
+    // Full detail: every booking, order, and line item in the period.
+    try {
+      const details = await fetchPeriodDetails({ data: { sinceOverride: sinceOverride } });
+      lines.push("");
+      lines.push(`Bookings (${details.bookings.length})`);
+      lines.push("reference,status,service_name,service_slug,scheduled_date,scheduled_time,customer_name,customer_email,customer_phone,zip,address,service_charge,estimated_price,created_at");
+      for (const b of details.bookings as any[]) {
+        lines.push([
+          b.reference, b.status, b.service_name, b.service_slug ?? "",
+          b.scheduled_date ?? "", b.scheduled_time ?? "",
+          b.customer_name ?? "", b.customer_email ?? "", b.customer_phone ?? "",
+          b.zip ?? "", b.address ?? "",
+          b.service_charge ?? 0, b.estimated_price ?? 0, b.created_at,
+        ].map(csvEscape).join(","));
+      }
+      lines.push("");
+      lines.push(`Orders (${details.orders.length})`);
+      lines.push("reference,status,total,subtotal,tax,shipping,customer_name,customer_email,customer_phone,zip,address,created_at");
+      for (const o of details.orders as any[]) {
+        lines.push([
+          o.reference, o.status, o.total ?? 0, o.subtotal ?? 0, o.tax ?? 0, o.shipping ?? 0,
+          o.customer_name ?? "", o.customer_email ?? "", o.customer_phone ?? "",
+          o.zip ?? "", o.address ?? "", o.created_at,
+        ].map(csvEscape).join(","));
+      }
+      const refByOrder = new Map<string, string>();
+      for (const o of details.orders as any[]) refByOrder.set(o.id, o.reference);
+      lines.push("");
+      lines.push(`Order line items (${details.orderItems.length})`);
+      lines.push("order_reference,product_slug,product_name,quantity,unit_price,line_total");
+      for (const it of details.orderItems as any[]) {
+        const qty = Number(it.quantity || 0);
+        const unit = Number(it.unit_price || 0);
+        lines.push([
+          refByOrder.get(it.order_id) ?? it.order_id,
+          it.product_slug ?? "", it.product_name ?? "",
+          qty, unit, (qty * unit).toFixed(2),
+        ].map(csvEscape).join(","));
+      }
+      // Calendar view (chronological schedule of bookings in the period).
+      lines.push("");
+      lines.push("Calendar (scheduled bookings)");
+      lines.push("scheduled_date,scheduled_time,reference,service_name,status,customer_name");
+      const cal = [...(details.bookings as any[])]
+        .filter((b) => b.scheduled_date)
+        .sort((a, b) =>
+          (a.scheduled_date + (a.scheduled_time ?? "")).localeCompare(
+            b.scheduled_date + (b.scheduled_time ?? ""),
+          ),
+        );
+      for (const b of cal) {
+        lines.push([
+          b.scheduled_date, b.scheduled_time ?? "",
+          b.reference, b.service_name, b.status, b.customer_name ?? "",
+        ].map(csvEscape).join(","));
+      }
+    } catch (e) {
+      lines.push("");
+      lines.push("Detail export failed — KPI summary only.");
+    }
+
     downloadCsv(`period_report_${label.replace(/\s+/g, "_")}_${stamp}.csv`, lines.join("\n"));
   };
 
   const startPeriod = async (period_type: "week" | "month" | "year" | "custom", started_at?: string) => {
     try {
       const closingLabel = active ? (active.label ?? active.period_type) : `last_${days}d`;
-      buildClosingReport(closingLabel);
+      await buildClosingReport(closingLabel);
       await createCheckpoint({ data: { period_type, started_at, label: period_type === "custom" ? `From ${started_at?.slice(0,10)}` : `New ${period_type}` } });
-      toast.success(`New ${period_type} started — all metrics reset to 0. Closing report downloaded. History preserved.`);
+      toast.success(`New ${period_type} started — bookings, orders & calendar reset to 0. Closing report downloaded. History preserved.`);
       await reloadCheckpoints();
     } catch (e: any) { toast.error(e?.message ?? "Failed"); }
   };
+
 
   if (loading || !data) {
     return <AdminDashboardSkeleton />;
