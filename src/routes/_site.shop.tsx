@@ -324,58 +324,6 @@ function ShopPage() {
             ))}
           </div>
         )}
-
-        {/* Instant Quote CTA */}
-        <div className="mt-16 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-center">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                <DynamicIcon name="Calculator" className="h-3.5 w-3.5" /> Instant quote
-              </span>
-              <h2 className="mt-3 text-2xl font-bold sm:text-3xl md:text-4xl">
-                Not sure which system fits? Get a price in 60 seconds.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
-                Answer 4 quick questions about your home — ZIP, square footage, system type, and preferred efficiency — and we'll show you a transparent price range including professional installation. No calls, no pressure.
-              </p>
-              <ul className="mt-5 grid gap-2 text-sm sm:grid-cols-2">
-                <li className="flex items-center gap-2"><DynamicIcon name="CheckCircle2" className="h-4 w-4 text-primary" /> Live pricing based on your ZIP</li>
-                <li className="flex items-center gap-2"><DynamicIcon name="CheckCircle2" className="h-4 w-4 text-primary" /> Includes install & permits</li>
-                <li className="flex items-center gap-2"><DynamicIcon name="CheckCircle2" className="h-4 w-4 text-primary" /> Financing options shown</li>
-                <li className="flex items-center gap-2"><DynamicIcon name="CheckCircle2" className="h-4 w-4 text-primary" /> Emailed for your records</li>
-              </ul>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/quote">
-                  <Button size="lg" className="gradient-cool text-primary-foreground hover:opacity-95">
-                    Start my instant quote
-                    <DynamicIcon name="ArrowRight" className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link to="/contact">
-                  <Button size="lg" variant="outline">Talk to an expert</Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              {[
-                { icon: "Timer", title: "60-second estimate", body: "Fastest way to plan your budget." },
-                { icon: "ShieldCheck", title: "No obligation", body: "Quote is yours — book only when ready." },
-                { icon: "Wallet", title: "All-in pricing", body: "Equipment + labor + permits, upfront." },
-              ].map((f) => (
-                <div key={f.title} className="flex items-start gap-3 rounded-xl border border-border bg-background/60 p-4">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                    <DynamicIcon name={f.icon} className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{f.title}</p>
-                    <p className="text-xs text-muted-foreground">{f.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </section>
     </>
   );
