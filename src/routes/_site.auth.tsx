@@ -12,13 +12,14 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_site/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/",
+    expired: s.expired === 1 || s.expired === "1" ? 1 : undefined,
   }),
   head: () => ({ meta: [{ title: "Sign in — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { redirect } = Route.useSearch();
+  const { redirect, expired } = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -29,6 +30,14 @@ function AuthPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    let flagged = false;
+    try {
+      flagged = sessionStorage.getItem("hvac:auth:expired") === "1";
+      if (flagged) sessionStorage.removeItem("hvac:auth:expired");
+    } catch { /* ignore */ }
+    if (expired || flagged) {
+      toast.error("Your session has expired. Please log in again.");
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         navigate({ to: redirect as any, replace: true });
@@ -36,7 +45,7 @@ function AuthPage() {
         setChecking(false);
       }
     });
-  }, [redirect, navigate]);
+  }, [redirect, navigate, expired]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +72,14 @@ function AuthPage() {
   };
 
   if (checking) {
-    return <section className="mx-auto max-w-md px-4 py-16 md:px-6" aria-hidden />;
+    return (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-3">
+          <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span className="text-sm text-muted-foreground">Checking your session…</span>
+        </div>
+      </div>
+    );
   }
 
 

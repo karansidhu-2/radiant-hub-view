@@ -70,3 +70,51 @@ export function clearRememberMe(): void {
     /* ignore */
   }
 }
+
+/**
+ * Nuke every trace of the auth session from BOTH local and session storage.
+ * Used for secure sign-out and when an expired/invalid session is detected.
+ */
+export function hardClearAuthStorage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const key = tokenKey();
+    if (key) {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+    // Sweep any lingering supabase.* keys (verifier, provider tokens, etc.).
+    for (const storage of [localStorage, sessionStorage]) {
+      const doomed: string[] = [];
+      for (let i = 0; i < storage.length; i++) {
+        const k = storage.key(i);
+        if (!k) continue;
+        if (k.startsWith("sb-") || k.startsWith("supabase.") || k === EPHEMERAL_FLAG) {
+          doomed.push(k);
+        }
+      }
+      doomed.forEach((k) => storage.removeItem(k));
+    }
+    sessionStorage.removeItem(TAB_ALIVE_FLAG);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** True if the persisted Supabase session token has already expired. */
+export function isPersistedSessionExpired(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const key = tokenKey();
+    if (!key) return false;
+    const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    const expiresAt: number | undefined =
+      parsed?.expires_at ?? parsed?.currentSession?.expires_at;
+    if (!expiresAt) return false;
+    return expiresAt * 1000 < Date.now();
+  } catch {
+    return false;
+  }
+}
