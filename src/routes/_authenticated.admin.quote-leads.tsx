@@ -275,6 +275,7 @@ function QuoteLeadsPage() {
                           value={l.status} onChange={(e) => updateStatus(l.id, e.target.value)}>
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
+                          <option value="sent">Quote sent</option>
                           <option value="converted">Converted</option>
                           <option value="closed">Closed</option>
                         </select>
