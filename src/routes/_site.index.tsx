@@ -1,5 +1,5 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, Clock, DollarSign, MapPin, PhoneCall, ShieldCheck, Sparkles, Star, Wrench } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, BadgeCheck, Calculator, Clock, DollarSign, MapPin, PhoneCall, ShieldCheck, Sparkles, Star, Wrench } from "lucide-react";
 import heroImg from "@/assets/hvac-hero.webp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +50,12 @@ const testimonials = [
 function Home() {
   const featured = products.slice(0, 4);
   const homeServices = services.slice(0, 6);
+  const navigate = useNavigate();
+  const goQuote = (slug: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate({ to: "/quote", search: { product: slug, qty: 1 } });
+  };
   return (
     <>
       <MobileQuickAccess />
@@ -188,6 +194,14 @@ function Home() {
                       <span className="text-base font-bold sm:text-lg">{formatMoney(p.price)}</span>
                       <span className="hidden text-xs text-muted-foreground sm:inline">+ install</span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={goQuote(p.slug)}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10"
+                      aria-label={`Get an instant quote for ${p.name}`}
+                    >
+                      <Calculator className="h-3.5 w-3.5" /> Quote this
+                    </button>
                   </CardContent>
                 </Card>
               </Link>

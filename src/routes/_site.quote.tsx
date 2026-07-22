@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { Calculator, CheckCircle2, Loader2, Sparkles, Package, X } from "lucide-react";
 import { toast } from "sonner";
+import { productBySlug, formatMoney, type ProductCategory } from "@/data/products";
+import { z } from "zod";
+
+const quoteSearchSchema = z.object({
+  product: z.string().optional(),
+  qty: z.coerce.number().int().min(1).max(20).optional(),
+});
 
 export const Route = createFileRoute("/_site/quote")({
+  validateSearch: quoteSearchSchema,
   head: () => ({
     meta: [
       { title: "Instant HVAC Installation Quote — Free Price Estimate" },
@@ -35,7 +43,19 @@ const DEFAULT_TYPES = [
   { key: "tankless", label: "Tankless Water Heater", basePrice: 2200, perSqft: 0 },
 ];
 
+const CATEGORY_TO_SYSTEM_KEY: Partial<Record<ProductCategory, string>> = {
+  ac: "central_ac",
+  "heat-pump": "heat_pump",
+  furnace: "furnace",
+  "mini-split": "mini_split",
+};
+
 function QuotePage() {
+  const navigate = Route.useNavigate();
+  const { product: productSlug, qty: rawQty } = Route.useSearch();
+  const preselected = productSlug ? productBySlug(productSlug) ?? null : null;
+  const qty = Math.max(1, Math.min(20, rawQty ?? 1));
+
   const settings = useSiteSettings();
   const submit = useServerFn(submitQuoteEstimate);
   const cfg = (settings.quote_estimator ?? {}) as Partial<EstimatorConfig>;
@@ -45,14 +65,26 @@ function QuotePage() {
     [cfg.systemTypes],
   );
 
+  const initialSystemKey = useMemo(() => {
+    if (preselected) {
+      const mapped = CATEGORY_TO_SYSTEM_KEY[preselected.category];
+      if (mapped && systemTypes.some((s: any) => s.key === mapped)) return mapped;
+    }
+    return systemTypes[0]?.key ?? "central_ac";
+  }, [preselected, systemTypes]);
+
+  const initialNotes = preselected
+    ? `Interested in: ${preselected.brand} ${preselected.name} (qty ${qty})`
+    : "";
+
   const [form, setForm] = useState({
     full_name: "",
     email: "",
     phone: "",
     zip: "",
     square_footage: 1500,
-    system_type_key: systemTypes[0]?.key ?? "central_ac",
-    notes: "",
+    system_type_key: initialSystemKey,
+    notes: initialNotes,
   });
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<null | {
@@ -68,6 +100,13 @@ function QuotePage() {
       setForm((f) => ({ ...f, system_type_key: systemTypes[0].key }));
     }
   }, [systemTypes, form.system_type_key]);
+
+  const clearPreselected = () => {
+    navigate({ search: {} as any, replace: true });
+    setForm((f) => ({ ...f, notes: "" }));
+  };
+
+  const productSubtotal = preselected ? (preselected.price + preselected.installationFee) * qty : 0;
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -154,6 +193,33 @@ function QuotePage() {
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
+              {preselected && (
+                <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                      Quoting selected product
+                    </div>
+                    <p className="mt-0.5 truncate text-sm font-semibold">
+                      {preselected.brand} {preselected.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Qty {qty} · Equipment {formatMoney(preselected.price)} + install {formatMoney(preselected.installationFee)}
+                      {qty > 1 ? ` · Subtotal ${formatMoney(productSubtotal)}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearPreselected}
+                    className="rounded-md p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                    aria-label="Clear selected product"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <Label>Full name</Label>
