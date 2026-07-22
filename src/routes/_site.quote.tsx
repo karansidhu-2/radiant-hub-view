@@ -193,6 +193,33 @@ function QuotePage() {
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
+              {preselected && (
+                <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                      Quoting selected product
+                    </div>
+                    <p className="mt-0.5 truncate text-sm font-semibold">
+                      {preselected.brand} {preselected.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Qty {qty} · Equipment {formatMoney(preselected.price)} + install {formatMoney(preselected.installationFee)}
+                      {qty > 1 ? ` · Subtotal ${formatMoney(productSubtotal)}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearPreselected}
+                    className="rounded-md p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                    aria-label="Clear selected product"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <Label>Full name</Label>
