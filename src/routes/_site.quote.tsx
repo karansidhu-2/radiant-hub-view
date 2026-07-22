@@ -72,6 +72,24 @@ function QuotePage() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  // Live client-side estimate (mirrors server computeRange in quote.functions.ts).
+  const livePreview = useMemo(() => {
+    const sys: any = systemTypes.find((s: any) => s.key === form.system_type_key);
+    if (!sys) return null;
+    const zipMults: any[] = Array.isArray(cfg.zipMultipliers) ? cfg.zipMultipliers : [];
+    const defaultMult = Number(cfg.defaultMultiplier) > 0 ? Number(cfg.defaultMultiplier) : 1;
+    const mult = zipMults.find((z) => z?.zip === form.zip)?.multiplier ?? defaultMult;
+    const spreadPct = Math.max(0, Math.min(60, Number(cfg.rangeSpreadPct) || 20));
+    const sqft = Math.max(0, Number(form.square_footage) || 0);
+    const base = (Number(sys.basePrice || 0) + Number(sys.perSqft || 0) * sqft) * mult;
+    const spread = spreadPct / 100;
+    const low = Math.max(0, Math.round((base * (1 - spread)) / 25) * 25);
+    const high = Math.max(low, Math.round((base * (1 + spread)) / 25) * 25);
+    const mid = Math.round(((low + high) / 2) / 25) * 25;
+    const hasZipMatch = /^\d{5}$/.test(form.zip) && !!zipMults.find((z) => z?.zip === form.zip);
+    return { low, high, mid, mult, spreadPct, systemLabel: sys.label, hasZipMatch };
+  }, [systemTypes, form.system_type_key, form.zip, form.square_footage, cfg.zipMultipliers, cfg.defaultMultiplier, cfg.rangeSpreadPct]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
