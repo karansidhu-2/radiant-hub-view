@@ -68,7 +68,15 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 0,
+    // Reuse cached loader/query data across intent-preload → click so hovering
+    // a link then clicking doesn't refetch. Matches Query's staleTime.
+    defaultPreloadStaleTime: 60_000,
+    // Reuse loader data on nav for a short window (cheap back/forward, tab
+    // switches, and re-visits render instantly instead of hitting the network).
+    defaultStaleTime: 30_000,
+    // Delay the pending UI so fast navigations don't flash a spinner.
+    defaultPendingMs: 400,
+    defaultPendingMinMs: 300,
     defaultErrorComponent: DefaultErrorComponent,
     defaultNotFoundComponent: DefaultNotFoundComponent,
   });
