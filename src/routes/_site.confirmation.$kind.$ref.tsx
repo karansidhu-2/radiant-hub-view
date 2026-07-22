@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Download, MapPin, Calendar, Clock, UserPlus } from "lucide-react";
 import { formatMoney } from "@/data/products";
+import { InvoiceBadge } from "@/components/InvoiceBadge";
 // jsPDF is dynamically imported inside downloadInvoicePDF so the ~400KB
 // jspdf+html2canvas chunks only load when the user clicks "Download Invoice".
 
