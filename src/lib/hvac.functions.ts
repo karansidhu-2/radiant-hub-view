@@ -549,19 +549,17 @@ async function activeCheckpointSince(context: any): Promise<string | null> {
   return data?.started_at ?? null;
 }
 
-export const adminListBookings = createServerFn({ method: "POST" })
+export const adminListBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { includeArchived?: boolean } | undefined) => d ?? {})
-  .handler(async ({ data, context }) => {
+  .handler(async ({ context }) => {
     await assertAdmin(context);
     let q = context.supabase.from("bookings").select("*").order("scheduled_date", { ascending: false });
-    if (!data.includeArchived) {
-      const since = await activeCheckpointSince(context);
-      if (since) q = q.gte("created_at", since);
-    }
+    const since = await activeCheckpointSince(context);
+    if (since) q = q.gte("created_at", since);
     const { data: rows } = await q;
     return rows ?? [];
   });
+
 
 
 export const adminUpdateBookingStatus = createServerFn({ method: "POST" })
