@@ -334,7 +334,10 @@ export const getBookingByRef = createServerFn({ method: "POST" })
         entity_type: "booking", metadata: { ref_prefix: data.reference.slice(0, 3) },
       }).catch(() => {});
     }
-    return row;
+    if (!row) return row;
+    const { fetchInvoiceStatus } = await import("./invoice-status.server");
+    const invoice = await fetchInvoiceStatus(supabaseAdmin, row.reference);
+    return { ...row, invoice };
   });
 
 export const getOrderByRef = createServerFn({ method: "POST" })
