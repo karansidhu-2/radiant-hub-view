@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { formatMoney } from "@/data/products";
+import { InvoiceBadge } from "@/components/InvoiceBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({ component: AdminOrders });
 
