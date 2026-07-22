@@ -6,13 +6,19 @@ import { SwipeBackIndicator } from "@/components/SwipeBackIndicator";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin" } });
-    return { user: data.user };
+  beforeLoad: async ({ location }) => {
+    // Use getSession() (reads local storage, triggers refresh only if needed)
+    // instead of getUser() which makes a network call on every navigation and
+    // spuriously signs users out on transient network errors.
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
+    return { user: data.session.user };
   },
   component: AuthedLayout,
 });
+
 
 function AuthedLayout() {
   const path = useRouterState({ select: (r) => r.location.pathname });
