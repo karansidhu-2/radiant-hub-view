@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { formatMoney } from "@/data/products";
+import { FinancingOption } from "@/components/FinancingOption";
 
 export const Route = createFileRoute("/_site/cart")({
   head: () => ({ meta: [{ title: "Your Cart — HVAC Pro" }, { name: "description", content: "Review your HVAC equipment and installation before booking." }, { name: "robots", content: "noindex, follow" }] }),
@@ -75,7 +76,8 @@ function CartPage() {
             <Link to="/checkout">
               <Button size="lg" className="mt-5 w-full gradient-cool text-primary-foreground shadow-soft">Proceed to checkout</Button>
             </Link>
-            <p className="mt-3 text-xs text-muted-foreground">Free financing available · 0% APR for qualified buyers · No payment due today</p>
+            <FinancingOption total={total} compact />
+            <p className="mt-3 text-xs text-muted-foreground">No payment due today · Prequalify at checkout with a soft credit check</p>
           </CardContent>
         </Card>
       </div>
