@@ -1,0 +1,42 @@
+name: visual-regression
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+      - name: Build app
+        run: bun run build
+      - name: Start preview server
+        run: bun run preview --port 8080 &
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            curl -sf http://localhost:8080 > /dev/null && exit 0
+            sleep 1
+          done
+          echo "Server did not start" && exit 1
+      - name: Run visual regression
+        run: bun run test:visual
+        env:
+          BASE_URL: http://localhost:8080
+      - name: Upload diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: tests/visual/__diffs__/
+          if-no-files-found: ignore
