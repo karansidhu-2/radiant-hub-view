@@ -8,6 +8,16 @@ import { products, formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
 import { HomeQuickReview } from "@/components/HomeQuickReview";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const faqs = [
+  { q: "How quickly can you come out for a repair?", a: "In most of our 28 service states we offer same-day or next-day appointments, and 24/7 emergency dispatch for no-heat and no-cool calls. You'll get a confirmed 2-hour arrival window within an hour of booking." },
+  { q: "Do your prices include installation?", a: "Yes. Every system on our shop — AC units, furnaces, heat pumps, and thermostats — includes professional installation, standard permits, haul-away of your old equipment, and a full system startup." },
+  { q: "Are your technicians licensed and insured?", a: "All of our technicians are NATE-certified, background-checked, and we carry full liability and workers' comp insurance. We're licensed in every state we serve." },
+  { q: "What warranty do you offer?", a: "New systems come with a 10-year manufacturer parts warranty and a 2-year HVAC Pro labor warranty. Repair work is guaranteed for 1 year, parts and labor." },
+  { q: "Do you offer financing or help with rebates?", a: "We help you claim available federal IRA tax credits, local utility rebates, and manufacturer promotions on qualifying high-efficiency systems. Ask your tech for a personalized savings estimate." },
+  { q: "How do I know if you service my area?", a: "Enter your ZIP on the booking or quote page and we'll instantly confirm availability, pricing, and next-available time slots for your address." },
+];
 
 export const Route = createFileRoute("/_site/")({
   head: () => ({
