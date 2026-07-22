@@ -12,13 +12,14 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_site/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/",
+    expired: s.expired === 1 || s.expired === "1" ? 1 : undefined,
   }),
   head: () => ({ meta: [{ title: "Sign in — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { redirect } = Route.useSearch();
+  const { redirect, expired } = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -29,6 +30,14 @@ function AuthPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    let flagged = false;
+    try {
+      flagged = sessionStorage.getItem("hvac:auth:expired") === "1";
+      if (flagged) sessionStorage.removeItem("hvac:auth:expired");
+    } catch { /* ignore */ }
+    if (expired || flagged) {
+      toast.error("Your session has expired. Please log in again.");
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         navigate({ to: redirect as any, replace: true });
@@ -36,7 +45,7 @@ function AuthPage() {
         setChecking(false);
       }
     });
-  }, [redirect, navigate]);
+  }, [redirect, navigate, expired]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
