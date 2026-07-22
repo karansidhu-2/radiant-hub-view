@@ -77,13 +77,13 @@ async function run() {
   const after = await page.evaluate(() => ({
     local: Object.keys(localStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
     session: Object.keys(sessionStorage).filter((k) => k.startsWith("sb-") || k.startsWith("supabase.") || k.startsWith("hvac:auth:")),
-    pathname: location.pathname,
+    navigatedTo: (window /* @ts-ignore */).__navigatedTo,
   }));
 
-  if (after.pathname !== "/") {
-    fail(`expected to land on "/", got "${after.pathname}"`);
+  if (after.navigatedTo !== "/") {
+    fail(`expected signOut to navigate to "/", got ${JSON.stringify(after.navigatedTo)}`);
   } else {
-    ok("signOut lands on /");
+    ok("signOut triggers hard navigation to /");
   }
   if (after.local.length !== 0) {
     fail(`localStorage still has auth keys after sign-out: ${JSON.stringify(after.local)}`);
