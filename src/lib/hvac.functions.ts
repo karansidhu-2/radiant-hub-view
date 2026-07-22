@@ -608,7 +608,7 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
     if (!(data.service_charge >= 0) || data.service_charge > 1_000_000) {
       throw new Error("Invalid amount");
     }
-    const { data: prev } = await context.supabase.from("bookings").select("service_charge, reference").eq("id", data.id).maybeSingle();
+    const { data: prev } = await context.supabase.from("bookings").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("bookings")
       .update({ service_charge: data.service_charge })
@@ -620,8 +620,35 @@ export const adminSetBookingCharge = createServerFn({ method: "POST" })
       before: { service_charge: prev?.service_charge }, after: { service_charge: data.service_charge },
       details: { reference: prev?.reference },
     });
+    // Auto-send invoice email once a charge is recorded for a completed booking.
+    if (prev && prev.status === "completed" && prev.email) {
+      try {
+        const { enqueueEmail } = await import("./email-outbox.server");
+        const origin = process.env.PUBLIC_APP_URL || "";
+        const amount = `$${Number(data.service_charge).toFixed(2)}`;
+        const invoiceUrl = `${origin}/confirmation/booking/${prev.reference}`;
+        const subject = `Invoice ${prev.reference} — ${amount}`;
+        const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px">
+          <h2 style="margin:0 0 12px">Thanks, ${String(prev.full_name || "").replace(/[<>]/g, "")}!</h2>
+          <p>Your service <b>${String(prev.service_name || "").replace(/[<>]/g, "")}</b> is complete.</p>
+          <p style="font-size:15px">Amount charged: <b>${amount}</b><br/>Reference: <b>${prev.reference}</b></p>
+          <p><a href="${invoiceUrl}" style="display:inline-block;padding:10px 16px;background:#0ea5e9;color:#fff;text-decoration:none;border-radius:6px">View & download invoice</a></p>
+          <p style="color:#666;font-size:12px">If the button doesn't work, open: ${invoiceUrl}</p>
+        </div>`;
+        await enqueueEmail({
+          to: prev.email,
+          subject,
+          html,
+          idempotencyKey: `invoice:booking:${prev.id}:${data.service_charge}`,
+          context: { booking_id: prev.id, reference: prev.reference, kind: "invoice" },
+        });
+      } catch (e) {
+        console.warn("invoice email enqueue failed:", e);
+      }
+    }
     return { ok: true };
   });
+
 
 export const adminSetBookingTechnician = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
