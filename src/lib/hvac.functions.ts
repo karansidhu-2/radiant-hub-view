@@ -334,7 +334,10 @@ export const getBookingByRef = createServerFn({ method: "POST" })
         entity_type: "booking", metadata: { ref_prefix: data.reference.slice(0, 3) },
       }).catch(() => {});
     }
-    return row;
+    if (!row) return row;
+    const { fetchInvoiceStatus } = await import("./invoice-status.server");
+    const invoice = await fetchInvoiceStatus(supabaseAdmin, row.reference);
+    return { ...row, invoice };
   });
 
 export const getOrderByRef = createServerFn({ method: "POST" })
@@ -356,7 +359,9 @@ export const getOrderByRef = createServerFn({ method: "POST" })
     }
     const { data: items } = await supabaseAdmin
       .from("order_items").select(ORDER_ITEM_PUBLIC_COLS).eq("order_id", row.id);
-    return { ...row, items: items ?? [] };
+    const { fetchInvoiceStatus } = await import("./invoice-status.server");
+    const invoice = await fetchInvoiceStatus(supabaseAdmin, row.reference);
+    return { ...row, items: items ?? [], invoice };
   });
 
 // ---------- Claim guest bookings/orders by email after sign-in ----------
@@ -557,7 +562,11 @@ export const adminListBookings = createServerFn({ method: "GET" })
     const since = await activeCheckpointSince(context);
     if (since) q = q.gte("created_at", since);
     const { data: rows } = await q;
-    return rows ?? [];
+    if (!rows || rows.length === 0) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fetchInvoiceStatuses } = await import("./invoice-status.server");
+    const invoices = await fetchInvoiceStatuses(supabaseAdmin, rows.map((r: any) => r.reference));
+    return rows.map((r: any) => ({ ...r, invoice: invoices[r.reference] ?? { generated: false, sent: false } }));
   });
 
 
@@ -772,7 +781,11 @@ export const adminListOrders = createServerFn({ method: "GET" })
     const since = await activeCheckpointSince(context);
     if (since) q = q.gte("created_at", since);
     const { data: rows } = await q;
-    return rows ?? [];
+    if (!rows || rows.length === 0) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fetchInvoiceStatuses } = await import("./invoice-status.server");
+    const invoices = await fetchInvoiceStatuses(supabaseAdmin, rows.map((r: any) => r.reference));
+    return rows.map((r: any) => ({ ...r, invoice: invoices[r.reference] ?? { generated: false, sent: false } }));
   });
 
 
@@ -782,7 +795,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { data: prev } = await context.supabase.from("orders").select("status, reference").eq("id", data.id).maybeSingle();
+    const { data: prev } = await context.supabase.from("orders").select("*").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase.from("orders").update({ status: data.status as any }).eq("id", data.id);
     if (error) throw new Error(error.message);
     const { logAdminAction } = await import("./audit.server");
@@ -791,6 +804,33 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
       before: { status: prev?.status }, after: { status: data.status },
       details: { reference: prev?.reference },
     });
+    // Auto-send invoice email once the order is marked installed (completed).
+    if (prev && data.status === "installed" && prev.status !== "installed" && prev.email) {
+      try {
+        const { enqueueEmail } = await import("./email-outbox.server");
+        const origin = process.env.PUBLIC_APP_URL || "";
+        const amount = `$${Number(prev.total).toLocaleString()}`;
+        const invoiceUrl = `${origin}/confirmation/order/${prev.reference}`;
+        const safeName = String(prev.full_name || "").replace(/[<>]/g, "");
+        const subject = `Invoice ${prev.reference} — ${amount}`;
+        const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px">
+          <h2 style="margin:0 0 12px">Thanks, ${safeName}!</h2>
+          <p>Your order <b>${prev.reference}</b> has been installed and completed.</p>
+          <p style="font-size:15px">Order total: <b>${amount}</b></p>
+          <p><a href="${invoiceUrl}" style="display:inline-block;padding:10px 16px;background:#0ea5e9;color:#fff;text-decoration:none;border-radius:6px">View &amp; download invoice</a></p>
+          <p style="color:#666;font-size:12px">If the button doesn't work, open: ${invoiceUrl}</p>
+        </div>`;
+        await enqueueEmail({
+          to: prev.email,
+          subject,
+          html,
+          idempotencyKey: `invoice:order:${prev.id}:${prev.total}`,
+          context: { order_id: prev.id, reference: prev.reference, kind: "invoice" },
+        });
+      } catch (e) {
+        console.warn("order invoice email enqueue failed:", e);
+      }
+    }
     return { ok: true };
   });
 
