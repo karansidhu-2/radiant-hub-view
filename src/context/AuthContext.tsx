@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);
-      // Refresh failed / token revoked → clean everything out.
       if (event === "SIGNED_OUT" && !s) {
         hardClearAuthStorage();
       }
@@ -43,7 +42,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.session?.user ?? null);
       setLoading(false);
     });
-    return () => sub.subscription.unsubscribe();
+
+    // ---- Cross-tab sign-out ----
+    // A tab that calls signOut() below broadcasts a message; every other open
+    // tab wipes its own local + session storage and hard-navigates home so no
+    // stale auth state (React, TanStack Query, cart) can linger.
+    let bc: BroadcastChannel | null = null;
+    const handleRemoteSignOut = () => {
+      hardClearAuthStorage();
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      if (typeof window !== "undefined") {
+        window.location.assign("/");
+      }
+    };
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        bc = new BroadcastChannel("hvac:auth");
+        bc.onmessage = (ev) => {
+          if (ev?.data?.type === "signout") handleRemoteSignOut();
+        };
+      }
+    } catch { /* ignore */ }
+    // Storage-event fallback for browsers/contexts where BroadcastChannel is
+    // unavailable (e.g. some privacy modes).
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key === "hvac:auth:signout-broadcast" && ev.newValue) {
+        handleRemoteSignOut();
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", onStorage);
+    }
+
+    return () => {
+      sub.subscription.unsubscribe();
+      bc?.close();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", onStorage);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -84,6 +123,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Belt-and-braces: purge both storages regardless of Supabase's response.
     hardClearAuthStorage();
+    // Broadcast to every other open tab so they wipe their own storage too.
+    if (typeof window !== "undefined") {
+      try {
+        if (typeof BroadcastChannel !== "undefined") {
+          const bc = new BroadcastChannel("hvac:auth");
+          bc.postMessage({ type: "signout", at: Date.now() });
+          bc.close();
+        }
+      } catch { /* ignore */ }
+      try {
+        // Storage-event fallback. Write+remove so the key doesn't linger.
+        localStorage.setItem("hvac:auth:signout-broadcast", String(Date.now()));
+        localStorage.removeItem("hvac:auth:signout-broadcast");
+      } catch { /* ignore */ }
+    }
     setSession(null);
     setUser(null);
     setIsAdmin(false);
