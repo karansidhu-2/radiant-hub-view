@@ -18,6 +18,7 @@ import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { ListSkeleton } from "@/components/skeletons";
+import { RememberMeToggle } from "@/components/RememberMeToggle";
 
 
 export const Route = createFileRoute("/_authenticated/account")({
