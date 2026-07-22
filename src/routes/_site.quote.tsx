@@ -65,14 +65,26 @@ function QuotePage() {
     [cfg.systemTypes],
   );
 
+  const initialSystemKey = useMemo(() => {
+    if (preselected) {
+      const mapped = CATEGORY_TO_SYSTEM_KEY[preselected.category];
+      if (mapped && systemTypes.some((s: any) => s.key === mapped)) return mapped;
+    }
+    return systemTypes[0]?.key ?? "central_ac";
+  }, [preselected, systemTypes]);
+
+  const initialNotes = preselected
+    ? `Interested in: ${preselected.brand} ${preselected.name} (qty ${qty})`
+    : "";
+
   const [form, setForm] = useState({
     full_name: "",
     email: "",
     phone: "",
     zip: "",
     square_footage: 1500,
-    system_type_key: systemTypes[0]?.key ?? "central_ac",
-    notes: "",
+    system_type_key: initialSystemKey,
+    notes: initialNotes,
   });
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<null | {
@@ -88,6 +100,13 @@ function QuotePage() {
       setForm((f) => ({ ...f, system_type_key: systemTypes[0].key }));
     }
   }, [systemTypes, form.system_type_key]);
+
+  const clearPreselected = () => {
+    navigate({ search: {} as any, replace: true });
+    setForm((f) => ({ ...f, notes: "" }));
+  };
+
+  const productSubtotal = preselected ? (preselected.price + preselected.installationFee) * qty : 0;
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
