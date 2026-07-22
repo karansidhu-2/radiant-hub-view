@@ -129,9 +129,12 @@ function ConfirmationPage() {
 
 
       <Card className="mt-6"><CardContent className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">Status tracking</h2>
-          <Badge variant={statusColor(data.status) as any}>{String(data.status).replace("_", " ").toUpperCase()}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <InvoiceBadge invoice={data.invoice} />
+            <Badge variant={statusColor(data.status) as any}>{String(data.status).replace("_", " ").toUpperCase()}</Badge>
+          </div>
         </div>
         <StatusTimeline kind={kind} status={data.status} />
         <div className="flex flex-wrap gap-2">
