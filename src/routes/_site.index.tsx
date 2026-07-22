@@ -136,28 +136,6 @@ function Home() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="border-b bg-background py-12 md:py-16">
-        <div className="mx-auto max-w-4xl px-4 md:px-6">
-          <div className="mb-8 text-center">
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Frequently asked</p>
-            <h2 className="mt-1 text-3xl font-bold md:text-4xl">Answers to common questions</h2>
-            <p className="mt-2 text-muted-foreground">Everything you need to know before you book — pricing, coverage, warranties, and more.</p>
-          </div>
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((f, i) => (
-              <AccordionItem key={i} value={`faq-${i}`}>
-                <AccordionTrigger className="text-left text-base font-semibold">{f.q}</AccordionTrigger>
-                <AccordionContent className="text-[15px] text-muted-foreground">{f.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
-            <span className="text-muted-foreground">Still have questions?</span>
-            <Link to="/contact" className="font-semibold text-primary hover:underline">Contact our team →</Link>
-          </div>
-        </div>
-      </section>
 
       {/* Pricing plans */}
       <section className="bg-secondary/40 py-12 md:py-20">
@@ -478,6 +456,29 @@ function Home() {
             </div>
           </CardContent>
         </Card>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-b bg-background py-12 md:py-16">
+        <div className="mx-auto max-w-4xl px-4 md:px-6">
+          <div className="mb-8 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Frequently asked</p>
+            <h2 className="mt-1 text-3xl font-bold md:text-4xl">Answers to common questions</h2>
+            <p className="mt-2 text-muted-foreground">Everything you need to know before you book — pricing, coverage, warranties, and more.</p>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`}>
+                <AccordionTrigger className="text-left text-base font-semibold">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-[15px] text-muted-foreground">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
+            <span className="text-muted-foreground">Still have questions?</span>
+            <Link to="/contact" className="font-semibold text-primary hover:underline">Contact our team →</Link>
+          </div>
+        </div>
       </section>
     </>
   );
