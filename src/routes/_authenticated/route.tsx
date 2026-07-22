@@ -2,19 +2,30 @@ import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/rea
 import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/BackButton";
 import { SwipeBackIndicator } from "@/components/SwipeBackIndicator";
+import { hardClearAuthStorage } from "@/lib/remember-me";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
   beforeLoad: async ({ location }) => {
-    // Use getSession() (reads local storage, triggers refresh only if needed)
-    // instead of getUser() which makes a network call on every navigation and
-    // spuriously signs users out on transient network errors.
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    const { data, error } = await supabase.auth.getSession();
+    const session = data?.session;
+    const expiresAt = session?.expires_at ? session.expires_at * 1000 : 0;
+    const expired = !session || (expiresAt && expiresAt < Date.now()) || !!error;
+    if (expired) {
+      hardClearAuthStorage();
+      if (typeof window !== "undefined" && session) {
+        try { sessionStorage.setItem("hvac:auth:expired", "1"); } catch { /* ignore */ }
+      }
+      throw redirect({
+        to: "/auth",
+        search: {
+          redirect: location.href,
+          ...(session ? { expired: 1 } : {}),
+        } as any,
+      });
     }
-    return { user: data.session.user };
+    return { user: session.user };
   },
   component: AuthedLayout,
 });
