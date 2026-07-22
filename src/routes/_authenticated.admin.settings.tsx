@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { RememberMeToggle } from "@/components/RememberMeToggle";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: SettingsPage,
