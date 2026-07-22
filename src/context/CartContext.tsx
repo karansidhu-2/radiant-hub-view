@@ -132,7 +132,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       toggleInstallation: (slug) =>
         setItems((prev) => prev.map((i) => (i.slug === slug ? { ...i, includeInstallation: !i.includeInstallation } : i))),
-      clear: () => setItems([]),
+      clear: () => {
+        setItems([]);
+        try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+      },
     };
   }, [items, hydrated, dbProducts]);
 
