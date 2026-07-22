@@ -781,7 +781,11 @@ export const adminListOrders = createServerFn({ method: "GET" })
     const since = await activeCheckpointSince(context);
     if (since) q = q.gte("created_at", since);
     const { data: rows } = await q;
-    return rows ?? [];
+    if (!rows || rows.length === 0) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fetchInvoiceStatuses } = await import("./invoice-status.server");
+    const invoices = await fetchInvoiceStatuses(supabaseAdmin, rows.map((r: any) => r.reference));
+    return rows.map((r: any) => ({ ...r, invoice: invoices[r.reference] ?? { generated: false, sent: false } }));
   });
 
 
