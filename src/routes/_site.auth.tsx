@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { setRememberMe } from "@/lib/remember-me";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/auth")({
@@ -22,11 +24,17 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: redirect as any });
+      if (data.session) {
+        navigate({ to: redirect as any, replace: true });
+      } else {
+        setChecking(false);
+      }
     });
   }, [redirect, navigate]);
 
@@ -45,13 +53,19 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate({ to: redirect as any });
+      setRememberMe(remember);
+      navigate({ to: redirect as any, replace: true });
     } catch (err: any) {
       toast.error(err?.message || "Auth failed");
     } finally {
       setBusy(false);
     }
   };
+
+  if (checking) {
+    return <section className="mx-auto max-w-md px-4 py-16 md:px-6" aria-hidden />;
+  }
+
 
   return (
     <section className="mx-auto max-w-md px-4 py-16 md:px-6">
