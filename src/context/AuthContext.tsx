@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { clearRememberMe, hardClearAuthStorage, isPersistedSessionExpired } from "@/lib/remember-me";
 
 type AuthValue = {
   session: Session | null;
@@ -19,10 +20,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    // If a persisted token has already expired, wipe storage BEFORE Supabase
+    // reads it — avoids a brief signed-in flash then a spurious refresh loop.
+    if (isPersistedSessionExpired()) {
+      hardClearAuthStorage();
+      if (typeof window !== "undefined") {
+        try { sessionStorage.setItem("hvac:auth:expired", "1"); } catch { /* ignore */ }
+      }
+    }
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);
+      // Refresh failed / token revoked → clean everything out.
+      if (event === "SIGNED_OUT" && !s) {
+        hardClearAuthStorage();
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -60,14 +74,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [user]);
 
+  const signOut = async () => {
+    clearRememberMe();
+    let result: { error: any } = { error: null };
+    try {
+      result = await supabase.auth.signOut();
+    } catch (err) {
+      result = { error: err };
+    }
+    // Belt-and-braces: purge both storages regardless of Supabase's response.
+    hardClearAuthStorage();
+    setSession(null);
+    setUser(null);
+    setIsAdmin(false);
+    if (typeof window !== "undefined") {
+      // Full navigation guarantees every provider/cache is torn down cleanly.
+      window.location.assign("/");
+    }
+    return result;
+  };
+
   return (
-    <AuthContext.Provider
-      value={{ session, user, loading, isAdmin, signOut: async () => {
-        const { clearRememberMe } = await import("@/lib/remember-me");
-        clearRememberMe();
-        return supabase.auth.signOut();
-      } }}
-    >
+    <AuthContext.Provider value={{ session, user, loading, isAdmin, signOut }}>
       {children}
     </AuthContext.Provider>
   );
