@@ -214,11 +214,11 @@ function ProductDetail() {
                   <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> 10-year warranty</span>
                   <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5 text-primary" /> Free delivery</span>
                 </div>
-                <FinancingOption total={price + (withInstall ? install : 0)} compact />
               </CardContent>
             </Card>
 
-            <FinancingOption total={price + (withInstall ? install : 0)} />
+
+
 
 
 
