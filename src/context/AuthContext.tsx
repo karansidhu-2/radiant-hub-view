@@ -123,6 +123,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Belt-and-braces: purge both storages regardless of Supabase's response.
     hardClearAuthStorage();
+    // Broadcast to every other open tab so they wipe their own storage too.
+    if (typeof window !== "undefined") {
+      try {
+        if (typeof BroadcastChannel !== "undefined") {
+          const bc = new BroadcastChannel("hvac:auth");
+          bc.postMessage({ type: "signout", at: Date.now() });
+          bc.close();
+        }
+      } catch { /* ignore */ }
+      try {
+        // Storage-event fallback. Write+remove so the key doesn't linger.
+        localStorage.setItem("hvac:auth:signout-broadcast", String(Date.now()));
+        localStorage.removeItem("hvac:auth:signout-broadcast");
+      } catch { /* ignore */ }
+    }
     setSession(null);
     setUser(null);
     setIsAdmin(false);
