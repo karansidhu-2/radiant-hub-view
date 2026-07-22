@@ -9,6 +9,9 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
 import { HomeQuickReview } from "@/components/HomeQuickReview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+import { ShoppingCart } from "lucide-react";
 
 const faqs = [
   { q: "How quickly can you come out for a repair?", a: "In most of our 28 service states we offer same-day or next-day appointments, and 24/7 emergency dispatch for no-heat and no-cool calls. You'll get a confirmed 2-hour arrival window within an hour of booking." },
