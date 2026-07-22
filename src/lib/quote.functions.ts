@@ -240,7 +240,7 @@ export const adminListQuoteLeads = createServerFn({ method: "POST" })
 
 export const adminUpdateQuoteLeadStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; status: "new" | "contacted" | "converted" | "closed" }) => d)
+  .inputValidator((d: { id: string; status: "new" | "contacted" | "sent" | "converted" | "closed" }) => d)
   .handler(async ({ data, context }) => {
     
     await assertAdmin(context);

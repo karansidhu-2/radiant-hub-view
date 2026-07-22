@@ -83,6 +83,11 @@ function QuoteLeadsPage() {
   };
 
   useEffect(() => { load();  }, [filter.status]);
+  useEffect(() => {
+    const t = setTimeout(() => { load(); }, 300);
+    return () => clearTimeout(t);
+     
+  }, [filter.q]);
 
   const saveConfig = async () => {
     setSavingCfg(true);
@@ -218,9 +223,10 @@ function QuoteLeadsPage() {
             <h2 className="mr-auto text-lg font-semibold">Leads ({leads.length})</h2>
             <select className="h-9 rounded-md border border-input bg-background px-2 text-sm"
               value={filter.status} onChange={(e) => setFilter((f) => ({ ...f, status: e.target.value }))}>
-              <option value="all">All statuses</option>
+              <option value="all">All statuses ({leads.length})</option>
               <option value="new">New</option>
               <option value="contacted">Contacted</option>
+              <option value="sent">Quote sent</option>
               <option value="converted">Converted</option>
               <option value="closed">Closed</option>
             </select>
@@ -269,6 +275,7 @@ function QuoteLeadsPage() {
                           value={l.status} onChange={(e) => updateStatus(l.id, e.target.value)}>
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
+                          <option value="sent">Quote sent</option>
                           <option value="converted">Converted</option>
                           <option value="closed">Closed</option>
                         </select>
