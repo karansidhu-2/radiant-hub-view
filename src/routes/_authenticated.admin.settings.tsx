@@ -132,6 +132,16 @@ function SettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">Company info, customer notifications, and technician roster.</p>
       </div>
 
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="mb-1 text-lg font-semibold">Your session</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Controls how long this browser stays signed in to the admin panel.
+          </p>
+          <RememberMeToggle />
+        </CardContent>
+      </Card>
+
       <form onSubmit={save} className="space-y-6">
         <Card>
           <CardContent className="p-6">
