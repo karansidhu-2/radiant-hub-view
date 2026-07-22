@@ -359,7 +359,9 @@ export const getOrderByRef = createServerFn({ method: "POST" })
     }
     const { data: items } = await supabaseAdmin
       .from("order_items").select(ORDER_ITEM_PUBLIC_COLS).eq("order_id", row.id);
-    return { ...row, items: items ?? [] };
+    const { fetchInvoiceStatus } = await import("./invoice-status.server");
+    const invoice = await fetchInvoiceStatus(supabaseAdmin, row.reference);
+    return { ...row, items: items ?? [], invoice };
   });
 
 // ---------- Claim guest bookings/orders by email after sign-in ----------
