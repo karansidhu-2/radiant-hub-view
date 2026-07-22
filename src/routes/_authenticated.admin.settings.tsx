@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { RememberMeToggle } from "@/components/RememberMeToggle";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: SettingsPage,
@@ -131,6 +132,16 @@ function SettingsPage() {
         <h1 className="text-2xl font-bold">Site settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">Company info, customer notifications, and technician roster.</p>
       </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="mb-1 text-lg font-semibold">Your session</h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Controls how long this browser stays signed in to the admin panel.
+          </p>
+          <RememberMeToggle />
+        </CardContent>
+      </Card>
 
       <form onSubmit={save} className="space-y-6">
         <Card>
