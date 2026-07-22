@@ -18,6 +18,9 @@ import { NotFoundPage, GenericErrorPage } from "@/components/error-pages/ErrorPa
 import { OfflineDetector } from "@/components/OfflineDetector";
 import { PerfProfilerControls } from "@/lib/perf-profiler";
 import { useAuth } from "@/hooks/useAuth";
+import { applyEphemeralGuard } from "@/lib/remember-me";
+
+if (typeof window !== "undefined") applyEphemeralGuard();
 
 
 

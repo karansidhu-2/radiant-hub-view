@@ -62,7 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, loading, isAdmin, signOut: () => supabase.auth.signOut() }}
+      value={{ session, user, loading, isAdmin, signOut: async () => {
+        const { clearRememberMe } = await import("@/lib/remember-me");
+        clearRememberMe();
+        return supabase.auth.signOut();
+      } }}
     >
       {children}
     </AuthContext.Provider>
