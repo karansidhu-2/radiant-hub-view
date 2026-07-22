@@ -737,19 +737,17 @@ export const adminRescheduleBooking = createServerFn({ method: "POST" })
 
 
 
-export const adminListOrders = createServerFn({ method: "POST" })
+export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { includeArchived?: boolean } | undefined) => d ?? {})
-  .handler(async ({ data, context }) => {
+  .handler(async ({ context }) => {
     await assertAdmin(context);
     let q = context.supabase.from("orders").select("*").order("created_at", { ascending: false });
-    if (!data.includeArchived) {
-      const since = await activeCheckpointSince(context);
-      if (since) q = q.gte("created_at", since);
-    }
+    const since = await activeCheckpointSince(context);
+    if (since) q = q.gte("created_at", since);
     const { data: rows } = await q;
     return rows ?? [];
   });
+
 
 
 export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
