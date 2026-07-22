@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { formatMoney } from "@/data/products";
-import { FinancingOption } from "@/components/FinancingOption";
+
 
 export const Route = createFileRoute("/_site/cart")({
   head: () => ({ meta: [{ title: "Your Cart — HVAC Pro" }, { name: "description", content: "Review your HVAC equipment and installation before booking." }, { name: "robots", content: "noindex, follow" }] }),
