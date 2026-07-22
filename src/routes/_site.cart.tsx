@@ -77,8 +77,6 @@ function CartPage() {
             <Link to="/checkout">
               <Button size="lg" className="mt-5 w-full gradient-cool text-primary-foreground shadow-soft">Proceed to checkout</Button>
             </Link>
-            <FinancingOption total={total} compact />
-            <p className="mt-3 text-xs text-muted-foreground">No payment due today · Prequalify at checkout with a soft credit check</p>
           </CardContent>
         </Card>
       </div>
