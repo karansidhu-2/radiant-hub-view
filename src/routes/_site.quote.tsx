@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { Calculator, CheckCircle2, Loader2, Sparkles, Package, X } from "lucide-react";
 import { toast } from "sonner";
+import { productBySlug, formatMoney, type ProductCategory } from "@/data/products";
+import { z } from "zod";
+
+const quoteSearchSchema = z.object({
+  product: z.string().optional(),
+  qty: z.coerce.number().int().min(1).max(20).optional(),
+});
 
 export const Route = createFileRoute("/_site/quote")({
+  validateSearch: quoteSearchSchema,
   head: () => ({
     meta: [
       { title: "Instant HVAC Installation Quote — Free Price Estimate" },
