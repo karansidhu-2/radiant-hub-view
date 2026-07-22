@@ -7,6 +7,7 @@ import { services } from "@/data/services";
 import { products, formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
+import { HomeQuickReview } from "@/components/HomeQuickReview";
 
 export const Route = createFileRoute("/_site/")({
   head: () => ({
@@ -292,6 +293,7 @@ function Home() {
               </Card>
             ))}
           </div>
+          <HomeQuickReview />
         </div>
       </section>
 
