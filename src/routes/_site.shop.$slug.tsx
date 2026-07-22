@@ -14,7 +14,7 @@ import type { MediaItem } from "@/lib/product-image";
 import { useAutoRatings } from "@/hooks/useAutoRatings";
 import { AutoRatingBadge } from "@/components/AutoRatingBadge";
 import { JsonLd } from "@/components/JsonLd";
-import { FinancingOption } from "@/components/FinancingOption";
+
 
 export const Route = createFileRoute("/_site/shop/$slug")({
   head: ({ params }) => {
