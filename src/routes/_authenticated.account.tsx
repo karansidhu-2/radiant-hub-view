@@ -512,25 +512,33 @@ function ProfilePanel({ uid, email, profile }: { uid: string; email: string; pro
   });
 
   return (
-    <Card>
-      <CardHeader><CardTitle className="text-base">Profile</CardTitle></CardHeader>
-      <CardContent className="grid gap-3 sm:max-w-md">
-        <div>
-          <label className="text-xs font-medium">Email</label>
-          <Input value={email} disabled />
-        </div>
-        <div>
-          <label className="text-xs font-medium">Full name</label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-xs font-medium">Phone</label>
-          <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
-        <div>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid gap-4 sm:max-w-md">
+      <Card>
+        <CardHeader><CardTitle className="text-base">Profile</CardTitle></CardHeader>
+        <CardContent className="grid gap-3">
+          <div>
+            <label className="text-xs font-medium">Email</label>
+            <Input value={email} disabled />
+          </div>
+          <div>
+            <label className="text-xs font-medium">Full name</label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs font-medium">Phone</label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </div>
+          <div>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base">Session</CardTitle></CardHeader>
+        <CardContent>
+          <RememberMeToggle />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
