@@ -90,6 +90,19 @@ function AuthPage() {
               <Label>Password</Label>
               <Input type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <Checkbox
+                checked={remember}
+                onCheckedChange={(v) => setRemember(v === true)}
+                aria-label="Remember me"
+              />
+              <span>
+                Remember me
+                <span className="ml-1 text-xs text-muted-foreground">
+                  {remember ? "(stay signed in on this device)" : "(sign out when I close the browser)"}
+                </span>
+              </span>
+            </label>
             <Button type="submit" disabled={busy} className="gradient-cool text-primary-foreground">
               {busy ? "Please wait..." : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
