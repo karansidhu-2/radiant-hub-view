@@ -81,7 +81,9 @@ function AdminDashboard() {
   const createCheckpoint = useServerFn(adminCreateCheckpoint);
   const setActive = useServerFn(adminSetCheckpointActive);
   const delCheckpoint = useServerFn(adminDeleteCheckpoint);
+  const fetchPeriodDetails = useServerFn(adminPeriodDetails);
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
+
   const [customDate, setCustomDate] = useState("");
   const active = checkpoints.find((c) => c.active) ?? null;
   const sinceOverride = active ? active.started_at : null;
