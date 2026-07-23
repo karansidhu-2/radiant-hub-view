@@ -13,7 +13,7 @@ import { InvoiceBadge } from "@/components/InvoiceBadge";
 // jspdf+html2canvas chunks only load when the user clicks "Download Invoice".
 
 export const Route = createFileRoute("/_site/confirmation/$kind/$ref")({
-  head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [{ title: "Confirmation — HVAC Pro" }, { name: "description", content: "Your HVAC Pro booking or order confirmation with reference number, status tracking, and downloadable invoice." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: ConfirmationPage,
 });
 
