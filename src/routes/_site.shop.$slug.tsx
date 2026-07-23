@@ -223,7 +223,7 @@ function ProductDetail() {
 
 
             <div className="mt-6">
-              <h3 className="font-semibold">Features</h3>
+              <h2 className="font-semibold">Features</h2>
               <ul className="mt-3 grid gap-2 sm:grid-cols-2">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">

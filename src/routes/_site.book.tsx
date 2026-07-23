@@ -19,7 +19,10 @@ export const Route = createFileRoute("/_site/book")({
   head: () => ({
     meta: [
       { title: "Book HVAC Service — HVAC Pro" },
-      { name: "description", content: "Schedule an HVAC repair, tune-up, or installation. Pick a time that works — we confirm within an hour." },
+      { name: "description", content: "Schedule an HVAC repair, tune-up, or installation online. Pick a date and time that works — we confirm your appointment within the hour." },
+      { property: "og:title", content: "Book HVAC Service — HVAC Pro" },
+      { property: "og:description", content: "Schedule HVAC repair, tune-up, or installation with a licensed technician. Same-day slots often available." },
+      { property: "og:type", content: "website" },
       { name: "robots", content: "noindex, follow" },
     ],
   }),

@@ -1,0 +1,18 @@
+# HVAC Pro
+
+> US-based HVAC company offering AC, furnace, and heat-pump service, repair, and installation, plus top-brand HVAC systems with professional installation.
+
+HVAC Pro is a licensed, NATE-certified HVAC contractor serving homes and businesses across the United States. Customers can book service online, get an instant quote, or shop equipment with installation included.
+
+## Pages
+
+- [Home](/): Overview of HVAC services, featured products, and instant quote.
+- [Services](/services): Full list of HVAC services — repair, installation, tune-ups, emergency service.
+- [Shop](/shop): HVAC systems and equipment with professional installation.
+- [Instant Quote](/quote): Get an estimated price range based on ZIP, home size, and system type.
+- [Book](/book): Schedule a service appointment with date and time selection.
+- [About](/about): Company background, credentials, and coverage area.
+
+## Optional
+
+- [Contact & Support](/): Phone, hours, and service area info on the home page footer.

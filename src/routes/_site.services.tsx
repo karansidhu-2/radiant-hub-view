@@ -257,7 +257,7 @@ function ServicesPage() {
                             Certified techs
                           </div>
                         )}
-                        <h3 className="truncate text-lg font-semibold">
+                        <h2 className="truncate text-lg font-semibold">
                           <Link
                             to="/services/$slug"
                             params={{ slug: s.slug }}
@@ -265,7 +265,7 @@ function ServicesPage() {
                           >
                             {s.name}
                           </Link>
-                        </h3>
+                        </h2>
                       </div>
                     </div>
 
