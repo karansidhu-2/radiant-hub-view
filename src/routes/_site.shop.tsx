@@ -301,7 +301,7 @@ function ShopPage() {
                     <AutoRatingBadge rating={autoRatings?.[p.slug]} compact />
                   </div>
                   <Link to="/shop/$slug" params={{ slug: p.slug }}>
-                    <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-tight hover:text-primary sm:text-base">{p.name}</h3>
+                    <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-tight hover:text-primary sm:text-base">{p.name}</h2>
                   </Link>
                   <div className="mt-2 hidden flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground sm:flex">
                     {p.seer && <span>{p.seer} SEER2</span>}
