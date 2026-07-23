@@ -18,6 +18,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated.account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated.reviews'
+import { Route as AuthenticatedSampleCrudRouteImport } from './routes/_authenticated.sample-crud'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as SiteAuthRouteImport } from './routes/_site.auth'
@@ -98,6 +99,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSampleCrudRoute = AuthenticatedSampleCrudRouteImport.update({
+  id: '/sample-crud',
+  path: '/sample-crud',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/reviews': typeof AuthenticatedReviewsRoute
+  '/sample-crud': typeof AuthenticatedSampleCrudRoute
   '/about': typeof SiteAboutRoute
   '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
   '/reviews': typeof AuthenticatedReviewsRoute
+  '/sample-crud': typeof AuthenticatedSampleCrudRoute
   '/about': typeof SiteAboutRoute
   '/auth': typeof SiteAuthRoute
   '/book': typeof SiteBookRoute
@@ -398,6 +406,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
+  '/_authenticated/sample-crud': typeof AuthenticatedSampleCrudRoute
   '/_site/about': typeof SiteAboutRoute
   '/_site/auth': typeof SiteAuthRoute
   '/_site/book': typeof SiteBookRoute
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/reviews'
+    | '/sample-crud'
     | '/about'
     | '/auth'
     | '/book'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/account'
     | '/reviews'
+    | '/sample-crud'
     | '/about'
     | '/auth'
     | '/book'
@@ -536,6 +547,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/admin'
     | '/_authenticated/reviews'
+    | '/_authenticated/sample-crud'
     | '/_site/about'
     | '/_site/auth'
     | '/_site/book'
@@ -650,6 +662,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews'
       preLoaderRoute: typeof AuthenticatedReviewsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sample-crud': {
+      id: '/_authenticated/sample-crud'
+      path: '/sample-crud'
+      fullPath: '/sample-crud'
+      preLoaderRoute: typeof AuthenticatedSampleCrudRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_site/': {
@@ -968,12 +987,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
+  AuthenticatedSampleCrudRoute: typeof AuthenticatedSampleCrudRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
+  AuthenticatedSampleCrudRoute: AuthenticatedSampleCrudRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
