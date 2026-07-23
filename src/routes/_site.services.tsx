@@ -265,7 +265,7 @@ function ServicesPage() {
                           >
                             {s.name}
                           </Link>
-                        </h3>
+                        </h2>
                       </div>
                     </div>
 
