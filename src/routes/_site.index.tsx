@@ -36,6 +36,21 @@ export const Route = createFileRoute("/_site/")({
       { rel: "canonical", href: "https://radiant-hub-view.lovable.app/" },
       { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+    ],
+
   }),
   component: Home,
 });
