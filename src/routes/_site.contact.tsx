@@ -6,13 +6,16 @@ import { useSiteSettings, telHref } from "@/hooks/useSiteSettings";
 export const Route = createFileRoute("/_site/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — 24/7 HVAC Service & Free Quotes" },
-      { name: "description", content: "Call or message us for repairs, quotes, or 24/7 emergency AC and furnace service. Licensed technicians across the US." },
-      { property: "og:title", content: "Contact us" },
-      { property: "og:description", content: "24/7 HVAC support and free installation quotes." },
+      { title: "Contact HVAC Pro — 24/7 AC & Furnace Service, Free Quotes" },
+      { name: "description", content: "Contact HVAC Pro for AC repair, furnace repair, and emergency heating & cooling service near you. Licensed, insured technicians. Free installation estimates, 24/7." },
+      { property: "og:title", content: "Contact HVAC Pro — 24/7 HVAC Service" },
+      { property: "og:description", content: "24/7 emergency AC and furnace repair plus free installation quotes." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/contact" },
     ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/contact" }],
   }),
+
   component: ContactPage,
 });
 

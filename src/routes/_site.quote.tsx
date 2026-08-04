@@ -21,17 +21,20 @@ export const Route = createFileRoute("/_site/quote")({
   validateSearch: quoteSearchSchema,
   head: () => ({
     meta: [
-      { title: "Instant HVAC Installation Quote — Free Price Estimate" },
+      { title: "Instant HVAC Installation Quote — Free AC & Furnace Price Estimate" },
       {
         name: "description",
         content:
-          "Get an instant price range for your HVAC installation. Enter your ZIP, square footage, and system type — no phone call required.",
+          "Get an instant HVAC installation cost estimate: central AC, heat pump, gas furnace, or ductless mini-split. Enter your ZIP and square footage for a free price range — no phone call required.",
       },
       { property: "og:title", content: "Instant HVAC Installation Quote" },
-      { property: "og:description", content: "Free instant price range in seconds." },
+      { property: "og:description", content: "Free instant AC, furnace, and heat pump installation price range in seconds." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://radiant-hub-view.lovable.app/quote" },
     ],
+    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/quote" }],
   }),
+
   component: QuotePage,
 });
 
