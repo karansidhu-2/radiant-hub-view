@@ -1,8 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { isCurrentUserAdmin } from "@/lib/hvac.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox, ScrollText, Users, KeyRound, Activity, Calculator } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
@@ -12,6 +10,11 @@ import { NewBookingNotifier } from "@/components/admin/NewBookingNotifier";
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
+
+// Remembering the last verified admin verdict lets the panel paint instantly on
+// re-entry instead of blocking behind a fresh round-trip every single time.
+const ADMIN_CACHE_KEY = "hvac:admin:verified";
+
 
 const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
