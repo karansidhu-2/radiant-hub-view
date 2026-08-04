@@ -42,17 +42,32 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 function AdminLayout() {
   const navigate = useNavigate();
   const router = useRouter();
-  const [state, setState] = useState<"loading" | "admin" | "denied">("loading");
-  const [email, setEmail] = useState("");
-  const check = useServerFn(isCurrentUserAdmin);
+  const { user, isAdmin, loading } = useAuth();
   const path = useRouterState({ select: (r) => r.location.pathname });
+  const email = user?.email ?? "";
+
+  // Optimistically trust a previously-verified verdict so navigating back into
+  // /admin paints immediately rather than showing a blocking "Loading…".
+  const [cached, setCached] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try { return sessionStorage.getItem(ADMIN_CACHE_KEY) === "1"; } catch { return false; }
+  });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
-    check().then((isAdmin) => setState(isAdmin ? "admin" : "denied"));
-  }, [check]);
+    if (isAdmin) {
+      setCached(true);
+      try { sessionStorage.setItem(ADMIN_CACHE_KEY, "1"); } catch { /* ignore */ }
+    } else if (!loading && user) {
+      setCached(false);
+      try { sessionStorage.removeItem(ADMIN_CACHE_KEY); } catch { /* ignore */ }
+    }
+  }, [isAdmin, loading, user]);
+
+  const state: "loading" | "admin" | "denied" =
+    isAdmin || cached ? "admin" : loading || !user ? "loading" : "denied";
 
   if (state === "loading") return <div className="p-16 text-center">Loading…</div>;
+
   if (state === "denied") {
     return (
       <div className="mx-auto max-w-md p-16 text-center">
