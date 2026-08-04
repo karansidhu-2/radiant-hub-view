@@ -1,8 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { isCurrentUserAdmin } from "@/lib/hvac.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox, ScrollText, Users, KeyRound, Activity, Calculator } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
@@ -12,6 +10,11 @@ import { NewBookingNotifier } from "@/components/admin/NewBookingNotifier";
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
+
+// Remembering the last verified admin verdict lets the panel paint instantly on
+// re-entry instead of blocking behind a fresh round-trip every single time.
+const ADMIN_CACHE_KEY = "hvac:admin:verified";
+
 
 const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -39,17 +42,32 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 function AdminLayout() {
   const navigate = useNavigate();
   const router = useRouter();
-  const [state, setState] = useState<"loading" | "admin" | "denied">("loading");
-  const [email, setEmail] = useState("");
-  const check = useServerFn(isCurrentUserAdmin);
+  const { user, isAdmin, loading } = useAuth();
   const path = useRouterState({ select: (r) => r.location.pathname });
+  const email = user?.email ?? "";
+
+  // Optimistically trust a previously-verified verdict so navigating back into
+  // /admin paints immediately rather than showing a blocking "Loading…".
+  const [cached, setCached] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try { return sessionStorage.getItem(ADMIN_CACHE_KEY) === "1"; } catch { return false; }
+  });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
-    check().then((isAdmin) => setState(isAdmin ? "admin" : "denied"));
-  }, [check]);
+    if (isAdmin) {
+      setCached(true);
+      try { sessionStorage.setItem(ADMIN_CACHE_KEY, "1"); } catch { /* ignore */ }
+    } else if (!loading && user) {
+      setCached(false);
+      try { sessionStorage.removeItem(ADMIN_CACHE_KEY); } catch { /* ignore */ }
+    }
+  }, [isAdmin, loading, user]);
+
+  const state: "loading" | "admin" | "denied" =
+    isAdmin || cached ? "admin" : loading || !user ? "loading" : "denied";
 
   if (state === "loading") return <div className="p-16 text-center">Loading…</div>;
+
   if (state === "denied") {
     return (
       <div className="mx-auto max-w-md p-16 text-center">

@@ -106,6 +106,8 @@ export function hardClearAuthStorage(): void {
       doomed.forEach((k) => storage.removeItem(k));
     }
     sessionStorage.removeItem(TAB_ALIVE_FLAG);
+    // Cached admin verdict must never survive a sign-out.
+    sessionStorage.removeItem("hvac:admin:verified");
   } catch {
     /* ignore */
   }
