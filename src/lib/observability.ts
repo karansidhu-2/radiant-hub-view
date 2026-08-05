@@ -72,8 +72,10 @@ async function flush() {
   if (!buffer.length) return;
   const batch = buffer.splice(0, buffer.length);
   try {
-    const { data: userRes } = await supabase.auth.getUser();
-    const uid = userRes.user?.id ?? null;
+    // getSession() reads the locally cached session — getUser() hits the auth
+    // server on every flush, adding a network round trip per batch per visitor.
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const uid = sessionRes.session?.user?.id ?? null;
     const rows = batch.map((e) => ({
       kind: e.kind,
       name: e.name.slice(0, 200),
@@ -108,9 +110,12 @@ function schedule() {
 }
 
 function enqueue(p: EventPayload) {
+  // Errors always report; everything else only for sampled sessions.
+  if (p.kind !== "error" && !isSampledSession()) return;
   buffer.push(p);
   schedule();
 }
+
 
 export function track(name: string, meta: Record<string, unknown> = {}) {
   enqueue({ kind: "event", name, meta });
