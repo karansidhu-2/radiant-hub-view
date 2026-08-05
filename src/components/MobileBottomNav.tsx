@@ -65,6 +65,8 @@ export function MobileBottomNav() {
           <Link
             to="/book"
             search={{ service: undefined }}
+            preload="viewport"
+
             aria-label="Book a service"
             className="mx-1 my-1 flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-xl gradient-cool text-[11px] font-semibold text-primary-foreground shadow-soft transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
