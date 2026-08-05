@@ -18,8 +18,37 @@ type EventPayload = {
 };
 
 const SESSION_KEY = "obs_session_id";
-const FLUSH_MS = 4000;
-const MAX_BUFFER = 25;
+const FLUSH_MS = 8000;
+const MAX_BUFFER = 40;
+
+/**
+ * Session sampling.
+ *
+ * Telemetry inserts are the single largest write load on the database at
+ * scale (one row per pageview/vital per visitor). At 10k+ visitors that is
+ * 100k+ rows/day of writes competing with real customer traffic.
+ *
+ * So we sample: only a fraction of *sessions* report pageviews/vitals, and
+ * the decision is sticky per session so funnels stay coherent. Errors are
+ * NEVER sampled out — those are the events we actually need in full.
+ */
+const SAMPLE_RATE = 0.15;
+const SAMPLE_KEY = "obs_sampled";
+
+function isSampledSession(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    let v = sessionStorage.getItem(SAMPLE_KEY);
+    if (v === null) {
+      v = Math.random() < SAMPLE_RATE ? "1" : "0";
+      sessionStorage.setItem(SAMPLE_KEY, v);
+    }
+    return v === "1";
+  } catch {
+    return Math.random() < SAMPLE_RATE;
+  }
+}
+
 
 let buffer: EventPayload[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
