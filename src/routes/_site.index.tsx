@@ -7,8 +7,16 @@ import { services } from "@/data/services";
 import { products, formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { MobileQuickAccess } from "@/components/MobileQuickAccess";
-import { HomeQuickReview } from "@/components/HomeQuickReview";
+import { lazy, Suspense } from "react";
+import { DeferredMount } from "@/components/DeferredMount";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+// Below-the-fold, interactive-only widget: split into its own chunk and mount
+// when it scrolls into view so it never delays first paint or hydration.
+const HomeQuickReview = lazy(() =>
+  import("@/components/HomeQuickReview").then((m) => ({ default: m.HomeQuickReview })),
+);
+
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { ShoppingCart } from "lucide-react";
