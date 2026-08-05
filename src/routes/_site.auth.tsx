@@ -10,10 +10,13 @@ import { setRememberMe } from "@/lib/remember-me";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_site/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  // Both params are optional for callers (`<Link to="/auth" />` with no search
+  // must typecheck) but always resolved to a concrete value when read.
+  validateSearch: (s: Record<string, unknown>): { redirect?: string; expired?: 1 } => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/",
     expired: s.expired === 1 || s.expired === "1" ? 1 : undefined,
   }),
+
   head: () => ({ meta: [{ title: "Sign in — HVAC Pro" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AuthPage,
 });
