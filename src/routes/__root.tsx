@@ -66,8 +66,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Warm the TLS handshake for the backend + image CDN before the first
+      // data fetch / image request fires.
+      { rel: "preconnect", href: "https://fwdysvinyusuijplooex.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://fwdysvinyusuijplooex.supabase.co" },
+      { rel: "preconnect", href: "https://wsrv.nl", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://wsrv.nl" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+
     ],
     scripts: [
       {
