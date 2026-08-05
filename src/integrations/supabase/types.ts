@@ -1147,6 +1147,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      prune_observability_events: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "customer"

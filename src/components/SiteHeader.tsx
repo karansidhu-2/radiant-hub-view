@@ -35,7 +35,11 @@ export function SiteHeader() {
             <Link
               key={n.to}
               to={n.to}
+              // Primary nav is always visible — warm these routes on render so
+              // clicks are instant, on touch devices too (no hover to rely on).
+              preload="viewport"
               className="rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+
               activeProps={{ className: "text-foreground", "aria-current": "page" } as any}
             >
               {n.label}

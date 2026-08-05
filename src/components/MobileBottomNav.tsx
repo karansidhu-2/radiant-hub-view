@@ -28,8 +28,14 @@ export function MobileBottomNav() {
             <li key={n.to} className="flex">
               <Link
                 to={n.to}
+                // Touch devices never fire hover, so "intent" preloading never
+                // triggers on mobile. The bottom bar is always on screen, so
+                // viewport-preload warms every tab's chunk + data up front and
+                // taps land on already-loaded routes.
+                preload="viewport"
                 aria-label={n.to === "/cart" && hydrated && count > 0 ? `${n.label}, ${count} item${count === 1 ? "" : "s"}` : n.label}
                 aria-current={active ? "page" : undefined}
+
                 className={`relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all duration-200 ease-out active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -59,6 +65,8 @@ export function MobileBottomNav() {
           <Link
             to="/book"
             search={{ service: undefined }}
+            preload="viewport"
+
             aria-label="Book a service"
             className="mx-1 my-1 flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-xl gradient-cool text-[11px] font-semibold text-primary-foreground shadow-soft transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
