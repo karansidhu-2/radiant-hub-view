@@ -362,7 +362,12 @@ function Home() {
               </Card>
             ))}
           </div>
-          <HomeQuickReview />
+          <DeferredMount fallback={<div className="h-24" aria-hidden />}>
+            <Suspense fallback={<div className="h-24" aria-hidden />}>
+              <HomeQuickReview />
+            </Suspense>
+          </DeferredMount>
+
         </div>
       </section>
 
