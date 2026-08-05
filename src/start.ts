@@ -38,8 +38,43 @@ const securityHeadersMiddleware = createMiddleware().server(async ({ next }) => 
   if (!response || typeof response.headers?.set !== "function") return result;
 
   const ctype = response.headers.get("content-type") || "";
+
+  // ---- Caching / compression negotiation -------------------------------
+  // Hashed build assets are immutable: cache them for a year in the browser
+  // and at the edge so repeat visits and client-side navigations cost 0 RTT.
+  const url = (() => {
+    try {
+      return new URL((result as any)?.request?.url ?? "http://local/");
+    } catch {
+      return new URL("http://local/");
+    }
+  })();
+  const isImmutableAsset =
+    /^\/(assets|_build|_server)\//.test(url.pathname) ||
+    /\.(js|mjs|css|woff2?|avif|webp|png|jpe?g|svg|ico)$/i.test(url.pathname);
+
+  if (isImmutableAsset) {
+    if (!response.headers.has("Cache-Control")) {
+      response.headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    }
+    // Let the CDN vary compressed variants correctly (br/gzip are applied by
+    // the edge; we only need the negotiation header to be honoured).
+    response.headers.append("Vary", "Accept-Encoding");
+    return result;
+  }
+
   // Only decorate HTML responses (skip JSON / RPC / static assets).
   if (!ctype.includes("text/html")) return result;
+
+  // SSR HTML: serve instantly from the edge, revalidate in the background.
+  if (!response.headers.has("Cache-Control")) {
+    response.headers.set(
+      "Cache-Control",
+      "public, max-age=0, s-maxage=60, stale-while-revalidate=600",
+    );
+  }
+  response.headers.append("Vary", "Accept-Encoding");
+
 
   const csp = [
     "default-src 'self'",

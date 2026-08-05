@@ -13,5 +13,24 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    build: {
+      // Split big, rarely-changing vendor code into long-lived cacheable
+      // chunks so app updates don't invalidate the whole payload and the
+      // browser can download them in parallel.
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (!id.includes("node_modules")) return;
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("@supabase")) return "vendor-supabase";
+            if (id.includes("@tanstack")) return "vendor-tanstack";
+            if (id.includes("react-dom") || /node_modules\/react(\/|$)/.test(id))
+              return "vendor-react";
+            return;
+          },
+        },
+      },
+    },
   },
+
 });
