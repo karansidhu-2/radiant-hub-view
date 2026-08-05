@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_site/auth")({
 });
 
 function AuthPage() {
-  const { redirect, expired } = Route.useSearch();
+  const { redirect: redirectParam, expired } = Route.useSearch();
+  const redirect = redirectParam ?? "/";
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
