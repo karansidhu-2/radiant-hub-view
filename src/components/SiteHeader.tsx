@@ -106,15 +106,16 @@ export function SiteHeader() {
               Book Service
             </Button>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label="Toggle menu"
-            onClick={() => setOpen((v) => !v)}
+          {/* Mobile: persistent Call Us */}
+          <a
+            href={telHref(settings.support_phone)}
+            aria-label={`Call us at ${settings.support_phone}`}
+            className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-[color:var(--ember)] px-3 text-sm font-bold text-[color:var(--ember-foreground)] shadow-elevated active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+            <Phone className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">Call</span>
+          </a>
+
         </div>
       </div>
 
