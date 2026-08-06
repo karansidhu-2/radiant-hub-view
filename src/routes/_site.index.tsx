@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { services } from "@/data/services";
 import { products, formatMoney } from "@/data/products";
 import { DynamicIcon } from "@/components/DynamicIcon";
-import { MobileQuickAccess } from "@/components/MobileQuickAccess";
 import { lazy, Suspense } from "react";
 import { DeferredMount } from "@/components/DeferredMount";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -101,13 +100,12 @@ function Home() {
   };
   return (
     <>
-      <MobileQuickAccess />
       {/* Hero */}
 
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
           <div className="flex flex-col justify-center text-primary-foreground">
             <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--ember)]" /> Same-day service across 28 states
@@ -118,29 +116,32 @@ function Home() {
                 All year, every year.
               </span>
             </h1>
-            <p className="mt-4 max-w-lg text-[15px] text-white/85 md:mt-5 md:text-lg">
-              Licensed heating, cooling, and air quality experts. Book same-day repair, order a new system with professional installation, or get a free replacement quote in minutes.
+            <p className="mt-4 max-w-lg text-[16px] leading-[1.5] text-white md:mt-5 md:text-lg">
+              Licensed heating, cooling, and air quality experts. Fast same-day repairs, professional installations, and free instant quotes.
             </p>
             <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
               <Link to="/book" search={{ service: undefined }} className="w-full sm:w-auto">
-                <Button size="lg" className="h-12 w-full bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-elevated hover:opacity-90 sm:w-auto">
+                <Button size="lg" className="h-12 w-full bg-[color:var(--ember)] text-[color:var(--ember-foreground)] shadow-[0_10px_24px_-8px_rgba(0,0,0,0.45)] hover:opacity-90 sm:w-auto">
                   Book Service <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/shop" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="h-12 w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto">
+                <Button size="lg" variant="outline" className="h-12 w-full border-2 border-white/60 bg-white/10 text-white shadow-[0_8px_20px_-10px_rgba(0,0,0,0.5)] hover:bg-white/20 hover:text-white sm:w-auto">
                   Shop Systems
                 </Button>
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
+            <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
               {trustPoints.map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2 text-sm text-white/85">
-                  <Icon className="h-4 w-4 text-[color:var(--ember)]" />
-                  {label}
-                </div>
+                <li
+                  key={label}
+                  className="flex min-h-11 items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3.5 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-8px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:text-sm"
+                >
+                  <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={2.4} aria-hidden="true" />
+                  <span className="min-w-0 leading-tight">{label}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
           <div className="relative">
             <div className="absolute -inset-1 -z-10 rounded-3xl bg-white/10" />
