@@ -131,14 +131,14 @@ function Home() {
                 </Button>
               </Link>
             </div>
-            <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3 md:mt-10 md:grid-cols-2 md:gap-3 lg:grid-cols-4 lg:gap-3.5">
+            <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3 md:mt-10 lg:gap-3.5">
               {trustPoints.map(({ icon: Icon, label }) => (
                 <li
                   key={label}
                   className="flex min-h-11 items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3.5 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-8px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:text-sm md:px-4 md:py-2.5"
                 >
                   <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={2.4} aria-hidden="true" />
-                  <span className="min-w-0 leading-tight">{label}</span>
+                  <span className="min-w-0 leading-tight sm:whitespace-nowrap">{label}</span>
                 </li>
               ))}
             </ul>
