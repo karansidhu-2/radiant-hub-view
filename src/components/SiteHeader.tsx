@@ -22,7 +22,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/90 shadow-[0_2px_12px_-8px_rgba(0,0,0,0.35)] backdrop-blur-md supports-[backdrop-filter]:bg-background/75 md:bg-background/95 md:shadow-none md:backdrop-blur-none">
-      <div className="mx-auto grid h-14 max-w-7xl grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 px-3 md:flex md:h-16 md:justify-between md:px-6">
+      <div className="mx-auto grid h-14 max-w-7xl grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 px-3 md:flex md:h-16 md:justify-between md:gap-6 md:px-6 lg:h-[72px] lg:px-8">
         {/* Mobile: hamburger left */}
         <Button
           variant="ghost"
@@ -40,11 +40,11 @@ export function SiteHeader() {
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
             <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
-          <span className="truncate">{settings.company_name}</span>
+          <span className="truncate md:hidden lg:inline">{settings.company_name}</span>
         </Link>
 
 
-        <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-5 md:flex lg:gap-8">
           {nav.map((n) => (
             <Link
               key={n.to}
@@ -52,7 +52,7 @@ export function SiteHeader() {
               // Primary nav is always visible — warm these routes on render so
               // clicks are instant, on touch devices too (no hover to rely on).
               preload="viewport"
-              className="rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="shrink-0 whitespace-nowrap rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 
               activeProps={{ className: "text-foreground", "aria-current": "page" } as any}
             >
@@ -65,13 +65,13 @@ export function SiteHeader() {
           <a
             href={telHref(settings.support_phone)}
             aria-label={`Call ${settings.support_phone}`}
-            className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
+            className="hidden h-10 items-center gap-2 rounded-full bg-secondary px-3 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex lg:px-4"
           >
-            <Phone className="h-4 w-4" aria-hidden="true" />
-            {settings.support_phone}
+            <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="hidden lg:inline">{settings.support_phone}</span>
           </a>
           <Link to="/cart" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"} className="relative hidden md:block">
-            <Button variant="outline" size="icon" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}>
+            <Button variant="outline" size="icon" className="h-10 w-10" aria-label={hydrated && count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}>
               <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             </Button>
             {hydrated && count > 0 && (
@@ -83,18 +83,18 @@ export function SiteHeader() {
           {user ? (
             <>
               <Link to="/account" className="hidden md:block" title="My account">
-                <Button variant="outline" size="icon" aria-label="My account"><UserIcon className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon" className="h-10 w-10" aria-label="My account"><UserIcon className="h-4 w-4" /></Button>
               </Link>
               {isAdmin && (
                 <Link to="/admin" className="hidden md:block" title="Admin">
-                  <Button variant="outline" size="icon" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
+                  <Button variant="outline" size="icon" className="h-10 w-10" aria-label="Admin"><Shield className="h-4 w-4" /></Button>
                 </Link>
               )}
-              <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden md:inline-flex" title="Sign out" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => signOut()} className="hidden h-10 w-10 md:inline-flex" title="Sign out" aria-label="Sign out"><LogOut className="h-4 w-4" /></Button>
             </>
           ) : (
             <Link to="/auth" search={{ redirect: "/" }} className="hidden md:block">
-              <Button variant="outline" size="sm" className="gap-1.5" title="Sign in" aria-label="Sign in">
+              <Button variant="outline" size="sm" className="h-10 gap-1.5 px-3" title="Sign in" aria-label="Sign in">
                 <LogIn className="h-4 w-4" />
                 <span className="text-xs font-semibold">Sign in</span>
               </Button>
@@ -102,7 +102,7 @@ export function SiteHeader() {
           )}
 
           <Link to="/book" search={{ service: undefined }} className="hidden md:block">
-            <Button className="gradient-cool text-primary-foreground shadow-soft hover:opacity-95">
+            <Button className="h-10 gradient-cool px-4 text-primary-foreground shadow-elevated hover:opacity-95">
               Book Service
             </Button>
           </Link>
@@ -115,6 +115,21 @@ export function SiteHeader() {
             <Phone className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
             <span className="sr-only sm:not-sr-only">Call</span>
           </a>
+          {/* Mobile: sign in / account, right of Call */}
+          {user ? (
+            <Link to="/account" className="md:hidden" aria-label="My account">
+              <span className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground shadow-soft active:scale-95">
+                <UserIcon className="h-5 w-5" strokeWidth={2.3} aria-hidden="true" />
+              </span>
+            </Link>
+          ) : (
+            <Link to="/auth" search={{ redirect: "/" }} className="md:hidden" aria-label="Sign in">
+              <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm font-bold text-foreground shadow-soft active:scale-95">
+                <LogIn className="h-5 w-5 shrink-0" strokeWidth={2.3} aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">Sign in</span>
+              </span>
+            </Link>
+          )}
 
         </div>
       </div>

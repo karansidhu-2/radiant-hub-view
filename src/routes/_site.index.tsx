@@ -105,7 +105,7 @@ function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.25),transparent_60%)]" />
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 md:grid-cols-2 md:gap-8 md:px-6 md:py-24 lg:py-28">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 md:grid-cols-2 md:items-center md:gap-10 md:px-6 md:py-20 lg:gap-14 lg:px-8 lg:py-28">
           <div className="flex flex-col justify-center text-primary-foreground">
             <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               <span className="inline-block h-2 w-2 rounded-full bg-[color:var(--ember)]" /> Same-day service across 28 states
@@ -131,14 +131,14 @@ function Home() {
                 </Button>
               </Link>
             </div>
-            <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
+            <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3 md:mt-10 lg:gap-3.5">
               {trustPoints.map(({ icon: Icon, label }) => (
                 <li
                   key={label}
-                  className="flex min-h-11 items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3.5 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-8px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:text-sm"
+                  className="flex min-h-11 items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3.5 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-8px_rgba(0,0,0,0.6)] backdrop-blur-sm sm:text-sm md:px-4 md:py-2.5"
                 >
                   <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={2.4} aria-hidden="true" />
-                  <span className="min-w-0 leading-tight">{label}</span>
+                  <span className="min-w-0 leading-tight sm:whitespace-nowrap">{label}</span>
                 </li>
               ))}
             </ul>
