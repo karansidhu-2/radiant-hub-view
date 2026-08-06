@@ -40,7 +40,7 @@ export function SiteHeader() {
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
             <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
-          <span className="truncate">{settings.company_name}</span>
+          <span className="truncate md:max-w-[150px] lg:max-w-none">{settings.company_name}</span>
         </Link>
 
 
@@ -52,7 +52,7 @@ export function SiteHeader() {
               // Primary nav is always visible — warm these routes on render so
               // clicks are instant, on touch devices too (no hover to rely on).
               preload="viewport"
-              className="rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="whitespace-nowrap rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 
               activeProps={{ className: "text-foreground", "aria-current": "page" } as any}
             >
