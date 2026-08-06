@@ -112,7 +112,7 @@ function Home() {
             </span>
             <h1 className="text-[2rem] font-bold leading-[1.1] md:text-5xl lg:text-6xl">
               Comfort you can count on.
-              <span className="mt-2 block bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+              <span className="mt-2 block text-white">
                 All year, every year.
               </span>
             </h1>
