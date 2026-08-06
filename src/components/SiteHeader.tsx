@@ -40,7 +40,7 @@ export function SiteHeader() {
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
             <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
-          <span className="truncate md:max-w-[150px] lg:max-w-none">{settings.company_name}</span>
+          <span className="truncate md:hidden lg:inline">{settings.company_name}</span>
         </Link>
 
 
