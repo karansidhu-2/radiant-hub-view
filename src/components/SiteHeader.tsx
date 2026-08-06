@@ -21,14 +21,28 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 md:bg-background/95 md:backdrop-blur-none">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 md:h-16 md:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2 text-base font-bold tracking-tight md:text-lg">
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/90 shadow-[0_2px_12px_-8px_rgba(0,0,0,0.35)] backdrop-blur-md supports-[backdrop-filter]:bg-background/75 md:bg-background/95 md:shadow-none md:backdrop-blur-none">
+      <div className="mx-auto grid h-14 max-w-7xl grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 px-3 md:flex md:h-16 md:justify-between md:px-6">
+        {/* Mobile: hamburger left */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 md:hidden"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+
+        {/* Logo: centered on mobile, left on desktop */}
+        <Link to="/" className="flex min-w-0 items-center justify-center gap-2 text-base font-bold tracking-tight md:justify-start md:text-lg">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg gradient-cool text-primary-foreground shadow-soft md:h-9 md:w-9">
             <Wind className="h-4 w-4 md:h-5 md:w-5" strokeWidth={2.4} />
           </span>
           <span className="truncate">{settings.company_name}</span>
         </Link>
+
 
         <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
           {nav.map((n) => (
@@ -92,15 +106,16 @@ export function SiteHeader() {
               Book Service
             </Button>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label="Toggle menu"
-            onClick={() => setOpen((v) => !v)}
+          {/* Mobile: persistent Call Us */}
+          <a
+            href={telHref(settings.support_phone)}
+            aria-label={`Call us at ${settings.support_phone}`}
+            className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-[color:var(--ember)] px-3 text-sm font-bold text-[color:var(--ember-foreground)] shadow-elevated active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+            <Phone className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">Call</span>
+          </a>
+
         </div>
       </div>
 
