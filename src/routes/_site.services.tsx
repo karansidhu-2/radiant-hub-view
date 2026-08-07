@@ -130,14 +130,27 @@ function ServicesPage() {
       )}
 
       <section className="border-b border-border bg-secondary/40">
-        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-20">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary md:text-sm">Services</p>
-          <h1 className="mt-1 text-2xl font-bold md:text-5xl">Everything your home comfort system needs</h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:mt-3 md:text-base">
-            Book any service online in under 2 minutes. Same-day availability in most metro areas. All work performed by our own W-2 certified technicians — never subcontracted.
-          </p>
+        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 md:grid-cols-[1.2fr_1fr] md:px-6 md:py-20">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary md:text-sm">Services</p>
+            <h1 className="mt-1 text-2xl font-bold md:text-5xl">Everything your home comfort system needs</h1>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:mt-3 md:text-base">
+              Book any service online in under 2 minutes. Same-day availability in most metro areas. All work performed by our own W-2 certified technicians — never subcontracted.
+            </p>
+          </div>
+          <img
+            src={condensersImg.url}
+            alt="Rooftop commercial HVAC condenser units with cooling fans"
+            width={1200}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            sizes="(min-width: 768px) 40vw, 100vw"
+            className="hidden aspect-[4/3] w-full rounded-2xl object-cover shadow-elevated ring-1 ring-border md:block"
+          />
         </div>
       </section>
+
 
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         {/* Category filter chips — horizontal scroll on mobile, wrap on desktop */}
