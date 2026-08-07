@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Star, PhoneCall, ShieldCheck, Sparkles } from "lucide-react";
 import { ServiceGridSkeleton } from "@/components/skeletons";
 import { JsonLd } from "@/components/JsonLd";
+import condensersImg from "@/assets/hvac-condensers.asset.json";
+
 
 
 export const Route = createFileRoute("/_site/services")({
