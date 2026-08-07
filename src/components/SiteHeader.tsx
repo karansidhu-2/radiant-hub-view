@@ -115,13 +115,22 @@ export function SiteHeader() {
             <Phone className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
             <span className="sr-only sm:not-sr-only">Call</span>
           </a>
-          {/* Mobile: sign in / account, right of Call */}
+          {/* Mobile: admin / account / sign in, right of Call */}
           {user ? (
-            <Link to="/account" className="md:hidden" aria-label="My account">
-              <span className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground shadow-soft active:scale-95">
-                <UserIcon className="h-5 w-5" strokeWidth={2.3} aria-hidden="true" />
-              </span>
-            </Link>
+            <>
+              {isAdmin && (
+                <Link to="/admin" className="md:hidden" aria-label="Admin panel">
+                  <span className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground shadow-soft active:scale-95">
+                    <Shield className="h-5 w-5" strokeWidth={2.3} aria-hidden="true" />
+                  </span>
+                </Link>
+              )}
+              <Link to="/account" className="md:hidden" aria-label="My account">
+                <span className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground shadow-soft active:scale-95">
+                  <UserIcon className="h-5 w-5" strokeWidth={2.3} aria-hidden="true" />
+                </span>
+              </Link>
+            </>
           ) : (
             <Link to="/auth" search={{ redirect: "/" }} className="md:hidden" aria-label="Sign in">
               <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm font-bold text-foreground shadow-soft active:scale-95">
@@ -130,6 +139,7 @@ export function SiteHeader() {
               </span>
             </Link>
           )}
+
 
         </div>
       </div>
