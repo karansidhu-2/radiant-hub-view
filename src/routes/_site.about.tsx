@@ -3,20 +3,29 @@ import technicianImg from "@/assets/hvac-technician.asset.json";
 import miniSplitImg from "@/assets/hvac-mini-split.asset.json";
 import ductworkImg from "@/assets/hvac-ductwork.asset.json";
 
+const SITE = "https://radiant-hub-view.lovable.app";
+const ABOUT_OG_IMAGE = `${SITE}${technicianImg.url}`;
+
 export const Route = createFileRoute("/_site/about")({
   head: () => ({
     meta: [
-      { title: "About HVAC Pro — Licensed HVAC Company Serving the US" },
-      { name: "description", content: "Family-owned, NATE-certified HVAC company serving homes and businesses across 28 US states with repair, installation, and 24/7 emergency service." },
-      { property: "og:title", content: "About HVAC Pro" },
-      { property: "og:description", content: "Licensed, insured, family-owned HVAC contractor." },
+      { title: "About HVAC Pro — Licensed, NATE-Certified HVAC Company" },
+      { name: "description", content: "Family-owned since 2005: NATE-certified technicians serving 50,000+ US homes and businesses with honest pricing, expert installs, and 24/7 emergency HVAC service." },
+      { property: "og:title", content: "About HVAC Pro — 20+ Years of Licensed HVAC Service" },
+      { property: "og:description", content: "Family-owned, fully insured, NATE-certified. 50,000+ homes served with a 100% satisfaction guarantee on every job." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://radiant-hub-view.lovable.app/about" },
+      { property: "og:url", content: `${SITE}/about` },
+      { property: "og:image", content: ABOUT_OG_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ABOUT_OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/about" }],
+    links: [
+      { rel: "canonical", href: `${SITE}/about` },
+    ],
   }),
   component: AboutPage,
 });
+
 
 function AboutPage() {
   return (
@@ -33,7 +42,8 @@ function AboutPage() {
           alt="NATE-certified HVAC technician inspecting a condenser unit with a tablet"
           width={612}
           height={408}
-          loading="lazy"
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           sizes="(min-width: 768px) 45vw, 100vw"
           className="aspect-[3/2] w-full rounded-2xl object-cover shadow-elevated ring-1 ring-border"
