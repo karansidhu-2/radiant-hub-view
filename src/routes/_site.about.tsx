@@ -21,8 +21,6 @@ export const Route = createFileRoute("/_site/about")({
     ],
     links: [
       { rel: "canonical", href: `${SITE}/about` },
-      // Hero portrait is the LCP candidate here; the gallery below stays lazy.
-      { rel: "preload", as: "image", href: technicianImg.url, fetchpriority: "high" },
     ],
   }),
   component: AboutPage,

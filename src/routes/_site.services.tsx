@@ -32,9 +32,6 @@ export const Route = createFileRoute("/_site/services")({
     ],
     links: [
       { rel: "canonical", href: `${SITE}/services` },
-      // Above-the-fold banner only — start the fetch with the HTML, not after
-      // the image element is discovered during hydration.
-      { rel: "preload", as: "image", href: condensersImg.url, fetchpriority: "high" },
     ],
   }),
 
