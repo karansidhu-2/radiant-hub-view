@@ -62,44 +62,15 @@ const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
 function AdminLayout() {
   const navigate = useNavigate();
   const router = useRouter();
-  const { user, isAdmin, loading } = useAuth();
+  const { user } = useAuth();
   const path = useRouterState({ select: (r) => r.location.pathname });
   const email = user?.email ?? "";
+  void navigate;
+  void email;
 
-  // Optimistically trust a previously-verified verdict so navigating back into
-  // /admin paints immediately rather than showing a blocking "Loading…".
-  const [cached, setCached] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try { return sessionStorage.getItem(ADMIN_CACHE_KEY) === "1"; } catch { return false; }
-  });
+  // No client-side gate needed: `beforeLoad` already verified admin on the
+  // server and redirected everyone else, so we can paint immediately.
 
-  useEffect(() => {
-    if (isAdmin) {
-      setCached(true);
-      try { sessionStorage.setItem(ADMIN_CACHE_KEY, "1"); } catch { /* ignore */ }
-    } else if (!loading && user) {
-      setCached(false);
-      try { sessionStorage.removeItem(ADMIN_CACHE_KEY); } catch { /* ignore */ }
-    }
-  }, [isAdmin, loading, user]);
-
-  const state: "loading" | "admin" | "denied" =
-    isAdmin || cached ? "admin" : loading || !user ? "loading" : "denied";
-
-  if (state === "loading") return <div className="p-16 text-center">Loading…</div>;
-
-  if (state === "denied") {
-    return (
-      <div className="mx-auto max-w-md p-16 text-center">
-        <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h1 className="mt-3 text-xl font-bold">Admin access required</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Signed in as <b>{email}</b>. Ask an existing admin to invite your email from the Admins page.
-        </p>
-        <Button className="mt-4" onClick={() => navigate({ to: "/" })}>Back</Button>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-secondary/20">
