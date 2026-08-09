@@ -14,18 +14,30 @@ import condensersImg from "@/assets/hvac-condensers.asset.json";
 
 
 
+const SITE = "https://radiant-hub-view.lovable.app";
+const SERVICES_OG_IMAGE = `${SITE}${condensersImg.url}`;
+
 export const Route = createFileRoute("/_site/services")({
   head: () => ({
     meta: [
-      { title: "HVAC Services — Repair, Installation, Maintenance | HVAC Pro" },
-      { name: "description", content: "Complete HVAC services: AC repair, furnace repair, new system installation, duct cleaning, indoor air quality, and 24/7 emergency service." },
-      { property: "og:title", content: "HVAC Services | HVAC Pro" },
-      { property: "og:description", content: "Full-service heating, cooling, and air quality across the US." },
+      { title: "HVAC Services in the US — AC & Furnace Repair, Install" },
+      { name: "description", content: "Licensed HVAC services nationwide: same-day AC and furnace repair, high-efficiency system installation, duct cleaning, air quality, and 24/7 emergency help." },
+      { property: "og:title", content: "HVAC Services — Repair, Installation & Maintenance | HVAC Pro" },
+      { property: "og:description", content: "Same-day AC and furnace repair, new system installs, duct cleaning and 24/7 emergency service from NATE-certified technicians." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://radiant-hub-view.lovable.app/services" },
+      { property: "og:url", content: `${SITE}/services` },
+      { property: "og:image", content: SERVICES_OG_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: SERVICES_OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: "https://radiant-hub-view.lovable.app/services" }],
+    links: [
+      { rel: "canonical", href: `${SITE}/services` },
+      // Above-the-fold banner only — start the fetch with the HTML, not after
+      // the image element is discovered during hydration.
+      { rel: "preload", as: "image", href: condensersImg.url, fetchpriority: "high" },
+    ],
   }),
+
   component: ServicesPage,
 });
 
