@@ -157,7 +157,8 @@ function ServicesPage() {
             alt="Rooftop commercial HVAC condenser units with cooling fans"
             width={1200}
             height={800}
-            loading="lazy"
+            loading="eager"
+            fetchPriority="high"
             decoding="async"
             sizes="(min-width: 768px) 40vw, 100vw"
             className="hidden aspect-[4/3] w-full rounded-2xl object-cover shadow-elevated ring-1 ring-border md:block"

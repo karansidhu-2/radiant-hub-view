@@ -33,7 +33,8 @@ function AboutPage() {
           alt="NATE-certified HVAC technician inspecting a condenser unit with a tablet"
           width={612}
           height={408}
-          loading="lazy"
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           sizes="(min-width: 768px) 45vw, 100vw"
           className="aspect-[3/2] w-full rounded-2xl object-cover shadow-elevated ring-1 ring-border"
