@@ -1,19 +1,39 @@
-import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Outlet, Link, useRouterState, useNavigate, useRouter, redirect } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Shield, LayoutDashboard, Wrench, Package, Calendar, CalendarDays, ShoppingBag, MapPin, UserCog, Settings, Star, Bell, Inbox, ScrollText, Users, KeyRound, Activity, Calculator } from "lucide-react";
 import { CapacityAlerts } from "@/components/admin/CapacityAlerts";
 import { NewBookingNotifier } from "@/components/admin/NewBookingNotifier";
+import { isCurrentUserAdmin } from "@/lib/hvac.functions";
 
+// Authorization is decided on the server: `isCurrentUserAdmin` runs behind
+// `requireSupabaseAuth` and checks `has_role(uid,'admin')` in the database, so a
+// tampered client can never paint (or fetch) admin surfaces. The verdict is
+// cached in TanStack Query for 5 minutes and warmed by link preloading, so
+// re-entering /admin is instant instead of a fresh round-trip every time.
+const adminVerdictQuery = {
+  queryKey: ["admin", "verdict"] as const,
+  queryFn: () => isCurrentUserAdmin(),
+  staleTime: 5 * 60_000,
+  gcTime: 10 * 60_000,
+  retry: 0,
+};
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async ({ context }) => {
+    let ok = false;
+    try {
+      ok = Boolean(await (context as any).queryClient.ensureQueryData(adminVerdictQuery));
+    } catch {
+      ok = false;
+    }
+    if (!ok) throw redirect({ to: "/account" });
+    return { isAdminVerified: true as const };
+  },
   component: AdminLayout,
 });
 
-// Remembering the last verified admin verdict lets the panel paint instantly on
-// re-entry instead of blocking behind a fresh round-trip every single time.
-const ADMIN_CACHE_KEY = "hvac:admin:verified";
+
 
 
 const nav: { to: string; label: string; icon: any; exact?: boolean }[] = [
