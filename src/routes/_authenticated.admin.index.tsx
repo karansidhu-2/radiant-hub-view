@@ -20,7 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { XCircle } from "lucide-react";
+import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
