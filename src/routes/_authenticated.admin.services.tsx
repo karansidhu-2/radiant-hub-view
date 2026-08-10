@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { DynamicIcon, ICON_NAMES } from "@/components/DynamicIcon";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/services")({
