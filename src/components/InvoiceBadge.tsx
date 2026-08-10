@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import { FileText, MailCheck, MailX } from "lucide-react";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import MailCheck from "lucide-react/dist/esm/icons/mail-check";
+import MailX from "lucide-react/dist/esm/icons/mail-x";
 
 export type InvoiceInfo = { generated?: boolean; sent?: boolean } | null | undefined;
 

@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import interLatinWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -64,15 +65,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Self-hosted Inter: same-origin, so no font-host handshakes. Preload the
+      // latin variable file (the only subset a US/EN page needs) so text paints
+      // in Inter on the first frame; `font-display: swap` covers the rest.
+      {
+        rel: "preload",
+        href: interLatinWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       // Warm the TLS handshake for the backend + image CDN before the first
       // data fetch / image request fires.
       { rel: "preconnect", href: "https://fwdysvinyusuijplooex.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://fwdysvinyusuijplooex.supabase.co" },
       { rel: "preconnect", href: "https://wsrv.nl", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://wsrv.nl" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
 
     ],

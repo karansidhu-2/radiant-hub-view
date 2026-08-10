@@ -1,5 +1,10 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Check, ShieldCheck, Truck, Loader2, Share2 } from "lucide-react";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import Check from "lucide-react/dist/esm/icons/check";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Truck from "lucide-react/dist/esm/icons/truck";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";

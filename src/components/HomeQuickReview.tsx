@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/StarRating";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { MessageSquarePlus, CheckCircle2 } from "lucide-react";
+import MessageSquarePlus from "lucide-react/dist/esm/icons/message-square-plus";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 
 export function HomeQuickReview() {
   const { user } = useAuthContext();

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { WifiOff, Wifi, X } from "lucide-react";
+import WifiOff from "lucide-react/dist/esm/icons/wifi-off";
+import Wifi from "lucide-react/dist/esm/icons/wifi";
+import X from "lucide-react/dist/esm/icons/x";
 
 /**
  * Only shows a banner when the browser actually fires an `offline` event,

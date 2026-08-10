@@ -9,7 +9,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { AlertTriangle, CalendarDays, CheckCircle2, Inbox, RotateCcw, Trash2 } from "lucide-react";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Inbox from "lucide-react/dist/esm/icons/inbox";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/inbox")({

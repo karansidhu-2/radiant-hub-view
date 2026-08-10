@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bell, BellOff, BellRing } from "lucide-react";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import BellOff from "lucide-react/dist/esm/icons/bell-off";
+import BellRing from "lucide-react/dist/esm/icons/bell-ring";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 

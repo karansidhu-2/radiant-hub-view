@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronRight, Download, ScrollText, Search } from "lucide-react";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Download from "lucide-react/dist/esm/icons/download";
+import ScrollText from "lucide-react/dist/esm/icons/scroll-text";
+import Search from "lucide-react/dist/esm/icons/search";
 
 export const Route = createFileRoute("/_authenticated/admin/audit")({
   component: AuditPage,

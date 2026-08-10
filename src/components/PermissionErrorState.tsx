@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { LockKeyhole, RefreshCw, LifeBuoy, LogIn } from "lucide-react";
+import LockKeyhole from "lucide-react/dist/esm/icons/lock-keyhole";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import LifeBuoy from "lucide-react/dist/esm/icons/life-buoy";
+import LogIn from "lucide-react/dist/esm/icons/log-in";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**

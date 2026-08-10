@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/StarRating";
 import { toast } from "sonner";
-import { CheckCircle2, MessageSquare } from "lucide-react";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 
 export const Route = createFileRoute("/_authenticated/reviews")({
   component: MyReviewsPage,

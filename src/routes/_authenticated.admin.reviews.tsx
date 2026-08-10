@@ -14,7 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Star, Eye, EyeOff, Trash2, MessageSquare, Search, FileText, MessageSquareOff } from "lucide-react";
+import Star from "lucide-react/dist/esm/icons/star";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Search from "lucide-react/dist/esm/icons/search";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import MessageSquareOff from "lucide-react/dist/esm/icons/message-square-off";
 
 export const Route = createFileRoute("/_authenticated/admin/reviews")({
   component: AdminReviews,

@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Trash2, Plus, Users } from "lucide-react";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Users from "lucide-react/dist/esm/icons/users";
 
 export const Route = createFileRoute("/_authenticated/admin/technicians")({
   component: TechniciansPage,

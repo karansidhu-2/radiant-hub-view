@@ -11,9 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import {
-  Calendar, DollarSign, MapPin, MessageSquare, Package, Plus, Star, Trash2, User, Wallet, Wrench, Reply,
-} from "lucide-react";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Package from "lucide-react/dist/esm/icons/package";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Star from "lucide-react/dist/esm/icons/star";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import User from "lucide-react/dist/esm/icons/user";
+import Wallet from "lucide-react/dist/esm/icons/wallet";
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import Reply from "lucide-react/dist/esm/icons/reply";
 import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";

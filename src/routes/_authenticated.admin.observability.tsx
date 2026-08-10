@@ -7,7 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Activity, AlertTriangle, Gauge, Users, Eye, RefreshCw } from "lucide-react";
+import Activity from "lucide-react/dist/esm/icons/activity";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Gauge from "lucide-react/dist/esm/icons/gauge";
+import Users from "lucide-react/dist/esm/icons/users";
+import Eye from "lucide-react/dist/esm/icons/eye";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, Legend,

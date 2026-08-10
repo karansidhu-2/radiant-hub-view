@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 
 export function PullToRefreshIndicator({ pull, refreshing, threshold }: { pull: number; refreshing: boolean; threshold: number }) {
   if (pull === 0 && !refreshing) return null;

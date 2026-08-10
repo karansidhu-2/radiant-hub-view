@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
 import { useSwipeBack, type SwipeBackPhase } from "@/hooks/useSwipeBack";
 
 /**

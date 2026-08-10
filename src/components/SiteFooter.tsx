@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Wind, Phone, Mail, MapPin } from "lucide-react";
+import Wind from "lucide-react/dist/esm/icons/wind";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function SiteFooter() {

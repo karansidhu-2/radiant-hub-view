@@ -1,5 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Wrench, ShoppingBag, ShoppingCart, CalendarPlus } from "lucide-react";
+import Home from "lucide-react/dist/esm/icons/home";
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import CalendarPlus from "lucide-react/dist/esm/icons/calendar-plus";
 import { useCart } from "@/context/CartContext";
 
 type NavItem = { to: "/" | "/services" | "/shop" | "/cart"; label: string; icon: typeof Home; exact?: boolean };

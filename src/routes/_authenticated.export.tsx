@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Download, Loader2, FileSpreadsheet } from "lucide-react";
+import Download from "lucide-react/dist/esm/icons/download";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import FileSpreadsheet from "lucide-react/dist/esm/icons/file-spreadsheet";
 
 export const Route = createFileRoute("/_authenticated/export")({
   head: () => ({

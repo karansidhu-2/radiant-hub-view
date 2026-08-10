@@ -1,5 +1,16 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, Check, Clock, DollarSign, Sparkles, Star, Wrench, ShieldCheck, Calculator, MapPin, PhoneCall } from "lucide-react";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import BadgeCheck from "lucide-react/dist/esm/icons/badge-check";
+import Check from "lucide-react/dist/esm/icons/check";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Star from "lucide-react/dist/esm/icons/star";
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Calculator from "lucide-react/dist/esm/icons/calculator";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import PhoneCall from "lucide-react/dist/esm/icons/phone-call";
 import heroImg from "@/assets/hvac-hero.webp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +29,7 @@ const HomeQuickReview = lazy(() =>
 
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
-import { ShoppingCart } from "lucide-react";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 
 const faqs = [
   { q: "How quickly can you come out for a repair?", a: "In most of our 28 service states we offer same-day or next-day appointments, and 24/7 emergency dispatch for no-heat and no-cool calls. You'll get a confirmed 2-hour arrival window within an hour of booking." },
