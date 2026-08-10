@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { DynamicIcon, ICON_NAMES } from "@/components/DynamicIcon";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/services")({
@@ -50,7 +51,21 @@ function AdminServices() {
             <div><Label>Slug</Label><Input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} /></div>
             <div><Label>Name</Label><Input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
             <div><Label>Category</Label><Input value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })} /></div>
-            <div><Label>Icon</Label><Input value={editing.icon} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} /></div>
+            <div>
+              <Label>Icon</Label>
+              <div className="flex items-center gap-2">
+                <select
+                  value={editing.icon}
+                  onChange={(e) => setEditing({ ...editing, icon: e.target.value })}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border">
+                  <DynamicIcon name={editing.icon} className="h-5 w-5" />
+                </span>
+              </div>
+            </div>
             <div><Label>Starting at ($)</Label><Input type="number" value={editing.starting_at} onChange={(e) => setEditing({ ...editing, starting_at: Number(e.target.value) })} /></div>
             <div className="flex items-center gap-2 mt-6"><Switch checked={editing.published} onCheckedChange={(v) => setEditing({ ...editing, published: v })} /><Label>Published</Label></div>
           </div>
