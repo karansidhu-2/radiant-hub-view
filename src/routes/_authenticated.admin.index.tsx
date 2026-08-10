@@ -20,10 +20,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import {
-  DollarSign, ShoppingBag, Calendar, TrendingUp, Users, Star,
-  CheckCircle2, XCircle, Repeat, Wrench, Download, RotateCcw, Trash2, Play,
-} from "lucide-react";
+import { XCircle } from "lucide-react";
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Users from "lucide-react/dist/esm/icons/users";
+import Star from "lucide-react/dist/esm/icons/star";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Repeat from "lucide-react/dist/esm/icons/repeat";
+import Wrench from "lucide-react/dist/esm/icons/wrench";
+import Download from "lucide-react/dist/esm/icons/download";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import Play from "lucide-react/dist/esm/icons/play";
 
 const RevenueTrendChart = lazy(() =>
   import("@/components/admin/DashboardCharts").then((m) => ({ default: m.RevenueTrendChart })),

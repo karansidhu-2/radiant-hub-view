@@ -1,5 +1,11 @@
 import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ImageOff, Keyboard, Maximize2, Play, X } from "lucide-react";
+import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ImageOff from "lucide-react/dist/esm/icons/image-off";
+import Keyboard from "lucide-react/dist/esm/icons/keyboard";
+import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
+import Play from "lucide-react/dist/esm/icons/play";
+import X from "lucide-react/dist/esm/icons/x";
 import { resolveProductImageUrls, youtubeId, type MediaItem } from "@/lib/product-image";
 import { DynamicIcon } from "@/components/DynamicIcon";
 import { decideSwipe, resolveAxisLock } from "@/lib/lightbox-swipe";

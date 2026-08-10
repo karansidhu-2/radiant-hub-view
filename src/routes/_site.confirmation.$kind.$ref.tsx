@@ -6,7 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, MapPin, Calendar, Clock, UserPlus } from "lucide-react";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import Download from "lucide-react/dist/esm/icons/download";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import { formatMoney } from "@/data/products";
 import { InvoiceBadge } from "@/components/InvoiceBadge";
 // jsPDF is dynamically imported inside downloadInvoicePDF so the ~400KB

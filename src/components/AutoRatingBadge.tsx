@@ -1,4 +1,5 @@
-import { Star, Sparkles } from "lucide-react";
+import Star from "lucide-react/dist/esm/icons/star";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import type { AutoRating } from "@/hooks/useAutoRatings";
 
 function confidenceLabel(c: number): string {

@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { LogIn, LogOut, Menu, Phone, Shield, ShoppingCart, User as UserIcon, Wind, X } from "lucide-react";
+import LogIn from "lucide-react/dist/esm/icons/log-in";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Shield from "lucide-react/dist/esm/icons/shield";
+import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import UserIcon from "lucide-react/dist/esm/icons/user";
+import Wind from "lucide-react/dist/esm/icons/wind";
+import X from "lucide-react/dist/esm/icons/x";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";

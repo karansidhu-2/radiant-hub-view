@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, X, AlertTriangle } from "lucide-react";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Save from "lucide-react/dist/esm/icons/save";
+import X from "lucide-react/dist/esm/icons/x";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import { toast } from "sonner";
 import { RememberMeToggle } from "@/components/RememberMeToggle";
 

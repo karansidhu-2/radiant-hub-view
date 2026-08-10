@@ -18,7 +18,11 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { RotateCcw, Save, Mail, MessageSquare, Sparkles } from "lucide-react";
+import RotateCcw from "lucide-react/dist/esm/icons/rotate-ccw";
+import Save from "lucide-react/dist/esm/icons/save";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
 export const Route = createFileRoute("/_authenticated/admin/notifications")({
   component: NotificationsPage,

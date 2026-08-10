@@ -5,7 +5,10 @@ import { adminListAllowlist, adminAddAllowlistEmail, adminRemoveAllowlistEmail }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, UserPlus, ShieldCheck, Loader2 } from "lucide-react";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/admins")({

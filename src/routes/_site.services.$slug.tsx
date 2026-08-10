@@ -1,5 +1,9 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Loader2, MessageSquare } from "lucide-react";
+import Check from "lucide-react/dist/esm/icons/check";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";

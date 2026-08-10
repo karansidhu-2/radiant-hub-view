@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Home, RefreshCw, WifiOff, Search, ShieldAlert, ServerCrash, ArrowLeft } from "lucide-react";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Home from "lucide-react/dist/esm/icons/home";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import WifiOff from "lucide-react/dist/esm/icons/wifi-off";
+import Search from "lucide-react/dist/esm/icons/search";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import ServerCrash from "lucide-react/dist/esm/icons/server-crash";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import type { ReactNode } from "react";
 import { PermissionErrorState, isPermissionError } from "@/components/PermissionErrorState";
 

@@ -8,7 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Pencil, Trash2, X, Check } from "lucide-react";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import Pencil from "lucide-react/dist/esm/icons/pencil";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import X from "lucide-react/dist/esm/icons/x";
+import Check from "lucide-react/dist/esm/icons/check";
 
 export const Route = createFileRoute("/_authenticated/sample-crud")({
   head: () => ({

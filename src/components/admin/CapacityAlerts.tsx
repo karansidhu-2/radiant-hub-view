@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { adminGetCapacityOverflow } from "@/lib/hvac.functions";
-import { AlertTriangle, X } from "lucide-react";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import X from "lucide-react/dist/esm/icons/x";
 import { toast } from "sonner";
 
 type OverflowSlot = { date: string; hour: number; capacity: number; count: number };

@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { KeyRound, ShieldCheck, Trash2 } from "lucide-react";
+import KeyRound from "lucide-react/dist/esm/icons/key-round";
+import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 
 export const Route = createFileRoute("/_authenticated/admin/security")({
   component: SecurityPage,
