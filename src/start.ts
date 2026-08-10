@@ -23,7 +23,7 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
  *
  * CSP allow-list is deliberately narrow:
  *  - Supabase REST/Realtime + Storage
- *  - Google Fonts (Inter, referenced from __root.tsx)
+ *  - Fonts are self-hosted (Inter, same-origin) so no font CDN is allow-listed
  *  - Lovable telemetry/preview surfaces
  *  - `'unsafe-inline'` on styles because Tailwind ships inline critical CSS
  *  - `'wasm-unsafe-eval'` because TanStack Start needs it for SSR hydration in some paths
@@ -82,10 +82,10 @@ const securityHeadersMiddleware = createMiddleware().server(async ({ next }) => 
     "object-src 'none'",
     "form-action 'self'",
     "img-src 'self' data: blob: https:",
-    "font-src 'self' data: https://fonts.gstatic.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
     "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://*.lovable.app https://*.lovable.dev https://*.lovableproject.com",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://*.lovable.app https://*.lovable.dev https://*.lovableproject.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app https://*.lovable.dev https://*.lovableproject.com",
     "frame-ancestors *",
     "upgrade-insecure-requests",
   ].join("; ");
