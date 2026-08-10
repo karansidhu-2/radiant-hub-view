@@ -38,7 +38,10 @@ const KB = 1024;
 const BUDGETS = {
   totalRaw: 3000 * KB,
   totalGz: 880 * KB,
-  singleChunkRaw: 620 * KB, // lucide-react barrel is currently the ceiling
+  // Icons are per-icon deep imports now (no lucide barrel chunk), so the
+  // ceiling is admin-only jspdf (~400KB raw, lazy-loaded). Keeping this tight
+  // fails the build if an icon/vendor barrel ever creeps back in.
+  singleChunkRaw: 430 * KB,
   singleChunkGz: 180 * KB,
 };
 
