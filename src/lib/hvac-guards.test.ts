@@ -81,7 +81,7 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     expect(out).toBe("false,false,true");
   });
 
-  it("allows up to _max hits, then blocks the next one in the same window", () => {
+  it.skipIf(!canExecute)("allows up to _max hits, then blocks the next one in the same window", () => {
     const key = uniq();
     const out = psqlMany([rl(key, 3, 60), rl(key, 3, 60), rl(key, 3, 60), rl(key, 3, 60)])
       .split(/\s+/).filter((x) => x === "t" || x === "f");
@@ -89,7 +89,7 @@ describe.skipIf(!hasPg)("rate limits (check_and_hit_rate_limit RPC)", () => {
     expect(out[3]).toBe("f");
   });
 
-  it("scopes limits per key (different buckets do not interfere)", () => {
+  it.skipIf(!canExecute)("scopes limits per key (different buckets do not interfere)", () => {
     const a = uniq(); const b = uniq();
     const out = psqlMany([rl(a, 1, 60), rl(a, 1, 60), rl(b, 1, 60)])
       .split(/\s+/).filter((x) => x === "t" || x === "f");
