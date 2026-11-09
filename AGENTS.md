@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Load the live product lookup only on cart and checkout routes so unrelated pages avoid the catalog request and its error handling.
