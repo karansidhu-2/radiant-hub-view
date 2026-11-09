@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { products as seedProducts, type Product } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,8 @@ const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "hvacpro:cart:v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const needsCartCatalog = pathname === "/cart" || pathname === "/checkout";
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -50,6 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // still resolve for cart totals, badge count, and checkout.
   const { data: dbProducts = [], error: catalogError } = useQuery({
     queryKey: ["cart", "product-lookup"],
+    enabled: needsCartCatalog && hydrated,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
