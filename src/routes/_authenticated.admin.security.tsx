@@ -12,7 +12,7 @@ import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 
 export const Route = createFileRoute("/_authenticated/admin/security")({
   component: SecurityPage,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
 });
 
 type Factor = { id: string; friendly_name?: string | null; factor_type: string; status: string };

@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -29,15 +30,16 @@ function NotFoundComponent() {
   return <NotFoundPage />;
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const routeError = error instanceof Error ? error : new Error(String(error));
+  console.error(routeError);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+    reportLovableError(routeError, { boundary: "tanstack_root_error_component" });
+  }, [routeError]);
   return (
     <GenericErrorPage
-      error={error}
+      error={routeError}
       reset={reset}
       onRetry={() => {
         router.invalidate();

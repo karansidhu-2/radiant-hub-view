@@ -20,7 +20,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/admin/observability")({
   component: ObservabilityPage,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
   notFoundComponent: () => <div className="p-6">Not found</div>,
 });
 
