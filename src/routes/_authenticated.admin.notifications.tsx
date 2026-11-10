@@ -26,7 +26,7 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
 export const Route = createFileRoute("/_authenticated/admin/notifications")({
   component: NotificationsPage,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
   notFoundComponent: () => <div className="p-6">Not found</div>,
 });
 

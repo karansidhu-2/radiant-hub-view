@@ -33,7 +33,7 @@ import { RememberMeToggle } from "@/components/RememberMeToggle";
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">{error.message}</div>
+    <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>
   ),
   notFoundComponent: () => <div className="p-6">Not found</div>,
 });

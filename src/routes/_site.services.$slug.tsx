@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_site/services/$slug")({
       links: [{ rel: "canonical", href: url }],
     };
   },
-  errorComponent: ({ error }) => <div role="alert" className="p-10 text-center">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert" className="p-10 text-center">{error instanceof Error ? error.message : String(error)}</div>,
   component: ServiceDetail,
 });
 

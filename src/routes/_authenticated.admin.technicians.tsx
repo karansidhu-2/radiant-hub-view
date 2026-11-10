@@ -16,7 +16,7 @@ import Users from "lucide-react/dist/esm/icons/users";
 
 export const Route = createFileRoute("/_authenticated/admin/technicians")({
   component: TechniciansPage,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
 });
 
 type Tech = { id: string; name: string; email: string | null; phone: string | null; skills: string[] | null; active: boolean };

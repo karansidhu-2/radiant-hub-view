@@ -25,7 +25,7 @@ import MessageSquareOff from "lucide-react/dist/esm/icons/message-square-off";
 
 export const Route = createFileRoute("/_authenticated/admin/reviews")({
   component: AdminReviews,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
   notFoundComponent: () => <div className="p-6">Not found</div>,
 });
 
