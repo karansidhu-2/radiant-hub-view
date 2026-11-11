@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Load the live product lookup only on cart and checkout routes so unrelated pages avoid the catalog request and its error handling.
+- Render Shop product data independently of signed image URL resolution so image storage latency cannot delay product details.

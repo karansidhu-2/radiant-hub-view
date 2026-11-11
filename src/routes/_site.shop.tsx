@@ -64,7 +64,7 @@ function ShopPage() {
   const { addItem } = useCart();
   const { data: autoRatings } = useAutoRatings();
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["products", "public"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -73,13 +73,28 @@ function ShopPage() {
         .eq("published", true)
         .order("name");
       if (error) throw error;
-      const rows = (data ?? []) as ProductRow[];
-      const paths = rows.map((r) => r.image_url).filter(Boolean) as string[];
-      const urls = paths.length ? await (await import("@/lib/product-image")).resolveProductImageUrls(paths) : {};
-      return rows.map((r) => ({ ...r, resolved_image: r.image_url ? urls[r.image_url] ?? null : null }));
+      return (data ?? []) as ProductRow[];
     },
     staleTime: 5 * 60_000,
     gcTime: 10 * 60_000,
+    retry: 1,
+    retryDelay: 1_000,
+  });
+
+  const imagePaths = useMemo(
+    () => products.map((product) => product.image_url).filter((path): path is string => Boolean(path)),
+    [products],
+  );
+  const { data: resolvedImages = {} } = useQuery({
+    queryKey: ["product-image-urls", imagePaths],
+    queryFn: async () => {
+      const { resolveProductImageUrls } = await import("@/lib/product-image");
+      return resolveProductImageUrls(imagePaths);
+    },
+    enabled: imagePaths.length > 0,
+    staleTime: 20 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: 1,
   });
 
   const brands = useMemo(
@@ -260,6 +275,12 @@ function ShopPage() {
 
         {isLoading ? (
           <ProductGridSkeleton count={8} />
+        ) : isError && products.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border p-10 text-center" role="alert">
+            <p className="font-semibold">Products couldn’t be loaded</p>
+            <p className="mt-1 text-sm text-muted-foreground">Please try again in a moment.</p>
+            <Button onClick={() => void refetch()} variant="outline" size="sm" className="mt-4">Try again</Button>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-10 text-center">
             <p className="font-semibold">No products match your filters</p>
@@ -272,9 +293,9 @@ function ShopPage() {
               <Card key={p.slug} className="card-pop group overflow-hidden hover:border-primary/35">
                 <Link to="/shop/$slug" params={{ slug: p.slug }}>
                   <div className="relative aspect-[4/3] gradient-cool overflow-hidden">
-                    {(p as any).resolved_image ? (
+                    {p.image_url && resolvedImages[p.image_url] ? (
                       <SmartImage
-                        src={(p as any).resolved_image}
+                        src={resolvedImages[p.image_url]}
                         alt={p.name}
                         widths={[240, 320, 480, 640]}
                         sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 48vw"
